@@ -77,7 +77,7 @@ export class MiscTracker implements IMutationAware, IStateAware {
         }
 
         const valueSpan = getSingletonByClassName(qualityDisplay, "item__value");
-        const target = this.miscValues.get("title")?.getTargetValue() || 1;
+        const target = this.miscValues.get(title)?.getTargetValue() || 1;
         if (valueSpan) {
             valueSpan.textContent = ` ${value} / ${target}`;
         }
