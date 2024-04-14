@@ -4,3 +4,4 @@ node_modules
 dist
 *.map
 .DS_Store
+/.vs/fl-small-mercies/FileContentIndex
