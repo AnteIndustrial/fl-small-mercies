@@ -6,7 +6,7 @@ import { getSingletonByClassName } from "../utils";
 import { MSG_TYPE_SAVE_SETTINGS } from "../constants";
 import { sendToServiceWorker } from "../comms";
 
-export class MiscTracker implements IMutationAware, IStateAware {
+export class MiscTrackerFixer implements IMutationAware, IStateAware {
 
     private displayMiscTracker = true;
     private miscQualities: Map<string, TrackedQuality> = new Map();
