@@ -33,6 +33,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
     
 
     linkState(state: GameStateController): void {
+        const stringSorter = (s1: string, s2: string) => (s1 > s2 ? -1 : 1)
         state.onCharacterDataLoaded((g) => {
             this.currentState = g;
             const unsortedQualityNames: string[] = []
@@ -40,7 +41,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 this.qualityNameAndCategory.set(quality.name, quality.category);
                 unsortedQualityNames.push(quality.name);
             }
-            this.qualityNames = unsortedQualityNames.sort(this.stringSorter())
+            this.qualityNames = unsortedQualityNames.sort(stringSorter)
             for (const [key, value] of this.miscQualities) {
                 const quality = g.getQuality(value.category, key);
                 if (quality) {
@@ -56,7 +57,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         state.onQualityChanged((state, quality, _previous, current) => {
             if (!this.qualityNames.includes(quality.name)) {
                 this.qualityNames.push(quality.name);
-                this.qualityNames = this.qualityNames.sort(this.stringSorter())
+                this.qualityNames = this.qualityNames.sort(stringSorter)
                 this.qualityNameAndCategory.set(quality.name, quality.category);
 
                 const miscSelect = document.getElementById("track-target-name");
@@ -72,18 +73,6 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 this.updateTracker(quality.name, current);
             }
         });
-    }
-
-    private stringSorter(): ((a: string, b: string) => number) | undefined {
-        return (s1, s2) => {
-            if (s1 > s2) {
-                return 1;
-            }
-            if (s1 < s2) {
-                return -1;
-            }
-            return 0;
-        };
     }
 
     //create the html element to track one quality
