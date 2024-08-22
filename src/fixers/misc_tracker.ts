@@ -16,41 +16,18 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
     private settingsString: string | undefined;
     private currentSettings: SettingsObject | undefined;
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     constructor() {
-        //chrome.storage.local.get(null)
-        //console.log(chrome.storage.local.get(null));
-            //console.log(JSON.stringify(Object.fromEntries(this.miscQualities)));
-            //sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.settings });
-        /*this.miscQualities.set("Striped Delights", { name: "Striped Delights", category: "Story", currentValue: 0, targetValue: 105, image: "tigerstripes" });
-this.miscQualities.set("Silver Horseheads", { name: "Silver Horseheads", category: "Story", currentValue: 0, targetValue: 176, image: "horsesilver" });
-this.miscQualities.set("Imperial Legitimacy", { name: "Imperial Legitimacy", category: "Story", currentValue: 0, targetValue: 100, image: "empresscourt" });
-this.miscQualities.set("Time Passing in Office", { name: "Time Passing in Office", category: "Progress", currentValue: 0, targetValue: 12, image: "declaim2" });
-this.miscQualities.set("Antique Mystery", { name: "Antique Mystery", category: "Elder", currentValue: 0, targetValue: 55, image: "meteors" });*/
+
     }
 
     applySettings(settings: SettingsObject): void {
         this.currentSettings = settings;
-        console.log("received settings")
-        console.log(settings)
         let temp = settings.trackedQualities as string;
         if (!temp) {
             temp = "{}";
         }
         this.miscQualities = new Map(Object.entries(JSON.parse(temp)));
-        /*this.currentSettings = settings;
-        console.log(2)
-        console.log(settings);
-        console.log(3)
-        let temp = settings.trackedQualities as string;
-        if (!temp) {
-            temp = "{\"Striped Delights\":{\"name\":\"Striped Delights\",\"category\":\"Story\",\"currentValue\":0,\"targetValue\":105,\"image\":\"tigerstripes\"},\"Silver Horseheads\":{\"name\":\"Silver Horseheads\",\"category\":\"Story\",\"currentValue\":0,\"targetValue\":176,\"image\":\"horsesilver\"},\"Imperial Legitimacy\":{\"name\":\"Imperial Legitimacy\",\"category\":\"Story\",\"currentValue\":0,\"targetValue\":100,\"image\":\"empresscourt\"},\"Time Passing in Office\":{\"name\":\"Time Passing in Office\",\"category\":\"Progress\",\"currentValue\":0,\"targetValue\":12,\"image\":\"declaim2\"},\"Antique Mystery\":{\"name\":\"Antique Mystery\",\"category\":\"Elder\",\"currentValue\":0,\"targetValue\":55,\"image\":\"meteors\"}}"
-        }
-        this.miscQualities = new Map(Object.entries(JSON.parse(temp)));
-        console.log(temp);
-        console.log(4)
-        console.log(this.miscQualities);
-        console.log(5)*/
-        //todo temp -> miscQualities
     }
 
     
@@ -184,18 +161,12 @@ this.miscQualities.set("Antique Mystery", { name: "Antique Mystery", category: "
         deleteSpan1.appendChild(deleteSpan4);
 
         deleteButton.addEventListener("click", () => {
-            console.log("before delete")
-            console.log(this.miscQualities)
-            console.log(this.currentSettings)
             document.getElementById(li.id)?.remove();
             this.miscQualities.delete(title);
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.currentSettings!.trackedQualities = JSON.stringify(Object.fromEntries(this.miscQualities))
 
             sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
-
-            console.log(this.miscQualities)
-            console.log(this.currentSettings)
         })
 
         li.appendChild(div);
@@ -321,9 +292,6 @@ this.miscQualities.set("Antique Mystery", { name: "Antique Mystery", category: "
                 const trackCurrent: number = this.currentState?.getQuality(trackCategory, trackName)?.level || 0;
                 const trackImage: string = this.currentState?.getQuality(trackCategory, trackName)?.image || "question"
                 const newQuality = { name: trackName, category: trackCategory, currentValue: trackCurrent, targetValue: trackNumber, image: trackImage };
-                console.log("before add")
-                console.log(this.miscQualities)
-                console.log(this.currentSettings)
                 this.miscQualities.set(trackName, newQuality);
                 if (this.currentSettings) {
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -331,8 +299,6 @@ this.miscQualities.set("Antique Mystery", { name: "Antique Mystery", category: "
                 }
 
                 sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
-                console.log(this.miscQualities)
-                console.log(this.currentSettings)
                
                 const miscDisplay = this.createTracker(trackName);
                 miscPanel?.appendChild(miscDisplay);
