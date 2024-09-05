@@ -33,7 +33,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
     
 
     linkState(state: GameStateController): void {
-        const stringSorter = (s1: string, s2: string) => (s1 > s2 ? -1 : 1)
+        const stringSorter = (s1: string, s2: string) => (s1 > s2 ? 1 : -1)
         state.onCharacterDataLoaded((g) => {
             this.currentState = g;
             const unsortedQualityNames: string[] = []
