@@ -42,7 +42,6 @@ export default [
     ProfileLinkFixer,
     ThingSortFixer,
     AsceticModeFixer,
-    FavourTrackerFixer,
     MiscTrackerFixer,
     SocialEmptyReqsFixer,
     AfterFallYearFixer,
