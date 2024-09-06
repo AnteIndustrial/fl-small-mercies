@@ -28,8 +28,6 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             temp = "{}";
         }
         this.miscQualities = new Map(Object.entries(JSON.parse(temp)));
-        console.log("here")
-        console.log(this.miscQualities)
         this.displayMiscTracker = this.currentSettings.display_quality_tracker as boolean;
     }
 
@@ -48,16 +46,12 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             for (const [key, value] of this.miscQualities) {
                 let dirty = false;
                 if (value.category === "") {
-                    console.log(this.miscQualities)
-                    console.log("cat is null")
                     value.category = this.qualityNameAndCategory.get(key) || "";
-                    console.log(value.category)
                     value.image = this.currentState?.getQuality(value.category, key)?.image || "question"
                     if (value.image !== "question") {
                         const tracker = document.getElementById(`${key}-tracker-icon`)
                         tracker?.setAttribute("src", `//images.fallenlondon.com/icons/${value.image}.png`);
                     }
-                    console.log(value.image)
                     dirty = value.category !== "";
                 }
                 if (value.category != "") {
@@ -72,11 +66,8 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 if (dirty && this.currentSettings) {
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     this.currentSettings!.trackedQualities = JSON.stringify(Object.fromEntries(this.miscQualities))
-                    console.log("updating")
                     sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
-                    console.log(this.currentSettings)
                 }
-                console.log("done")
             }
         });
 
@@ -99,21 +90,15 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 updatedQuality.currentValue = current;
                 this.updateTracker(quality.name, current);
                 if (updatedQuality.category === "") {
-                    console.log(this.miscQualities)
-                    console.log("cat is null 2")
                     updatedQuality.category = this.qualityNameAndCategory.get(quality.name) || "";
-                    console.log(updatedQuality.category)
                     updatedQuality.image = this.currentState?.getQuality(quality.category, quality.name)?.image || "question"
                     if (updatedQuality.image !== "question") {
                         const tracker = document.getElementById(`${quality.name}-tracker-icon`)
                         tracker?.setAttribute("src", `//images.fallenlondon.com/icons/${updatedQuality.image}.png`);
                     }
-                    console.log(updatedQuality.image)
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     this.currentSettings!.trackedQualities = JSON.stringify(Object.fromEntries(this.miscQualities))
-                    console.log("updating")
                     sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
-                    console.log(this.currentSettings)
                 }
             }
         });
@@ -170,42 +155,8 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         }
         span4.style.cssText = `width: ${percentage}%;`;
 
-        const deleteButton = document.createElement("button");
-        deleteButton.classList.add("buttonlet-container")
-        deleteButton.setAttribute("aria-label", "Stop Tracking");
-        deleteButton.setAttribute("type", "button");
-
-        const deleteSpan1 = document.createElement("span");
-        deleteSpan1.classList.add("buttonlet", "fa-stack", "fa-lg", "buttonlet-enabled", "buttonlet-delete");
-        deleteSpan1.setAttribute("title", "Stop Tracking")
-
-        const deleteSpan2 = document.createElement("span");
-        deleteSpan2.classList.add("fa", "fa-circle", "fa-stack-2x");
-
-        const deleteSpan3 = document.createElement("span");
-        deleteSpan3.classList.add("fa", "fa-inverse", "fa-stack-1x", "fa-times");
-
-        const deleteSpan4 = document.createElement("span");
-        deleteSpan4.classList.add("u-visually-hidden")
-        deleteSpan4.textContent = "delete";
-
-        deleteButton.appendChild(deleteSpan1);
-        deleteSpan1.appendChild(deleteSpan2);
-        deleteSpan1.appendChild(deleteSpan3);
-        deleteSpan1.appendChild(deleteSpan4);
-
-        deleteButton.addEventListener("click", () => {
-            document.getElementById(li.id)?.remove();
-            this.miscQualities.delete(title);
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            this.currentSettings!.trackedQualities = JSON.stringify(Object.fromEntries(this.miscQualities))
-
-            sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
-        })
-
         li.appendChild(div);
         li.appendChild(div3);
-        li.appendChild(deleteButton);
         div.appendChild(div4);
         div3.appendChild(span);
         div3.appendChild(span3);
@@ -301,49 +252,6 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 const miscDisplay = this.createTracker(valueName);
                 miscPanel.appendChild(miscDisplay);
             }
-
-            const miscPicker = document.createElement("div");
-            const miscSelect = document.createElement("select");
-            miscSelect.id = "track-target-name";
-            miscPicker.appendChild(miscSelect);
-            for (const qualityName of this.qualityNames) {
-                const option = document.createElement("option");
-                option.value = qualityName;
-                option.text = qualityName;
-                miscSelect.appendChild(option);
-            }
-            const targetInput = document.createElement("input");
-            targetInput.id = "track-target-number";
-            targetInput.type = "number";
-            miscPicker.appendChild(targetInput);
-
-            const trackButton = document.createElement("button");
-            trackButton.classList.add("js-tt", "button", "button--primary", "button--margin", "button--go")
-            trackButton.addEventListener("click", () => {
-                const trackName = (document.getElementById("track-target-name") as HTMLSelectElement).value;
-                const trackNumber = Number((document.getElementById("track-target-number") as HTMLInputElement).value);
-                const trackCategory = this.qualityNameAndCategory.get(trackName) || "";
-                const trackCurrent: number = this.currentState?.getQuality(trackCategory, trackName)?.level || 0;
-                const trackImage: string = this.currentState?.getQuality(trackCategory, trackName)?.image || "question"
-                const newQuality = { name: trackName, category: trackCategory, currentValue: trackCurrent, targetValue: trackNumber, image: trackImage };
-                this.miscQualities.set(trackName, newQuality);
-                if (this.currentSettings) {
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    this.currentSettings!.trackedQualities = JSON.stringify(Object.fromEntries(this.miscQualities)) ;
-                }
-
-                sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
-               
-                const miscDisplay = this.createTracker(trackName);
-                miscPanel?.appendChild(miscDisplay);
-                miscPanel?.appendChild(miscPicker);
-            })
-            const trackText = document.createElement("span");
-            trackText.textContent = "Track";
-            trackButton.appendChild(trackText);
-            miscPicker.appendChild(trackButton);
-
-            miscPanel.appendChild(miscPicker);
 
             sidebar.appendChild(fragment);
         }
