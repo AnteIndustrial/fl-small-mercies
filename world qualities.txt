@@ -1,0 +1,32 @@
+https://fallenlondon.wiki/w/api.php?action=ask&format=json&query=%5B%5BPhase+of+the+Rat-Moon%3A%5D%5D
+
+[[Phase of the Rat-Moon:]]|?Has current description
+
+[[Phase of the Rat-Moon:||Direction of the Rat-Wind:||The Rat-Season:||The False-Season:||Saintly Demand||Soft Demand||Tempestuous Demand||Inscrutable Demand||Intricate Demand||Maudlin Demand||The Season in Soup||Bone Market Fluctuations:||Zoological Mania:||Hearts' Game Season (Placeholder)||Season of the Sacroboscan Calendar]]|?Has current value
+
+
+
+Saintly Demand
+Soft Demand
+Tempestuous Demand
+Inscrutable Demand
+Intricate Demand
+Maudlin Demand
+
+The Rat-Season:
+Direction of the Rat-Wind:
+Phase of the Rat-Moon:
+The False-Season:
+
+The Season in Soup
+
+Bone Market Fluctuations:
+Zoological Mania:
+
+Hearts' Game Season (Placeholder)
+
+Season of the Sacroboscan Calendar
+
+
+https://fallenlondon.wiki/w/api.php?action=ask&format=json&query=[[Phase%20of%20the%20Rat-Moon:||Direction%20of%20the%20Rat-Wind:||The%20Rat-Season:||The%20False-Season:||Saintly%20Demand||Soft%20Demand||Tempestuous%20Demand||Inscrutable%20Demand||Intricate%20Demand||Maudlin%20Demand||The%20Season%20in%20Soup||Bone%20Market%20Fluctuations:||Zoological%20Mania:||Hearts%27%20Game%20Season%20(Placeholder)||Season%20of%20the%20Sacroboscan%20Calendar]]|?Has%20current%20value
+{"query":{"printrequests":[{"label":"","key":"","redi":"","typeid":"_wpg","mode":2},{"label":"Has current value","key":"Has_current_value","redi":"","typeid":"_txt","mode":1,"format":""}],"results":{"Bone Market Fluctuations:":{"printouts":{"Has current value":["Antiquity"]},"fulltext":"Bone Market Fluctuations:","fullurl":"https://fallenlondon.wiki/wiki/Bone_Market_Fluctuations:","namespace":0,"exists":"1","displaytitle":""},"Direction of the Rat-Wind:":{"printouts":{"Has current value":["North"]},"fulltext":"Direction of the Rat-Wind:","fullurl":"https://fallenlondon.wiki/wiki/Direction_of_the_Rat-Wind:","namespace":0,"exists":"1","displaytitle":""},"Hearts' Game Season (Placeholder)":{"printouts":{"Has current value":["Irreverences"]},"fulltext":"Hearts' Game Season (Placeholder)","fullurl":"https://fallenlondon.wiki/wiki/Hearts%27_Game_Season_(Placeholder)","namespace":0,"exists":"1","displaytitle":""},"Inscrutable Demand":{"printouts":{"Has current value":["1"]},"fulltext":"Inscrutable Demand","fullurl":"https://fallenlondon.wiki/wiki/Inscrutable_Demand","namespace":0,"exists":"1","displaytitle":""},"Intricate Demand":{"printouts":{"Has current value":["4"]},"fulltext":"Intricate Demand","fullurl":"https://fallenlondon.wiki/wiki/Intricate_Demand","namespace":0,"exists":"1","displaytitle":""},"Maudlin Demand":{"printouts":{"Has current value":["2"]},"fulltext":"Maudlin Demand","fullurl":"https://fallenlondon.wiki/wiki/Maudlin_Demand","namespace":0,"exists":"1","displaytitle":""},"Phase of the Rat-Moon:":{"printouts":{"Has current value":["Hard"]},"fulltext":"Phase of the Rat-Moon:","fullurl":"https://fallenlondon.wiki/wiki/Phase_of_the_Rat-Moon:","namespace":0,"exists":"1","displaytitle":""},"Saintly Demand":{"printouts":{"Has current value":["0"]},"fulltext":"Saintly Demand","fullurl":"https://fallenlondon.wiki/wiki/Saintly_Demand","namespace":0,"exists":"1","displaytitle":""},"Season of the Sacroboscan Calendar":{"printouts":{"Has current value":["9"]},"fulltext":"Season of the Sacroboscan Calendar","fullurl":"https://fallenlondon.wiki/wiki/Season_of_the_Sacroboscan_Calendar","namespace":0,"exists":"1","displaytitle":""},"Soft Demand":{"printouts":{"Has current value":["3"]},"fulltext":"Soft Demand","fullurl":"https://fallenlondon.wiki/wiki/Soft_Demand","namespace":0,"exists":"1","displaytitle":""},"Tempestuous Demand":{"printouts":{"Has current value":["1"]},"fulltext":"Tempestuous Demand","fullurl":"https://fallenlondon.wiki/wiki/Tempestuous_Demand","namespace":0,"exists":"1","displaytitle":""},"The False-Season:":{"printouts":{"Has current value":["Autumn"]},"fulltext":"The False-Season:","fullurl":"https://fallenlondon.wiki/wiki/The_False-Season:","namespace":0,"exists":"1","displaytitle":""},"The Rat-Season:":{"printouts":{"Has current value":["Wine-Whisper"]},"fulltext":"The Rat-Season:","fullurl":"https://fallenlondon.wiki/wiki/The_Rat-Season:","namespace":0,"exists":"1","displaytitle":""},"The Season in Soup":{"printouts":{"Has current value":["1"]},"fulltext":"The Season in Soup","fullurl":"https://fallenlondon.wiki/wiki/The_Season_in_Soup","namespace":0,"exists":"1","displaytitle":""},"Zoological Mania:":{"printouts":{"Has current value":["Arachnids"]},"fulltext":"Zoological Mania:","fullurl":"https://fallenlondon.wiki/wiki/Zoological_Mania:","namespace":0,"exists":"1","displaytitle":""}},"serializer":"SMW\\Serializers\\QueryResultSerializer","version":2,"meta":{"hash":"f3042184938b6525af19c6b9c4bc8e71","count":15,"offset":0,"source":"","time":"0.005671"}}}

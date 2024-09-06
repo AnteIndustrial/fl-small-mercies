@@ -213,6 +213,99 @@ const SETTINGS_SCHEMA: SettingsSchema = [
             },
         },
     },
+    {
+        title: "Time-keeping",
+        settings: {
+            tth: {
+                description: "Show time until Time The Healer returns.",
+                default: true,
+            },
+            notability: {
+                description: "Warn if notability will fall when TtH returns.",
+                default: true,
+            },
+            beneficience: {
+                description: "Notify if 'A Beneficience' is available.",
+                default: true,
+            },
+            free_evenings: {
+                description: "Notify if Free Evenings are available.",
+                default: true,
+            },
+            mired_in_mail: {
+                description: "Notify if Mired in Mail is below 5.",
+                default: true,
+            },
+            backstage: {
+                description: "Notify if Backstage at Mrs Chapman's is available.",
+                default: true,
+            },
+            favourable_circumstance: {
+                description: "Notify if a Favourable Circumstance is available.",
+                default: true,
+            },
+            professional_perks: {
+                description: "Warn if Professional Perks is 0.",
+                default: true,
+            },
+            irrigo: {
+                description: "Notify if Irrigo is 0.",
+                default: true,
+            },
+            parabolan_ravages: {
+                description: "Notify if Parabolan Ravages is 0.",
+                default: true,
+            },
+            ambition_reward: {
+                description: "Notify when A Consequence of your Ambition is next available.",
+                default: true,
+            },
+            bone_market_exhaustion: {
+                description: "Notify if Bone Market Exhaustion is less than 4.",
+                default: true,
+            },
+            board_meeting: {
+                description: "Notify if a Board Meeting is available.",
+                default: true,
+            },
+            visit_hell: {
+                description: "Notify if a trip to Hell is available.",
+                default: true,
+            },
+            wellspring: {
+                description: "Notify if a trip to the Wellspring of Moulin is available",
+                default: true,
+            },
+            starved_embassy: {
+                description: "Notify if the Starved Embassy is available.",
+                default: true,
+            },
+            ecdysis: {
+                description: "Notify if an Ecdysis boon is available.",
+                default: true,
+            },
+            bone_market_trends: {
+                description: "List the current Bone Market trends, and the time they will change.",
+                default: true,
+            },
+            rat_market: {
+                description: "List the Rat Market's next opening and closing times, and what it is buying and selling.",
+                default: true,
+            },
+            hearts_game: {
+                description: "Notify if this month's Hearts' Game distinction is available.",
+                default: true,
+            },
+            waswood: {
+                description: "Notify if a Waswood event with a unique item is available.",
+                default: true,
+            },
+            house_of_chimes: {
+                description: "Notify if a House of Chimes vote is available, and when they will be restored.",
+                default: true,
+            }
+        }
+    }
 ];
 
 const COMMUNITY_SNIPPETS: ICustomSnippet[] = [

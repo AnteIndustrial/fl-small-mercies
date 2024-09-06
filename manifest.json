@@ -3,7 +3,7 @@
   "description": "Set of small 'fixes' for Fallen London UI.",
   "version": "3.2.0",
   "manifest_version": 2,
-  "permissions": ["storage", "tabs"],
+  "permissions": ["storage", "tabs", "https://fallenlondon.wiki/*"],
   "background": {
     "page": "dist/background.html",
     "persistent": true
@@ -11,7 +11,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.fallenlondon.com/*"
+        "https://www.fallenlondon.com/*",
+        "https://fallenlondon.wiki/*"
       ],
       "css": [
         "dist/css/extension.css"
@@ -37,7 +38,8 @@
     "128": "/images/fl-small-mercies-icon-128.png"
   },
   "web_accessible_resources": [
-      "dist/*",
-      "src/*"
+    "dist/*",
+    "src/*",
+    "https://fallenlondon.wiki/*"
   ]
 }
