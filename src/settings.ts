@@ -29,6 +29,23 @@ const isToggle = (setting: SettingDescriptor): setting is ToggleSetting => typeo
 const isMultipleChoice = (setting: SettingDescriptor): setting is MultipleChoiceSetting => "choices" in setting;
 const isDropDown = (setting: SettingDescriptor): setting is DropDownListSetting => setting.default === "select";
 
+// Mapping of favour name to its respective image
+const FAVOURS = new Map([
+    ["Favours: Bohemians", "bohogirl1"],
+    ["Favours: Society", "salon2"],
+    ["Favours: Criminals", "manacles"],
+    ["Favours: The Church", "clergy"],
+    ["Favours: The Docks", "ship"],
+    ["Favours: Urchins", "urchin"],
+    ["Favours: Constables", "constablebadge"],
+    ["Favours: Fingerkings", "fingerking"],
+    ["Favours: Hell", "devil"],
+    ["Favours: Revolutionaries", "flames"],
+    ["Favours: Rubbery Men", "rubberyman"],
+    ["Favours: The Great Game", "pawn"],
+    ["Favours: Tomb-Colonies", "bandagedman"],
+]);
+
 class FLSettingsFrontend {
     private readonly name: string;
     private readonly extensionId: string;
@@ -239,6 +256,18 @@ class FLSettingsFrontend {
         return miscPicker;
     }
 
+    populateDefaultTrackedQualities() {
+        for (const key in FAVOURS) {
+            this.trackedQualities.set(key, {
+                name: key,
+                category: "Contacts",
+                currentValue: this.currentState?.getQuality("Contacts", key)?.level || 0,
+                targetValue: 7,
+                image: FAVOURS.get(key) || "question"
+            })
+        }
+    }
+
     private createLocalSettingsPanel(): Node {
         const containerDiv = document.createElement("div");
         containerDiv.setAttribute("custom-settings", this.extensionId);
@@ -316,6 +345,9 @@ class FLSettingsFrontend {
                         temp = "{}";
                     }
                     this.trackedQualities = new Map(Object.entries(JSON.parse(temp)));
+                    if (this.trackedQualities.size === 0) {
+                        this.populateDefaultTrackedQualities();
+                    }
 
                     const miscPanel = document.createElement("ul");
                     miscPanel.setAttribute("id", "misc-tracker");
@@ -584,3 +616,5 @@ class FLSettingsBackend {
 }
 
 export {FLSettingsFrontend, FLSettingsBackend, SettingsObject, SettingsSchema};
+
+
