@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { IMutationAware, IStateAware } from "./base";
 import { SettingsObject } from "../settings";
 import { GameState, GameStateController } from "../game_state";
@@ -18,7 +17,8 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     constructor() {
-
+        console.log("test")
+        sendToServiceWorker("GetWikiData", {})
     }
 
     applySettings(settings: SettingsObject): void {
@@ -28,6 +28,9 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             temp = "{}";
         }
         this.miscQualities = new Map(Object.entries(JSON.parse(temp)));
+        console.log("here")
+        console.log(this.miscQualities)
+        this.displayMiscTracker = this.currentSettings.display_quality_tracker as boolean;
     }
 
     
@@ -43,14 +46,37 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             }
             this.qualityNames = unsortedQualityNames.sort(stringSorter)
             for (const [key, value] of this.miscQualities) {
-                const quality = g.getQuality(value.category, key);
-                if (quality) {
-                    value.currentValue = quality.level;
-                } else {
-                    value.currentValue = 0;
+                let dirty = false;
+                if (value.category === "") {
+                    console.log(this.miscQualities)
+                    console.log("cat is null")
+                    value.category = this.qualityNameAndCategory.get(key) || "";
+                    console.log(value.category)
+                    value.image = this.currentState?.getQuality(value.category, key)?.image || "question"
+                    if (value.image !== "question") {
+                        const tracker = document.getElementById(`${key}-tracker-icon`)
+                        tracker?.setAttribute("src", `//images.fallenlondon.com/icons/${value.image}.png`);
+                    }
+                    console.log(value.image)
+                    dirty = value.category !== "";
                 }
-
-                this.updateTracker(key, quality?.level || 0);
+                if (value.category != "") {
+                    const quality = g.getQuality(value.category, key);
+                    if (quality) {;
+                        value.currentValue = quality.level;
+                    } else {
+                        value.currentValue = 0;
+                    }
+                    this.updateTracker(key, quality?.level || 0);
+                }
+                if (dirty && this.currentSettings) {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    this.currentSettings!.trackedQualities = JSON.stringify(Object.fromEntries(this.miscQualities))
+                    console.log("updating")
+                    sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
+                    console.log(this.currentSettings)
+                }
+                console.log("done")
             }
         });
 
@@ -69,8 +95,26 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             }
             if (this.miscQualities.has(quality.name)) {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                this.miscQualities.get(quality.name)!.currentValue = current;
+                const updatedQuality = this.miscQualities.get(quality.name)!;
+                updatedQuality.currentValue = current;
                 this.updateTracker(quality.name, current);
+                if (updatedQuality.category === "") {
+                    console.log(this.miscQualities)
+                    console.log("cat is null 2")
+                    updatedQuality.category = this.qualityNameAndCategory.get(quality.name) || "";
+                    console.log(updatedQuality.category)
+                    updatedQuality.image = this.currentState?.getQuality(quality.category, quality.name)?.image || "question"
+                    if (updatedQuality.image !== "question") {
+                        const tracker = document.getElementById(`${quality.name}-tracker-icon`)
+                        tracker?.setAttribute("src", `//images.fallenlondon.com/icons/${updatedQuality.image}.png`);
+                    }
+                    console.log(updatedQuality.image)
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    this.currentSettings!.trackedQualities = JSON.stringify(Object.fromEntries(this.miscQualities))
+                    console.log("updating")
+                    sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
+                    console.log(this.currentSettings)
+                }
             }
         });
     }
@@ -113,6 +157,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
 
         const img = document.createElement("img");
         img.classList.add("cursor-default");
+        img.setAttribute("id", `${title}-tracker-icon`)
         img.setAttribute("alt", `${title}`);
         img.setAttribute("src", `//images.fallenlondon.com/icons/${icon}.png`);
         img.setAttribute("aria-label", `${title}`);
