@@ -17,8 +17,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     constructor() {
-        console.log("test")
-        sendToServiceWorker("GetWikiData", {})
+
     }
 
     applySettings(settings: SettingsObject): void {
