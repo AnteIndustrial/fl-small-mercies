@@ -26,7 +26,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware {
     private infoDisplay = null;
     private tthContainer = null;
 
-    private tthMoment = null;
+    private tthMoment: null | number = null;
     private balmoralMoment = null;
     private khanateMoment = null;
     private wellspringMoment = null;
@@ -38,6 +38,9 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware {
         "Bone Market Fluctuations:", "Zoological Mania:",
         "Hearts' Game Season (Placeholder)",
         "Season of the Sacroboscan Calendar]"];
+    private currentSettings: SettingsObject | undefined;
+    private displayTimekeeping = true;
+    private currentState?: GameState;
 
     //private worldQualitiesMap;
 
@@ -45,23 +48,35 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware {
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     constructor() {
-
     }
+
     linkState(state: GameStateController): void {
-        throw new Error("Method not implemented.");
+        state.onCharacterDataLoaded((g) => {
+            this.currentState = g;
+        });
+        state.onQualityChanged((state, quality, _previous, current) => {
+            this.currentState = state;
+        });
     }
     onNodeAdded(node: HTMLElement): void {
-        throw new Error("Method not implemented.");
+        //build some html
     }
     onNodeRemoved(node: HTMLElement): void {
-        throw new Error("Method not implemented.");
+        ;//do nothing
     }
     checkEligibility(node: HTMLElement): boolean {
-        throw new Error("Method not implemented.");
+        if (!this.displayTimekeeping) {
+            return false;
+        }
+
+        return getSingletonByClassName(node, "timekeeper") != null;
     }
     applySettings(settings: SettingsObject): void {
-        throw new Error("Method not implemented.");
+
+        this.currentSettings = settings;
+        this.displayTimekeeping = this.currentSettings.display_timekeeping as boolean;
+        if (this.currentSettings.tthMoment) {
+            console.log(this.currentSettings.tthMoment)
+        }
     }
-
-
 }

@@ -10,6 +10,7 @@ import {ThingSortFixer} from "./things_sorter";
 import {ProfileLinkFixer} from "./profile_link";
 import {AsceticModeFixer} from "./ascetic_mode";
 import { MiscTrackerFixer } from "./misc_tracker";
+import { TimeKeeperFixer } from "./timekeeper";
 import {SocialEmptyReqsFixer} from "./empty_requirements";
 import {AfterFallYearFixer} from "./af_year";
 import {KhanateOracleFixer} from "./khanate_oracle";
@@ -43,6 +44,7 @@ export default [
     ThingSortFixer,
     AsceticModeFixer,
     MiscTrackerFixer,
+    TimeKeeperFixer,
     SocialEmptyReqsFixer,
     AfterFallYearFixer,
     KhanateOracleFixer,

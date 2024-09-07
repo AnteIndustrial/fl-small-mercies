@@ -1,5 +1,8 @@
 import {IChooseBranchRequest, IUserResponse} from "./interfaces";
-import {debug} from "./logging";
+import { debug } from "./logging";
+import { MSG_TYPE_SAVE_SETTINGS } from "./constants";
+import { sendToServiceWorker } from "./comms";
+import { SettingsObject } from "./settings";
 
 type AjaxMethod = (method: string, url: string, async: boolean) => any;
 
@@ -70,6 +73,7 @@ export class FLApiInterceptor {
     }
 
     private currentToken = "";
+    private static authToken = "";
     private responseListeners: Map<string, ((request: any, response: any) => any)[]> = new Map();
     private requestListeners: Map<string, ((request: IModifiedAjax, data: Record<string, unknown>) => any)[]> =
         new Map();
@@ -236,12 +240,25 @@ export class FLApiInterceptor {
             XMLHttpRequest.prototype.send,
             this.processRequest.bind(this)
         );
+        XMLHttpRequest.prototype.setRequestHeader = this.installAuthSniffer(XMLHttpRequest.prototype.setRequestHeader);
 
         // Acquire token stored by FL UI itself
         this.currentToken = localStorage.access_token || sessionStorage.access_token || "";
 
         this.onResponseReceived("/api/login/user", this.refreshUserToken.bind(this));
         this.onResponseReceived("/api/login", this.refreshUserToken.bind(this));
+    }
+
+    private installAuthSniffer(original_function: any) {
+        return function (this, ...args) {
+            if (args.length > 1 && args[0] === "Authorization" && args[1] !== FLApiInterceptor.authToken) {
+                FLApiInterceptor.authToken = args[1];
+                FLApiInterceptor.getTTHMoment()
+            }
+
+            return original_function.apply(this, args);
+        }
+
     }
 
     private refreshUserToken(_request: any, response: IUserResponse): IUserResponse {
@@ -253,5 +270,32 @@ export class FLApiInterceptor {
         }
 
         return response;
+    }
+
+    private static async getTTHMoment() {
+        console.log("Trying to fetch TTH arrival moment from server...");
+        console.log(FLApiInterceptor.authToken)
+        const response = await fetch(
+            "https://api.fallenlondon.com/api/settings/timethehealer",
+            {
+                headers: {
+                    "Authorization": FLApiInterceptor.authToken
+                },
+            }
+        );
+        if (!response.ok) {
+            throw new Error("FL API did not like our request");
+        }
+
+        const userData = await response.json();
+        if (!userData.isSuccess) {
+            throw new Error("Could not retrieve Time The Healer moment")
+        }
+
+        const stringifiedTime = userData.dateTimeToExecute;
+        console.log(stringifiedTime)
+        const settings: SettingsObject = {};
+        settings.TTH_MSG = stringifiedTime
+        sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, settings)
     }
 }

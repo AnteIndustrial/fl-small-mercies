@@ -214,8 +214,12 @@ const SETTINGS_SCHEMA: SettingsSchema = [
         },
     },
     {
-        title: "Time-keeping",
+        title: "Timekeeping",
         settings: {
+            display_timekeeping: {
+                description: "Show timekeeping utilities.",
+                default: true,
+            },
             tth: {
                 description: "Show time until Time The Healer returns.",
                 default: true,

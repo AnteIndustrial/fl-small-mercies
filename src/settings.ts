@@ -797,6 +797,22 @@ class FLSettingsBackend {
 
     handleMessage(message: SettingsMessage) {
         if (message.action === MSG_TYPE_SAVE_SETTINGS) {
+            log("saving")
+            if (message.TTH_MSG) {
+                log("in here")
+                chrome.storage.local.get(["settings"], (result) => {
+                    if (chrome.runtime.lastError) {
+                        log("error")
+                        debug("Could not load settings from DB, doing nothing.");
+                    } else {
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        result.settings.tthMoment = message.TTH_MSG
+                        log(result.settings.tthMoment)
+                        this.handleMessage({ action: MSG_TYPE_SAVE_SETTINGS, settings: result.settings })
+                    }
+                });
+            }
+            console.log(message)
             chrome.storage.local.set(
                 {
                     settings: message.settings,
