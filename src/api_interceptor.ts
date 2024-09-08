@@ -273,8 +273,6 @@ export class FLApiInterceptor {
     }
 
     private static async getTTHMoment() {
-        console.log("Trying to fetch TTH arrival moment from server...");
-        console.log(FLApiInterceptor.authToken)
         const response = await fetch(
             "https://api.fallenlondon.com/api/settings/timethehealer",
             {
@@ -293,7 +291,6 @@ export class FLApiInterceptor {
         }
 
         const stringifiedTime = userData.dateTimeToExecute;
-        console.log(stringifiedTime)
         const settings: SettingsObject = {};
         settings.TTH_MSG = stringifiedTime
         sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, settings)

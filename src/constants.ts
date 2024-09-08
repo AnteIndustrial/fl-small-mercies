@@ -6,6 +6,7 @@ const EXTENSION_ID = "FL_SM";
 
 const MSG_TYPE_SAVE_SETTINGS = `${EXTENSION_ID}_saveSettings`;
 const MSG_TYPE_CURRENT_SETTINGS = `${EXTENSION_ID}_currentSettings`;
+const MSG_TYPE_WIKI_API_CALL = `${EXTENSION_ID}_callWiki`
 
 const SETTINGS_SCHEMA: SettingsSchema = [
     {
@@ -434,6 +435,7 @@ export {
     EXTENSION_ID,
     MSG_TYPE_SAVE_SETTINGS,
     MSG_TYPE_CURRENT_SETTINGS,
+    MSG_TYPE_WIKI_API_CALL,
     SETTINGS_SCHEMA,
     COMMUNITY_SNIPPETS,
 };
