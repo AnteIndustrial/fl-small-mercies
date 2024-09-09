@@ -1,38 +1,94 @@
-import { MSG_TYPE_CURRENT_SETTINGS, MSG_TYPE_WIKI_API_CALL } from "./constants";
+import { MSG_TYPE_WIKI_API_CALL, MSG_TYPE_WIKI_API_RESPONSE } from "./constants";
 import { debug, log } from "./logging";
+import Tab = chrome.tabs.Tab;
 
-type WikiRequestObject = { action: string, missingQualities: string, callback: (results: Map<string, unknown>) => void};
+type WikiRequestObject = { action: string, missingQualities: string };
+type WikiResult = {name: string, value: string, timestamp: number}
+
 
 class WikiApi {
-    private i = 1;
-    private results: Map<string, unknown> = new Map();
+    private i = 0;// for now, this prevents multiple API calls. In future it will need to be not a permanent block
+
     constructor() {
         ;
     }
 
+    private getFallenLondonTabs(): Promise<Array<Tab>> {
+        return new Promise((resolve, _) => {
+            chrome.windows.getCurrent((w) => {
+                chrome.tabs.query({ windowId: w.id, url: "*://*.fallenlondon.com/*" }, function (tabs) {
+                    resolve(tabs);
+                });
+            });
+        });
+    }
+
+    private sendResultsToTabs(parsedResults: Map<string, WikiResult>) {
+        debug(`Sending results to tabs: ${JSON.stringify(Object.fromEntries(parsedResults)) }`);
+        this.getFallenLondonTabs().then((tabs) => {
+            tabs.map((t) => {
+                if (t.id == null) {
+                    return;
+                }
+
+                const message = { action: MSG_TYPE_WIKI_API_RESPONSE, results: JSON.stringify(Object.fromEntries(parsedResults)) }
+                chrome.tabs.sendMessage(t.id, message);
+            });
+        });
+    }
+
     handleMessage(message: WikiRequestObject) {
-        console.log("wiki handle message")
-        log(JSON.stringify(message))
         let url = "https://fallenlondon.wiki/w/api.php?action=ask&format=json&query=[["
         const missingWorldQualities: string[] = JSON.parse(message.missingQualities)
         for (const qualityName of missingWorldQualities) {
             url += qualityName;
             url += "||"
         }
-        url = url.slice(0, -2)
+        url = url.slice(0, -2); //remove the last delimiter
         url += "]]"
         url += "|?Has current value"
         url = encodeURI(url)
-        log(url);
         if (this.i == 0) {
             this.i = 1;
             fetch(url)
                 .then(response => response.json())
-                .then(data => this.results = data.query.results)
-                .then(() => message.callback(this.results))
+                .then(data => new Map(Object.entries(data.query.results)))
+                .then(results => this.parseResults(results))
+                .then(parsedResults => this.sendResultsToTabs(parsedResults))
                 .catch(error => log(error));
-
         }
+    }
+
+    private parseResults(results: Map<string, string | number | unknown>): Map<string, WikiResult>{
+        const parsedResults: Map<string, WikiResult> = new Map();
+        const timestamp = Date.now();
+        results.forEach((val, key) => {
+            // eslint-disable-next-line @typescript-eslint/ban-types
+            const valAsMap: Map<string, string | number | unknown> = new Map(Object.entries(val as Object));
+            valAsMap.forEach((innerVal, _innerKey) => {
+                if (typeof innerVal !== "string" && typeof innerVal !== "number") {
+                    // eslint-disable-next-line @typescript-eslint/ban-types
+                    const entry: Map<string, string[]> = new Map(Object.entries(innerVal as Object))
+                    try {
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        const value = entry.get("Has current value")![0];
+                        parsedResults.set(key, { name: key, value: value, timestamp: timestamp })
+                    } catch (e: unknown) {
+                        log("error parsing result")
+                        log(key)
+                        log(JSON.stringify(entry))
+                        if (typeof e === "string") {
+                            log(e)
+                        } else if (e instanceof Error) {
+                            log(e.message)
+                        }
+                    }
+                }
+            });
+
+        });
+        debug(`Parsed wiki results: ${parsedResults}`)
+        return parsedResults;
     }
 
     isMessageRelevant(message: WikiRequestObject): boolean {
@@ -40,5 +96,4 @@ class WikiApi {
     }
 
 }
-
-export {WikiApi }
+export { WikiApi, WikiResult }

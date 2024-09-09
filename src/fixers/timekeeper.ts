@@ -3,11 +3,10 @@ import { IMutationAware, IStateAware } from "./base";
 import { SettingsObject } from "../settings";
 import { GameState, GameStateController } from "../game_state";
 import { getSingletonByClassName } from "../utils";
-import { MSG_TYPE_SAVE_SETTINGS, MSG_TYPE_WIKI_API_CALL } from "../constants";
+import { MSG_TYPE_SAVE_SETTINGS, MSG_TYPE_WIKI_API_CALL, MSG_TYPE_WIKI_API_RESPONSE } from "../constants";
 import { sendToServiceWorker } from "../comms";
+import { WikiResult } from "../wiki";
 
-type ApiCallObject = { [key: string]: string | ((results: Map<string, unknown>) => void) };
-type ApiCallMessage = { action: string; message: ApiCallObject };
 
 export class TimeKeeperFixer implements IMutationAware, IStateAware {
 
@@ -36,23 +35,38 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware {
     private calendarMoment = null;
 
     private worldQualityNames = ["Saintly Demand", "Soft Demand", "Tempestuous Demand", "Inscrutable Demand", "Intricate Demand", "Maudlin Demand",
-        "The Rat - Season:", "Direction of the Rat - Wind:", "Phase of the Rat - Moon:", "The False - Season:",
+        "The Rat-Season:", "Direction of the Rat-Wind:", "Phase of the Rat-Moon:", "The False-Season:",
         "The Season in Soup",
         "Bone Market Fluctuations:", "Zoological Mania:",
         "Hearts' Game Season (Placeholder)",
         "Season of the Sacroboscan Calendar"];
-    private knownWorldQualities: Map<string, string> = new Map()
+    private knownWorldQualities: Map<string, WikiResult> = new Map()
     private currentSettings: SettingsObject | undefined;
     private displayTimekeeping = true;
     private currentState?: GameState;
 
+    private i = 0;
 
-    //private worldQualitiesMap;
-
-    //private const qualities = new Map();
-
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     constructor() {
+        window.addEventListener("message", (event) => {
+            if (event.data.action === MSG_TYPE_WIKI_API_RESPONSE) {
+                const results: Map<string, WikiResult> = new Map(Object.entries(JSON.parse(event.data.results)));
+                console.log(`wiki gave us these results: ${results.keys}`)
+                let dirty = false;
+                results.forEach((val, key) => {
+                    //todo check the timestamp
+                    if (this.knownWorldQualities.get(key)?.value !== val.value) {
+                        dirty = true;
+                        this.knownWorldQualities.set(key, val)
+                    }
+                });
+                if (dirty) {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    this.currentSettings!.worldQualities = JSON.stringify(Object.fromEntries(this.knownWorldQualities))
+                    sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
+                }
+            }
+        });
     }
 
     linkState(state: GameStateController): void {
@@ -64,7 +78,49 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware {
         });
     }
     onNodeAdded(node: HTMLElement): void {
-        //build some html
+        const travelColumn = getSingletonByClassName(node, "travel");
+        if (!travelColumn) return;
+
+        let sidebar = document.getElementById("right-sidebar");
+        if (!sidebar) {
+            sidebar = document.createElement("div");
+            sidebar.setAttribute("id", "right-sidebar");
+            sidebar.classList.add("sidebar");
+
+            if (travelColumn.querySelector("div[class='snippet']")) {
+                // Give some clearance in case snippets are not disabled.
+                (sidebar as HTMLElement).style.cssText = "margin-top: 30px";
+            }
+        }
+
+        let timekeeperPanel = document.getElementById("timekeeper-panel");
+        // Trackers are already created and visible, nothing to do here.
+        if (!timekeeperPanel) {
+            const fragment = document.createDocumentFragment();
+
+            const timekeeperHeader = document.createElement("p");
+            timekeeperHeader.classList.add("heading", "heading--4");
+            timekeeperHeader.textContent = "Timekeeper";
+            fragment.appendChild(timekeeperHeader);
+
+            timekeeperPanel = document.createElement("ul");
+            timekeeperPanel.setAttribute("id", "timekeeper-panel");
+            this.knownWorldQualities.forEach((val, key) => {
+                const element = document.createElement("li")
+                const span = document.createElement("span");
+                const dateString = new Date(val.timestamp).toISOString()
+                span.textContent = `${val.name} is currently ${val.value}, last checked ${dateString}`
+                element.appendChild(span)
+                timekeeperPanel?.appendChild(element);
+            });
+            fragment.appendChild(timekeeperPanel);
+
+            sidebar.appendChild(fragment);
+        }
+
+        if (!travelColumn.contains(sidebar)) {
+            travelColumn.appendChild(sidebar);
+        }
     }
     onNodeRemoved(node: HTMLElement): void {
         ;//do nothing
@@ -73,14 +129,20 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware {
         if (!this.displayTimekeeping) {
             return false;
         }
-
-        return getSingletonByClassName(node, "timekeeper") != null;
+        if (document.getElementById("main") == null) {
+            return false;
+        }
+        return document.getElementById("timekeeper-panel") == null;
     }
     applySettings(settings: SettingsObject): void {
         this.currentSettings = settings;
+        /*if (this.i === 0) {
+            this.currentSettings.worldQualities = ""
+            this.i = 1;
+        }*/ //clears saved qualities
         this.displayTimekeeping = this.currentSettings.display_timekeeping as boolean;
         if (this.currentSettings.worldQualities) {
-            this.knownWorldQualities = JSON.parse(this.currentSettings.worldQualities as string)
+            this.knownWorldQualities = new Map(Object.entries(JSON.parse(this.currentSettings.worldQualities as string)))
         }
         
         const missingWorldQualities: string[] = []
@@ -89,31 +151,16 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware {
                 missingWorldQualities.push(name);
             }
         });
-        console.log("sending message");
-        console.log(missingWorldQualities)
-        const qualityString = JSON.stringify(missingWorldQualities)
+
+        //TODO foreach(if time < now, add them to missing to get an update)
 
 
-        sendToServiceWorker(MSG_TYPE_WIKI_API_CALL, { missingQualities: qualityString })
-        /* injected code can't call chrome.runtime
-        chrome.runtime.sendMessage({ missingQualities: qualityString }, (response) => {
-            console.log("got a response!")
-            console.log(response);
-        });*/
-    }
+        if (missingWorldQualities.length > 0) {
+            const qualityString = JSON.stringify(missingWorldQualities)
 
-    makeMessage(qualities: string): ApiCallObject{
-        return { missingQualities: qualities, callback: this.updateFromWiki }
-    }
-    
-    updateFromWiki(results: Map<string, unknown>) {
-        console.log(results)
-        for (const key of results.keys()) {
-            console.log(key)
-            const value = results.get(key);
-            console.log(value)
-            //this.knownWorldQualities.set(key, value.printouts.)
+            sendToServiceWorker(MSG_TYPE_WIKI_API_CALL, { missingQualities: qualityString })
         }
-        console.log("done")
+
     }
+
 }
