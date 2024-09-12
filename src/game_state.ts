@@ -178,7 +178,7 @@ export class GameState {
 export class GameStateController {
     private static instance: GameStateController;
 
-    private constructor() {}
+    private constructor() { ; }
 
     public static getInstance(): GameStateController {
         if (!GameStateController.instance) {

@@ -7,7 +7,8 @@ type WikiResult = {name: string, value: string, timestamp: number}
 
 
 class WikiApi {
-    private i = 0;// for now, this prevents multiple API calls. In future it will need to be not a permanent block
+    private static lock = 0;// for now, this prevents multiple API calls. In future it will need to be not a permanent block
+    private static currentQuery = [];
 
     constructor() {
         ;
@@ -38,24 +39,28 @@ class WikiApi {
     }
 
     handleMessage(message: WikiRequestObject) {
-        let url = "https://fallenlondon.wiki/w/api.php?action=ask&format=json&query=[["
-        const missingWorldQualities: string[] = JSON.parse(message.missingQualities)
-        for (const qualityName of missingWorldQualities) {
-            url += qualityName;
-            url += "||"
-        }
-        url = url.slice(0, -2); //remove the last delimiter
-        url += "]]"
-        url += "|?Has current value"
-        url = encodeURI(url)
-        if (this.i == 0) {
-            this.i = 1;
+        if (WikiApi.lock == 0) {
+            WikiApi.lock = 1;
+            let url = "https://fallenlondon.wiki/w/api.php?action=ask&format=json&query=[["
+            const missingWorldQualities: string[] = JSON.parse(message.missingQualities)
+            
+            for (const qualityName of missingWorldQualities) {
+                url += qualityName;
+                url += "||"
+            }
+            url = url.slice(0, -2); //remove the last delimiter
+            url += "]]"
+            url += "|?Has current value"
+            url = encodeURI(url)
             fetch(url)
                 .then(response => response.json())
                 .then(data => new Map(Object.entries(data.query.results)))
                 .then(results => this.parseResults(results))
                 .then(parsedResults => this.sendResultsToTabs(parsedResults))
+                .then(() => WikiApi.lock = 0)
                 .catch(error => log(error));
+        } else {
+            //TODO something while it's locked...? It isn't an issue yet.
         }
     }
 

@@ -14,7 +14,8 @@ type SettingDescriptor = MultipleChoiceSetting | ToggleSetting | DropDownListSet
 type SettingGroupDescriptor = {title: string; settings: {[key: string]: SettingDescriptor}};
 type SettingsSchema = SettingGroupDescriptor[];
 type SettingsObject = {[key: string]: boolean | string};
-type SettingsMessage = {action: string; settings?: SettingsObject};
+type SettingsMessage = { action: string; settings?: SettingsObject };
+type TTHMessage = {action: string, TTH_MSG: string}
 
 function createDefaultSettings(schema: SettingsSchema): SettingsObject {
     const defaultSettings: {[key: string]: boolean | string} = {};
@@ -81,6 +82,7 @@ class FLSettingsFrontend {
 
     linkState(state: GameStateController): void {
         const stringSorter = (s1: string, s2: string) => (s1 > s2 ? 1 : -1)
+        //todo on qualitychange get quality-list and update
         state.onCharacterDataLoaded((g) => {
             this.currentState = g;
             const unsortedQualityNames: string[] = []
@@ -795,36 +797,41 @@ class FLSettingsBackend {
         return message.action == MSG_TYPE_CURRENT_SETTINGS || message.action == MSG_TYPE_SAVE_SETTINGS;
     }
 
-    handleMessage(message: SettingsMessage) {
+    handleMessage(message: SettingsMessage | TTHMessage) {
+        log("settings is handling this message");
+        log(message.action);
         if (message.action === MSG_TYPE_SAVE_SETTINGS) {
-            if (message.TTH_MSG) {
+            if ('TTH_MSG' in message) {
+                log(message.TTH_MSG)
                 chrome.storage.local.get(["settings"], (result) => {
                     if (chrome.runtime.lastError) {
                         log("Could not load settings from DB, doing nothing.");
                     } else {
                         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        result.settings.tthMoment = message.TTH_MSG
+                        result.settings.nextTthMoment = message.TTH_MSG
                         this.handleMessage({ action: MSG_TYPE_SAVE_SETTINGS, settings: result.settings })
                     }
                 });
+            } else {
+                log(Object.keys(((message as SettingsMessage).settings || {})).toString())
+                chrome.storage.local.set(
+                    {
+                        settings: message.settings,
+                    },
+                    () => {
+                        // Send out new state to the FL tabs
+                        this.getFallenLondonTabs().then((tabs) => {
+                            if (message.settings == null) {
+                                return;
+                            }
+
+                            this.sendStateToTabs(tabs, message.settings);
+                        });
+
+                        log("Saved settings to local storage.");
+                    }
+                );
             }
-            chrome.storage.local.set(
-                {
-                    settings: message.settings,
-                },
-                () => {
-                    // Send out new state to the FL tabs
-                    this.getFallenLondonTabs().then((tabs) => {
-                        if (message.settings == null) {
-                            return;
-                        }
-
-                        this.sendStateToTabs(tabs, message.settings);
-                    });
-
-                    log("Saved settings to local storage.");
-                }
-            );
         }
 
         if (message.action === MSG_TYPE_CURRENT_SETTINGS) {

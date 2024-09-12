@@ -250,7 +250,7 @@ export class FLApiInterceptor {
     }
 
     private installAuthSniffer(original_function: any) {
-        return function (this, ...args) {
+        return function (this: any, ...args: any) {
             if (args.length > 1 && args[0] === "Authorization" && args[1] !== FLApiInterceptor.authToken) {
                 FLApiInterceptor.authToken = args[1];
                 FLApiInterceptor.getTTHMoment()
@@ -291,6 +291,8 @@ export class FLApiInterceptor {
         }
 
         const stringifiedTime = userData.dateTimeToExecute;
+        console.log("got tth")
+        console.log(stringifiedTime)
         const settings: SettingsObject = {};
         settings.TTH_MSG = stringifiedTime
         sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, settings)

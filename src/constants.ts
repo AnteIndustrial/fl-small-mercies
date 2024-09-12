@@ -231,8 +231,8 @@ const SETTINGS_SCHEMA: SettingsSchema = [
                 description: "Warn if notability will fall when TtH returns.",
                 default: true,
             },
-            beneficience: {
-                description: "Notify if 'A Beneficience' is available.",
+            beneficence: {
+                description: "Notify if 'A Beneficence' is available.",
                 default: true,
             },
             free_evenings: {
@@ -251,8 +251,12 @@ const SETTINGS_SCHEMA: SettingsSchema = [
                 description: "Notify if a Favourable Circumstance is available.",
                 default: true,
             },
+            payment: {
+                description: "An Earnest of Payment is available.",
+                default: true,
+            },
             professional_perks: {
-                description: "Warn if Professional Perks is 0.",
+                description: "Warn if Professional Perks is 4.",
                 default: true,
             },
             irrigo: {
@@ -280,7 +284,7 @@ const SETTINGS_SCHEMA: SettingsSchema = [
                 default: true,
             },
             wellspring: {
-                description: "Notify if a trip to the Wellspring of Moulin is available",
+                description: "Notify if a trip to the Wellspring of Moulin is available.",
                 default: true,
             },
             starved_embassy: {
@@ -310,7 +314,19 @@ const SETTINGS_SCHEMA: SettingsSchema = [
             house_of_chimes: {
                 description: "Notify if a House of Chimes vote is available, and when they will be restored.",
                 default: true,
-            }
+            },
+            balmoral: {
+                description: "Notify if a reward from Balmoral is available.",
+                default: true,
+            },
+            khanate: {
+                description: "Notify if a reward from the Khanate is available.",
+                default: true,
+            },
+            boons_and_burdens: {
+                description: "Notify when boons and burdens expire.",
+                default: true,
+            },
         }
     }
 ];
