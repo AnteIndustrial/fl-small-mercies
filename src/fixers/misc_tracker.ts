@@ -381,7 +381,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             return false;
         }
 
-        if (node.getElementsByClassName("travel").length == 0) {
+        if (node.getElementsByClassName("travel").length === 0) {
             return false;
         }
         return document.getElementById("quality-tracker") == null;
