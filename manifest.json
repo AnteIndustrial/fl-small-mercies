@@ -11,8 +11,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.fallenlondon.com/*",
-        "https://fallenlondon.wiki/*"
+        "https://www.fallenlondon.com/*"
       ],
       "css": [
         "dist/css/extension.css"
@@ -39,7 +38,6 @@
   },
   "web_accessible_resources": [
     "dist/*",
-    "src/*",
-    "https://fallenlondon.wiki/*"
+    "src/*"
   ]
 }

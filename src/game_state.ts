@@ -173,6 +173,15 @@ export class GameState {
             }
         }
     }
+
+    public *enumerateQualitiesInCategory(category: string) {
+        const qualities = this.qualities.get(category)
+        if (qualities) {
+            for (const thing of qualities.values()) {
+                yield thing;
+            }
+        }
+    }
 }
 
 export class GameStateController {

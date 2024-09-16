@@ -1,89 +1,11 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { IMutationAware, INetworkAware, IStateAware } from "./base";
 import { SettingsObject } from "../settings";
-import { GameStateController } from "../game_state";
+import { GameStateController, GameState } from "../game_state";
 import { getSingletonByClassName } from "../utils";
 import { MSG_TYPE_SAVE_SETTINGS, MSG_TYPE_WIKI_API_CALL, MSG_TYPE_WIKI_API_RESPONSE } from "../constants";
 import { sendToServiceWorker } from "../comms";
 import { WikiResult } from "../wiki";
 import { FLApiInterceptor } from "../api_interceptor";
-
-const SAINTLY_DEMAND = "Saintly Demand";
-const SOFT_DEMAND = "Soft Demand";
-const TEMPESTUOUS_DEMAND = "Tempestuous Demand";
-const INSCRUTABLE_DEMAND = "Inscrutable Demand";
-const INTRICATE_DEMAND = "Intricate Demand";
-const MAUDLIN_DEMAND = "Maudlin Demand";
-const THE_RAT_SEASON = "The Rat-Season:";
-const DIRECTION_OF_THE_RAT_WIND = "Direction of the Rat-Wind:";
-const PHASE_OF_THE_RAT_MOON = "Phase of the Rat-Moon:";
-const THE_FALSE_SEASON = "The False-Season:";
-const THE_SEASON_IN_SOUP = "The Season in Soup";
-const BONE_MARKET_FLUCTUATIONS = "Bone Market Fluctuations:";
-const ZOOLOGICAL_MANIA = "Zoological Mania:";
-const HEARTS_GAME_SEASON = "Hearts' Game Season (Placeholder)";
-const SEASON_OF_THE_SACROBOSCAN_CALENDAR = "Season of the Sacroboscan Calendar";
-const WORLD_QUALITIES = [SAINTLY_DEMAND, SOFT_DEMAND, TEMPESTUOUS_DEMAND, INSCRUTABLE_DEMAND, INTRICATE_DEMAND, MAUDLIN_DEMAND,
-    THE_RAT_SEASON, DIRECTION_OF_THE_RAT_WIND, PHASE_OF_THE_RAT_MOON, THE_FALSE_SEASON,
-    THE_SEASON_IN_SOUP, BONE_MARKET_FLUCTUATIONS, ZOOLOGICAL_MANIA, HEARTS_GAME_SEASON, SEASON_OF_THE_SACROBOSCAN_CALENDAR];
-
-const CHARACTER_QUALITIES = {
-    MAKING_WAVES: "Making Waves",
-    NOTABILITY: "Notability",
-    BENEFICENCE: "A Beneficence",
-    FREE_EVENING: "Free Evening",
-    MIRED_IN_MAIL: "Mired in Mail",
-    WHISPERS: "Whispers Behind Mrs Chapman's",
-    A_KNOCK: "A Knock Behind the Wainscotting",
-    A_SUSURRUS: "A Susurrus in the Soup Kitchen",
-    UNEARTHLY_WHISPER: "An Unearthly Whisper from Below",
-    BACKSTAGE: "Backstage at Mrs Chapman's",
-    ACQUAINTANCE_MRS_CHAPMAN: "Acquaintance: Mrs Chapman",
-    FAVOURABLE_CIRCUMSTANCE: "Favourable Circumstance",
-    PAYMENT: "An Earnest of Payment",
-    PROFESSIONAL_PERK: "Professional Perk",
-    ROUTE_NADIR: "Route: The Cave of the Nadir",
-    IRRIGO: "Irrigo",
-    FLEETING_RECOLLECTIONS: "Fleeting Recollections",
-    PARABOLAN_COMPANY: "Grand Parabolan Company",
-    PARABOLAN_RAVAGES: "Ravages of Parabolan Warfare",
-    TRUE_DENIZEN: "A True Denizen of the Neath",
-    CONSEQUENCE: "A Consequence of your Ambition -", // todo this may not be working
-    ROUTE_BONE_MARKET: "Route: The Bone Market",
-    BONE_MARKET_EXHAUSTION: "Bone Market Exhaustion",
-    DELAY_NEXT_MEETING: "Delay until the Next Board Meeting",
-    RAILWAY_VENTURE: "Involved in a Railway Venture",
-    BUREAUCRATIC_ADVANTAGE: "Bureaucratic Advantage",
-    APPROACHING_HELL: "Approaching Hell",
-    VISITOR_TO_HELL: "A Visitor to Hell",
-    FLOWER_FROM_HELL: "The Flower from Hell that Grows Under Your Skin",
-    STARVED_EXCHANGE: "Recent Participant in a Starved Cultural Exchange",
-    ECDYSIS: "Discovered: Your Own Discarded Exuviae",
-    WIDE_EYED: "Wide-Eyed",
-    SHARPENED: "Sharpened",
-    PARTIALLY_BONELESS: "Partially Boneless",
-    RADIANT_BEARING: "Radiant Bearing",
-    HALLOW_VESSEL: "Hallow Vessel",
-    VOTES_CAST: "Votes Cast on the Matter at Hand",
-    JENNYS_WIMPLE: "Sinning Jenny's Forsaken Wimple",
-    M_D_A_FOR_F: "M. D_____' A_____ for _______: F____ Edition",
-    DRINKING_VESSEL: "Polythreme Drinking Vessel",
-    WAX_BOOTS: "Wax-Hardened Boots",
-    WORK_GLOVES: "Singed and Stained Work Gloves",
-    MINIATURE_MUSEUM: "Memory of a Miniature Museum",
-    PERFUMERS_ARTS: "An Initiate into the Perfumer's Arts",
-    GEBRANDTS_ADDRESS_BOOK: "Your Name in F.F. Gebrandt's Address Book",
-    NASCENCY: "Distinction of Nascency",
-    EXCESS: "Distinction of Excess",
-    DARES: "Distinction of Dares",
-    DEVOTION: "Distinction of Devotion",
-    IRREVERENCE: "Distinction of Irreverence",
-    DUPLICITY: "Distinction of Duplicity",
-    BALMORAL: "A Gift from Balmoral",
-    NULL_AND_VOID: "Null and Void",
-    KHAGANS_PALACE_REPORT: "A Report from the Khagan's Palace", //0 is available, 1 is not
-    AGENT: "An Agent of No Consequence",
-}
 
 const MILLISECONDS_IN_MINUTE = 60 * 1000;
 const MILLISECONDS_IN_HOUR = 60 * MILLISECONDS_IN_MINUTE;
@@ -101,74 +23,164 @@ const MESSAGE_STRINGS = {
     BALMORAL_MESSAGE: "Things change in Balmoral. The railway brings trade, resources, opportunities.", 
     TTH_MESSAGE: "Memory fades; pain departs; rewards arrive!" ,
     CHIMES_MESSAGE: "The apparently illustrious voting body to which you belong" ,
-    //ROSE_MESSAGE: "Something blooms in the shadow of the old chapel" ,
-    //NULL_AND_VOID_MESSAGE: "The Dauntless Knight has sent a message to your lodgings" , //starts at 10, ends at 11
-    //I think only repeatable ones are useful here
 }
 
-
-
+type WorldQualityName = "SAINTLY_DEMAND" | "SOFT_DEMAND" | "TEMPESTUOUS_DEMAND" | "INSCRUTABLE_DEMAND" | "INTRICATE_DEMAND" | "MAUDLIN_DEMAND" | "THE_RAT_SEASON" |
+    "DIRECTION_OF_THE_RAT_WIND" | "PHASE_OF_THE_RAT_MOON" | "THE_FALSE_SEASON" | "THE_SEASON_IN_SOUP" | "BONE_MARKET_FLUCTUATIONS" | "ZOOLOGICAL_MANIA" |
+    "HEARTS_GAME_SEASON" | "SEASON_OF_THE_SACROBOSCAN_CALENDAR"
 
 type FLMessage = { type: string, image: string, relatedId: number, description: string, date: string, ago: string };
+interface WorldQuality { name: string, result?: WikiResult, resetDay: number }
 
 export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAware {
 
     private nextTthMoment: null | number = null;
     private knownWorldQualities: Map<string, WikiResult> = new Map()
-    private currentSettings: SettingsObject = {};
+    private currentSettings!: SettingsObject;
+    private currentState!: GameState;
     private displayTimekeeping = true;
-    private playerQualities = new Map()
     private backupMoments: Map<string, string> = new Map();
+    private waitingOnApi = false;
     nextBalmoralMoment = 0;
     nextKhanateMoment = 0;
     nextWellspringMoment = 0;
     nextWaswoodMoment = 0;
-    
+
+    private worldQualities: Record<WorldQualityName, WorldQuality> = {
+        SAINTLY_DEMAND: { name: "Saintly Demand", result: undefined, resetDay: 1 }, //Monday
+        SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: 1 },
+        TEMPESTUOUS_DEMAND: { name: "Tempestuous Demand", result: undefined, resetDay: 1 },
+        INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: undefined, resetDay: 1 },
+        INTRICATE_DEMAND: { name: "Intricate Demand", result: undefined, resetDay: 1 },
+        MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: 1 },
+        THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: 1 },
+        DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: 1 },
+        PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: 1 },
+        THE_FALSE_SEASON: { name: "The False-Season:", result: undefined, resetDay: 1 },
+        THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: 1 },
+        BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: 2 }, //Tuesday
+        ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: 2 },
+        HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: undefined, resetDay: 2 }, //Only the first time each month
+        SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: undefined, resetDay: 4 }, //Thursday
+    };
+
+    private characterQualities = {
+        MAKING_WAVES: { id: 545, value: 0 },
+        NOTABILITY: { id: 101305, value: 0 },
+        BENEFICENCE: { id: 141145, value: 0 },
+        FREE_EVENING: { id: 106147, value: 0 },
+        MIRED_IN_MAIL: { id: 142520, value: 0 },
+        WHISPERS: { id: 143984, value: 0 },
+        A_KNOCK: { id: 143982, value: 0 },
+        A_SUSURRUS: { id: 143981, value: 0 },
+        UNEARTHLY_WHISPER: { id: 143980, value: 0 },
+        BACKSTAGE: { id: 143985, value: 0 },
+        ACQUAINTANCE_MRS_CHAPMAN: { id: 143992, value: 0 },
+        FAVOURABLE_CIRCUMSTANCE: { id: 23980, value: 0 },
+        PAYMENT: { id: 13927, value: 0 },
+        PROFESSIONAL_PERK: { id: 22836, value: 0 },
+        ROUTE_NADIR: { id: 23569, value: 0 },
+        IRRIGO: { id: 23879, value: 0 },
+        FLEETING_RECOLLECTIONS: { id: 107562, value: 0 },
+        PARABOLAN_COMPANY: { id: 142527, value: 0 },
+        PARABOLAN_RAVAGES: { id: 141647, value: 0 },
+        TRUE_DENIZEN: { id: 140753, value: 0 },
+        CONSEQUENCE: { id: 140799, value: 0 },
+        ROUTE_BONE_MARKET: { id: 140958, value: 0 },
+        BONE_MARKET_EXHAUSTION: { id: 141648, value: 0 },
+        DELAY_NEXT_MEETING: { id: 141545, value: 0 },
+        RAILWAY_VENTURE: { id: 140992, value: 0 },
+        BUREAUCRATIC_ADVANTAGE: { id: 141651, value: 0 },
+        APPROACHING_HELL: { id: 142923, value: 0 },
+        VISITOR_TO_HELL: { id: 142983, value: 0 },
+        FLOWER_FROM_HELL: { id: 143027, value: 0 },
+        STARVED_EXCHANGE: { id: 144487, value: 0 },
+        ECDYSIS: { id: 145023, value: 0 },
+        WIDE_EYED: { id: 145006, value: 0 },
+        //SHARPENED: "Sharpened",
+        PARTIALLY_BONELESS: { id: 145011, value: 0 },
+        RADIANT_BEARING: { id: 145010, value: 0 },
+        HALLOW_VESSEL: { id: 145013, value: 0 },
+        VOTES_CAST: { id: 144587, value: 0 },
+        JENNYS_WIMPLE: { id: 128206, value: 0 },
+        M_D_A_FOR_F: { id: 142997, value: 0 },
+        DRINKING_VESSEL: { id: 127174, value: 0 },
+        WAX_BOOTS: { id: 127177, value: 0 },
+        WORK_GLOVES: { id: 142999, value: 0 },
+        MINIATURE_MUSEUM: { id: 143538, value: 0 },
+        PERFUMERS_ARTS: { id: 143748, value: 0 },
+        GEBRANDTS_ADDRESS_BOOK: { id: 143752, value: 0 },
+        NASCENCY: { id: 144836, value: 0 },
+        EXCESS: { id: 144837, value: 0 },
+        DARES: { id: 144838, value: 0 },
+        DEVOTION: { id: 144839, value: 0 },
+        IRREVERENCE: { id: 144840, value: 0 },
+        DUPLICITY: { id: 144841, value: 0 },
+        BALMORAL: { id: 141783, value: 0 },
+        NULL_AND_VOID: { id: 141948, value: 0 },
+        KHAGANS_PALACE_REPORT: { id: 142863, value: 0 }, //0 is available, 1 is not
+        AGENT: { id: 142862, value: 0 },
+    }
 
     //private i = 0; //resets settings, for testing purposes
 
     constructor() {
-        Object.values(CHARACTER_QUALITIES).forEach((value) => {
-            this.playerQualities.set(value, 0);
-        });
         window.addEventListener("message", (event) => {
             if (event.data.action === MSG_TYPE_WIKI_API_RESPONSE) {
                 const results: Map<string, WikiResult> = new Map(Object.entries(JSON.parse(event.data.results)));
-                console.log(`wiki gave us these results: ${results.keys}`)
                 let dirty = false;
                 results.forEach((val, key) => {
+                    Object.values(this.worldQualities).forEach((quality) => {
+                        if (quality.name === key) {
+                            quality.result = val;
+                            dirty = true;
+                        }
+                    });
                     //todo check the timestamp
-                    if (this.knownWorldQualities.get(key)?.value !== val.value) {
-                        dirty = true;
-                        this.knownWorldQualities.set(key, val)
-                    }
                 });
                 if (dirty) {
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    this.currentSettings!.worldQualities = JSON.stringify(Object.fromEntries(this.knownWorldQualities))
+                    this.currentSettings.worldQualities = JSON.stringify(this.worldQualities)
                     sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
                 }
+                this.waitingOnApi = false;
             }
         });
     }
 
     linkState(state: GameStateController): void {
         state.onCharacterDataLoaded((g) => {
-            for (const quality of g.enumerateQualities()) {
-                if (Object.values(CHARACTER_QUALITIES).includes(quality.name)) {
-                    this.playerQualities.set(quality.name, quality.level);
-                }
-
-            }
+            this.currentState = g;
+            Object.values(this.characterQualities).forEach((characterQuality) => {
+                characterQuality.value = g.getQualityById(characterQuality.id)?.level || 0;
+            })
         });
         state.onQualityChanged((_state, quality, _previous, _current) => {
-            if (Object.values(CHARACTER_QUALITIES).includes(quality.name)) {
-                this.playerQualities.set(quality.name, quality.level);
-            }
+            Object.values(this.characterQualities).forEach((characterQuality) => {
+                if (characterQuality.id === quality.qualityId) {
+                    characterQuality.value = quality.level;
+                }
+            });
         });
     }
+    //todo does this do anything?
+    currentRetries = 0;
+    node?: HTMLElement;
 
     onNodeAdded(node: HTMLElement): void {
+        this.node = node;
+        const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+        const waitForSettings = async () => {
+            await delay(100);
+            console.log("Waited 100ms");
+        };
+        const maxRetries = 5;
+        console.log(Date.now())
+        if (!(this.currentState && this.currentSettings) && this.currentRetries < maxRetries) {
+            console.log(Date.now())
+            this.currentRetries++;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            waitForSettings().then(() => this.onNodeAdded(this.node!));
+        }
         const travelColumn = getSingletonByClassName(node, "travel");
         if (!travelColumn) return;
 
@@ -195,19 +207,20 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             fragment.appendChild(timekeeperHeader);
 
             timekeeperPanel = document.createElement("ul");
-            timekeeperPanel.setAttribute("id", "timekeeper-panel");
-            if (this.currentSettings!.tth) {
+            timekeeperPanel.id = "timekeeper-panel";
+            timekeeperPanel.classList.add("items", "items--list");
+            if (this.currentSettings.tth) {
                 timekeeperPanel.appendChild(this.buildTthPanel());
             }
-            if (this.currentSettings!.wellspring || this.currentSettings!.waswood || this.currentSettings!.house_of_chimes || this.currentSettings!.balmoral ||
-                this.currentSettings!.khanate || this.currentSettings!.boons_and_burdens) {
+            if (this.currentSettings.wellspring || this.currentSettings.waswood || this.currentSettings.house_of_chimes || this.currentSettings.balmoral ||
+                this.currentSettings.khanate || this.currentSettings.boons_and_burdens) {
 
                 timekeeperPanel.appendChild(this.buildLivingStoryPanel());
             }
-            if (this.currentSettings!.rat_market) {
+            if (this.currentSettings.rat_market) {
                 timekeeperPanel.appendChild(this.buildRatMarketPanel());
             }
-            if (this.currentSettings!.bone_market) {
+            if (this.currentSettings.bone_market_trends) {
                 timekeeperPanel.appendChild(this.buildBoneMarketPanel());
             }
 
@@ -223,14 +236,13 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
 
     //only works with strings, but string | boolean makes it play nicer with settings
     private calculateRemainingTimeFromIsoOrNumberString(datetime: string | boolean | undefined) {
-        if (datetime == undefined) {
+        if (datetime == undefined || typeof datetime === "boolean") {
             return "";
         }
         return this.calculateRemainingTime(new Date(datetime as string).getTime());
     }
 
-    calculateRemainingTime(moment: number) {
-        const now = new Date().getTime();
+    calculateTimeDifference(moment: number, now: number) {
         const minutesLeft = Math.round((moment - now) / (MILLISECONDS_IN_MINUTE));
         const hoursLeft = Math.floor(minutesLeft / 60) + (minutesLeft % 60 >= 30 ? 1 : 0);
         const daysLeft = hoursLeft >= 24 ? Math.ceil(hoursLeft / 24) : 0;
@@ -251,16 +263,21 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             const unit = minutesLeft === 1 ? "minute" : "minutes";
             remainingText = `in ${minutesLeft} ${unit}.`;
         } else {
-            remainingText = `again someday.`;
+            remainingText = `again someday.`; //In theory this means it's ready for pickup. Or it's been picked up and no new time entered
         }
 
         return remainingText;
     }
 
+    calculateRemainingTime(moment: number) {
+        const now = new Date().getTime();
+        return this.calculateTimeDifference(moment, now);
+    }
+
     buildTthPanel(): HTMLUListElement {
-        console.log(this.currentSettings)
-        console.log(Object.fromEntries(this.playerQualities) )
         const tthPanel = document.createElement("ul");
+        tthPanel.id = "tth-panel";
+        tthPanel.classList.add("items", "items--list");
         const lines = [];
         if (this.nextTthMoment) {
             const remainingText = this.calculateRemainingTime(this.nextTthMoment);
@@ -268,141 +285,157 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         } else {
             //TODO get tth moment
         }
-        if (this.currentSettings!.notability) {
-            const currentMakingWaves = this.playerQualities.get("Making Waves");
-            const currentNotability = this.playerQualities.get("Notability");
+        if (this.currentSettings.notability) {
+            const currentMakingWaves = this.characterQualities.MAKING_WAVES;
+            const currentNotability = this.characterQualities.NOTABILITY;
             if (currentMakingWaves < currentNotability) {
                 lines.push(`You will lose Notability! (${currentMakingWaves} MW < ${currentNotability} Nota)`);
             }
+            const currentBDR = this.getBDR();
+            lines.push(`Current BDR is ${currentBDR}`)
+            const requiredMakingWaves = 20 - currentBDR + 4 * this.characterQualities.NOTABILITY.value
+            if (this.characterQualities.MAKING_WAVES.value >= requiredMakingWaves) {
+                lines.push("You can increase your Notability now.")
+            } else {
+                lines.push(`You need ${requiredMakingWaves - this.characterQualities.MAKING_WAVES.value} more Making Waves to increase your Notability.`)
+            }
+            //todo update the BDR calculation
         }
-        if (this.currentSettings!.beneficence) {
-            if (!this.playerQualities.get(CHARACTER_QUALITIES.BENEFICENCE)) {
-                lines.push("A Beneficence is still available")
+        if (this.currentSettings.beneficence) {
+            if (!this.characterQualities.BENEFICENCE.value) {
+                lines.push("A Beneficence is still available.")
             }
         }
-        if (this.currentSettings!.free_evenings) {
-            const evenings = this.playerQualities.get(CHARACTER_QUALITIES.FREE_EVENING);
+        if (this.currentSettings.free_evenings) {
+            const evenings = this.characterQualities.FREE_EVENING.value;
             if (evenings) {
-                lines.push(`${evenings} Free Evenings are available`);
+                if (evenings === 1) {
+                    lines.push(`1 Free Evening is available.`)
+                } else {
+                    lines.push(`${evenings} Free Evenings are available.`);
+                }
             }
         }
-        if (this.currentSettings!.mired_in_mail) {
-            const mired = this.playerQualities.get(CHARACTER_QUALITIES.MIRED_IN_MAIL)
-            if (mired < 5) {
-                lines.push(`${5 - mired} letter readings are available`);
+        if (this.currentSettings.mired_in_mail) {
+            const mired = this.characterQualities.MIRED_IN_MAIL.value;
+            if (mired === 4) {
+                lines.push(`1 letter reading is available.`);
+            } else if (mired < 5) {
+                lines.push(`${5 - mired} letter readings are available.`);
             }
         }
-        if (this.currentSettings!.backstage) {
-            //if you can do something, and haven't maxxed your acquaintance yet
-            if (this.playerQualities.get(CHARACTER_QUALITIES.WHISPERS) && this.playerQualities.get(CHARACTER_QUALITIES.ACQUAINTANCE_MRS_CHAPMAN) < 4) {
+        if (this.currentSettings.backstage) {
+            //if you can do something, and haven't maxed your acquaintance yet
+            if (this.characterQualities.WHISPERS.value && this.characterQualities.ACQUAINTANCE_MRS_CHAPMAN.value < 4) {
 
                 //if you have all the prerequisites to visit
-                if (this.playerQualities.get(CHARACTER_QUALITIES.A_KNOCK) && this.playerQualities.get(CHARACTER_QUALITIES.A_SUSURRUS) &&
-                    this.playerQualities.get(CHARACTER_QUALITIES.UNEARTHLY_WHISPER)) {
+                if (this.characterQualities.A_KNOCK.value && this.characterQualities.A_SUSURRUS.value &&
+                    this.characterQualities.UNEARTHLY_WHISPER.value) {
                     lines.push("You can go Backstage at Mrs Chapman's");
                 } else {
                     //you need a prerequisite
-                    if (this.knownWorldQualities.get(THE_SEASON_IN_SOUP)) {
-                        switch (Number(this.knownWorldQualities.get(THE_SEASON_IN_SOUP)!.value)) {
+                    if (this.worldQualities.THE_SEASON_IN_SOUP.result) {
+                        switch (Number(this.worldQualities.THE_SEASON_IN_SOUP.result?.value)) {
                             case 1:
-                                console.log("do nothing")
                                 break; //nothing to do here
                             case 2:
-                                if (!this.playerQualities.get(CHARACTER_QUALITIES.A_KNOCK)) {
+                                if (!this.characterQualities.A_KNOCK.value) {
                                     lines.push("You can Promenade in Mrs Chapman's Parlor");
                                 }
                                 break;
                             case 3:
-                                if (!this.playerQualities.get(CHARACTER_QUALITIES.A_SUSURRUS)) {
+                                if (!this.characterQualities.A_SUSURRUS.value) {
                                     lines.push("You can have the Mrs Chapman's Flavour of Dahut soup");
                                 }
                                 break;
                             case 4:
-                                if (!this.playerQualities.get(CHARACTER_QUALITIES.UNEARTHLY_WHISPER)) {
+                                if (!this.characterQualities.UNEARTHLY_WHISPER.value) {
                                     lines.push("You can take absinthe at Mrs Chapman's Parlor");
                                 }
                         }
                     } else {
                         //todo handling missing wiki call
                     }
-                    
+
                 }
             }
         }
-        if (this.currentSettings!.favourable_circumstance) {
-            if (this.playerQualities.get(CHARACTER_QUALITIES.FAVOURABLE_CIRCUMSTANCE)) {
+        if (this.currentSettings.favourable_circumstance) {
+            if (this.characterQualities.FAVOURABLE_CIRCUMSTANCE.value) {
                 lines.push("You can use a Favourable Circumstance");
             }
         }
-        if (this.currentSettings!.professional_perks) {
-            if (this.playerQualities.get(CHARACTER_QUALITIES.PROFESSIONAL_PERK) === 4) {
+        if (this.currentSettings.professional_perks) {
+            if (this.characterQualities.PROFESSIONAL_PERK.value === 4) {
                 lines.push("You have 4 Professional Perks, use them before TtH arrives");
             }
         }
-        if (this.currentSettings!.irrigo && this.playerQualities.get(CHARACTER_QUALITIES.ROUTE_NADIR)! > 2) {
-            if (!this.playerQualities.get(CHARACTER_QUALITIES.IRRIGO) || this.playerQualities.get(CHARACTER_QUALITIES.FLEETING_RECOLLECTIONS)) {
+        if (this.currentSettings.irrigo && this.characterQualities.ROUTE_NADIR.value > 2) {
+            if (!this.characterQualities.IRRIGO.value || this.characterQualities.FLEETING_RECOLLECTIONS.value) {
                 lines.push("You can visit the Cave of the Nadir");
             }
         }
-        if (this.currentSettings!.parabolan_ravages && this.playerQualities.get(CHARACTER_QUALITIES.PARABOLAN_COMPANY)) {
-            if (this.playerQualities.get(CHARACTER_QUALITIES.PARABOLAN_RAVAGES)! < 10) {
+        if (this.currentSettings.parabolan_ravages && this.characterQualities.PARABOLAN_COMPANY.value) {
+            if (this.characterQualities.PARABOLAN_RAVAGES.value < 10) {
                 lines.push("Your Parabolan Ravages is below 10");
             }
         }
-        if (this.currentSettings!.ambition_reward && this.playerQualities.get(CHARACTER_QUALITIES.TRUE_DENIZEN)) {
-            if (this.playerQualities.get(CHARACTER_QUALITIES.CONSEQUENCE) === 4) {
+        if (this.currentSettings.ambition_reward && this.characterQualities.TRUE_DENIZEN.value) {
+            if (this.characterQualities.CONSEQUENCE.value === 4) {
                 lines.push("You can collect your monthly Ambition reward")
             } else {
-                const weeksRemaining = 3 - this.playerQualities.get(CHARACTER_QUALITIES.CONSEQUENCE)!;
+                const weeksRemaining = 3 - this.characterQualities.CONSEQUENCE.value;
                 if (this.nextTthMoment) {
                     const ambitionDate = new Date(this.nextTthMoment + (weeksRemaining * SEVEN_DAYS_IN_MILLISECONDS));
                     const ambitionText = this.calculateRemainingTime(ambitionDate.getTime());
-                    lines.push(ambitionText);
+                    lines.push(`Your ambition reward will be available in ${ambitionText}`);
                 } else {
                     lines.push(`You can collect your monthly Ambition reward in approximately ${weeksRemaining} weeks`);
                 }
             }
         }
-        if (this.currentSettings!.bone_market_exhaustion && this.playerQualities.get(CHARACTER_QUALITIES.ROUTE_BONE_MARKET)) {
-            const remainingExh = 4 - this.playerQualities.get(CHARACTER_QUALITIES.BONE_MARKET_EXHAUSTION)!
+        if (this.currentSettings.bone_market_exhaustion && this.characterQualities.ROUTE_BONE_MARKET.value) {
+            const remainingExh = 4 - this.characterQualities.BONE_MARKET_EXHAUSTION.value
             if (remainingExh > 0) {
                 lines.push(`You can use ${remainingExh} Bone Market Exhaustion`);
             }
         }
-        if (this.currentSettings!.board_meeting && this.playerQualities.get(CHARACTER_QUALITIES.RAILWAY_VENTURE)) {
-            const bureaucraticAdvantageUsed = this.playerQualities.get(CHARACTER_QUALITIES.RAILWAY_VENTURE)! > 0 &&
-                this.playerQualities.get(CHARACTER_QUALITIES.RAILWAY_VENTURE)! < 121 &&
-                this.playerQualities.get(CHARACTER_QUALITIES.BUREAUCRATIC_ADVANTAGE) === 1;
-            const meetingAvailable = this.playerQualities.get(CHARACTER_QUALITIES.DELAY_NEXT_MEETING) === 0;
-            if (bureaucraticAdvantageUsed) {
-                if (meetingAvailable) {
-                    lines.push("You can call a GHR Board meeting.");
-                }
-            } else {
+        if (this.currentSettings.board_meeting && this.characterQualities.RAILWAY_VENTURE.value) {
+            const bureaucraticAdvantageAvailable = this.characterQualities.RAILWAY_VENTURE.value > 0 &&
+                this.characterQualities.RAILWAY_VENTURE.value < 121 &&
+                this.characterQualities.BUREAUCRATIC_ADVANTAGE.value === 0;
+            //this should return true if the quality = 0, or if the quality is not set (which it probably shouldn't be if it's 0)
+
+            const meetingAvailable = this.characterQualities.DELAY_NEXT_MEETING.value === 0;
+            if (bureaucraticAdvantageAvailable) {
                 if (meetingAvailable) {
                     lines.push("You can call two GHR Board meetings.");
                 } else {
                     lines.push("You can call a GHR Board meeting, with the Board Secretary's help.");
                 }
+            } else {
+                if (meetingAvailable) {
+                    lines.push("You can call a GHR Board meeting.");
+                }
             }
 
         }
-        if (this.currentSettings!.visit_hell && this.playerQualities.get(CHARACTER_QUALITIES.APPROACHING_HELL) === 777) {
-            if (!this.playerQualities.get(CHARACTER_QUALITIES.VISITOR_TO_HELL) && !this.playerQualities.get(CHARACTER_QUALITIES.FLOWER_FROM_HELL)) {
+        if (this.currentSettings.visit_hell && this.characterQualities.APPROACHING_HELL.value === 777) {
+            if (!this.characterQualities.VISITOR_TO_HELL.value && !this.characterQualities.FLOWER_FROM_HELL.value) {
                 lines.push("You can visit Hell");
             }
         }
-        if (this.currentSettings!.starved_embassy) {
-            if (!this.playerQualities.get(CHARACTER_QUALITIES.STARVED_EXCHANGE)) {
+        if (this.currentSettings.starved_embassy) {
+            if (!this.characterQualities.STARVED_EXCHANGE.value) {
                 lines.push("You can visit the Starved Embassy.");
             }
         }
-        if (this.currentSettings!.ecdysis && this.playerQualities.get(CHARACTER_QUALITIES.ECDYSIS)) {
-            if (!(this.playerQualities.get(CHARACTER_QUALITIES.WIDE_EYED) ||
-                this.playerQualities.get(CHARACTER_QUALITIES.SHARPENED) ||
-                this.playerQualities.get(CHARACTER_QUALITIES.PARTIALLY_BONELESS) ||
-                this.playerQualities.get(CHARACTER_QUALITIES.RADIANT_BEARING) ||
-                this.playerQualities.get(CHARACTER_QUALITIES.HALLOW_VESSEL))) {
+        if (this.currentSettings.ecdysis && this.characterQualities.ECDYSIS.value) {
+            if (!(this.characterQualities.WIDE_EYED.value ||
+                //this.characterQualities.SHARPENED) ||
+                this.characterQualities.PARTIALLY_BONELESS.value ||
+                this.characterQualities.RADIANT_BEARING.value ||
+                this.characterQualities.HALLOW_VESSEL.value)) {
 
                 lines.push("You can get a boon from Ecdysis.");
             }
@@ -416,39 +449,45 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         return tthPanel;
     }
 
+    getBDR(): number {
+        return (this.currentState.getQualityById(957)?.effectiveLevel || 0) +
+            (this.currentState.getQualityById(958)?.effectiveLevel || 0) +
+            (this.currentState.getQualityById(950)?.effectiveLevel || 0);
+    }
+
     buildLivingStoryPanel(): HTMLUListElement {
         const livingStoryPanel = document.createElement("ul");
-        if (this.currentSettings!.wellspring) {
+        livingStoryPanel.id = "living-story-panel";
+        livingStoryPanel.classList.add("items", "items--list");
+        if (this.currentSettings.wellspring) {
             ;
         }
-        if (this.currentSettings!.waswood) {
+        if (this.currentSettings.waswood) {
             ;
         }
-        if (this.currentSettings!.house_of_chimes) {
+        if (this.currentSettings.house_of_chimes) {
             ;
         }
-        if (this.currentSettings!.balmoral) {
+        if (this.currentSettings.balmoral) {
             ;
         }
 
-        //if (this.currentSettings!.khanate && this.playerQualities.get(CHARACTER_QUALITIES.AGENT)) {
+        if (this.currentSettings.khanate && this.characterQualities.AGENT.value) {
             const khanateDiv = this.createKhanateDiv();
 
             livingStoryPanel.appendChild(khanateDiv);
-        //}
-        if (this.currentSettings!.boons_and_burdens) {
+        }
+        if (this.currentSettings.boons_and_burdens) {
             ;
         }
 
         return livingStoryPanel;
     }
 
-    
-
     private createKhanateDiv() {
         const now = new Date().getTime();
         let nextKhanateReport = "";
-        if (this.playerQualities.get(CHARACTER_QUALITIES.AGENT) && !this.playerQualities.get(CHARACTER_QUALITIES.KHAGANS_PALACE_REPORT)) {
+        if (this.characterQualities.AGENT.value && !this.characterQualities.KHAGANS_PALACE_REPORT.value) {
             nextKhanateReport = "A 'report' is waiting for you in Khanate.";
         } else {
             //Report is not ready
@@ -458,16 +497,19 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 nextKhanateReport = this.calculateRemainingTime(nextKhanateMoment);
             } else {
                 //No saved moment, or moment in past. Check backup (taken from messages)
-                const backupMoment = this.backupMoments.get(MESSAGE_STRINGS.KHANATE_MESSAGE) ?
-                    new Date(this.backupMoments.get(MESSAGE_STRINGS.KHANATE_MESSAGE) as string).getTime() :
-                    undefined;
-                if (backupMoment && backupMoment > now) {
-                    //Backup moment looks good, save it and use it
-                    this.currentSettings.nextKhanateMoment = backupMoment.toString();
-                    sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
-                    nextKhanateReport = this.calculateRemainingTime(backupMoment);
+                
+                const backupString = this.backupMoments.get(MESSAGE_STRINGS.KHANATE_MESSAGE);
+                if (backupString) {
+                    const nextBackupDate = new Date(this.backupMoments.get(MESSAGE_STRINGS.KHANATE_MESSAGE) as string)
+                    nextBackupDate.setDate(nextBackupDate.getDate() + 7);
+                    const nextBackupMoment = nextBackupDate.getTime();
+                    if (nextBackupDate.getTime() > now) {
+                        //Backup moment looks good, save it and use it
+                        this.currentSettings.nextKhanateMoment = nextBackupDate.toISOString();
+                        sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
+                        nextKhanateReport = this.calculateRemainingTime(nextBackupMoment);
+                    }
                 }
-                nextKhanateReport = this.calculateRemainingTimeFromIsoOrNumberString(this.backupMoments.get(MESSAGE_STRINGS.KHANATE_MESSAGE));
             }
             if (nextKhanateReport) {
                 nextKhanateReport = "A 'report' from Khagan's Palace is due " + nextKhanateReport;
@@ -503,6 +545,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         document.body.appendChild(khanateModal);
         khanateModal.setAttribute("id", "khanate-modal");
 
+        const khanateWrapperDiv = document.createElement("div");
         const khanateForm = document.createElement("form");
         khanateForm.setAttribute("method", "dialog");
 
@@ -535,38 +578,86 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         khanateModalConfirm.textContent = "Confirm";
         khanateModalConfirm.addEventListener("click", () => {
             const nextKhanateMoment = khanateDatePicker.value + "Z";
-            console.log(nextKhanateMoment)
-            console.log(new Date(nextKhanateMoment).getTime().toString())
-
-            console.log(this.currentSettings.nextKhanateMoment)
-            this.currentSettings.nextKhanateMoment = new Date(nextKhanateMoment).getTime().toString();
-            console.log(this.currentSettings.nextKhanateMoment)
+            this.currentSettings.nextKhanateMoment = new Date(nextKhanateMoment).toISOString();
             sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
             const nextKhanateReport = "A 'report' from Khagan's Palace is due " + this.calculateRemainingTimeFromIsoOrNumberString(nextKhanateMoment);
-            document.getElementById("next-khanate-report-message")!.textContent = nextKhanateReport;
+            const nextKhanateReportSpan = document.getElementById("next-khanate-report-message");
+            if (nextKhanateReportSpan) {
+                nextKhanateReportSpan.textContent = nextKhanateReport;
+            }
             khanateModal.close();
         });
         khanateModalConfirm.classList.add("js-tt", "button", "button--primary", "button--go");
         khanateModalConfirm.style.padding = "2px 5px";
 
-        khanateModal.appendChild(khanateForm);
+        khanateModal.appendChild(khanateWrapperDiv);
+        khanateWrapperDiv.appendChild(khanateForm);
         khanateForm.appendChild(khanateLabel);
         khanateLabel.appendChild(khanateDatePicker);
         khanateForm.appendChild(khanateModalCancel);
         khanateForm.appendChild(khanateModalConfirm);
-
+        khanateModal.addEventListener("click", (event) => {
+            if (event.target === khanateModal) {
+                khanateModal.close();
+            }
+        });
+        khanateModal.style.padding = "0";
+        khanateWrapperDiv.style.margin = "0";
+        khanateWrapperDiv.style.padding = "1rem";
         return khanateModal;
+    }
+
+    private getNextTuesday() {
+        const now = new Date();
+        const nextResetDay = new Date();
+        nextResetDay.setUTCHours(11, 0, 0, 0);
+
+        if (now.getUTCDay() == 2) { //tuesday
+            if (now.getUTCHours() < 11) {
+                //don't change the date
+            } else {
+                nextResetDay.setUTCDate(nextResetDay.getUTCDate() + 7);
+                //next reset is nearly 7 days away
+            }
+        } else {
+            nextResetDay.setUTCDate(now.getUTCDate() + (2 + 7 - now.getUTCDay()) % 7)
+            //next reset is 1-6 days away
+        }
+        return this.calculateRemainingTime(nextResetDay.getTime());
     }
 
     buildBoneMarketPanel(): HTMLElement {
         const boneMarketPanel = document.createElement("div");
+        const boneMarketHeader = document.createElement("h4");
+        boneMarketHeader.textContent = "Bone Market";
+        const preferredQualitySpan = document.createElement("span");
+        const preferredQuality = this.worldQualities.BONE_MARKET_FLUCTUATIONS.result?.value;
+        preferredQualitySpan.textContent = `Preferred Quality: ${preferredQuality}`;
+        const zoologicalManiaSpan = document.createElement("span");
+        const zoologicalMania = this.worldQualities.ZOOLOGICAL_MANIA.result?.value;
+        zoologicalManiaSpan.textContent = `Zoological Mania: ${zoologicalMania}`;
+        const refreshSpan = document.createElement("span");
 
+        refreshSpan.textContent = `These values will change ${this.getNextTuesday()}`;
+
+        const currentExhaustion = this.characterQualities.BONE_MARKET_EXHAUSTION.value;
+        const exhaustionSpan = document.createElement("span");
+        if(this.nextTthMoment) {
+            exhaustionSpan.textContent = `You have ${currentExhaustion} exhaustion, reducing by 4 ${this.calculateRemainingTime(this.nextTthMoment)}`;
+        }
+
+        boneMarketPanel.appendChild(boneMarketHeader);
+        boneMarketPanel.appendChild(preferredQualitySpan);
+        boneMarketPanel.appendChild(zoologicalManiaSpan);
+        boneMarketPanel.appendChild(refreshSpan);
+        boneMarketPanel.appendChild(exhaustionSpan);
         return boneMarketPanel;
     }
 
     buildRatMarketPanel(): HTMLElement {
         const ratMarketPanel = document.createElement("div");
-
+        //get what the rats are buying and selling.
+        //check inventory for useful things that could be picked up.check inventory for rat - shilling value of current items
         return ratMarketPanel;
     }
 
@@ -592,7 +683,8 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         }*/ //clears saved qualities
         this.displayTimekeeping = this.currentSettings.display_timekeeping as boolean;
         if (this.currentSettings.worldQualities) {
-            this.knownWorldQualities = new Map(Object.entries(JSON.parse(this.currentSettings.worldQualities as string)))
+            this.worldQualities = JSON.parse(this.currentSettings.worldQualities as string)
+            this.removeOutdatedWorldQualities();
         }
         if (settings.nextTthMoment) {
             this.nextTthMoment = new Date(settings.nextTthMoment as string).getTime();
@@ -602,18 +694,25 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         }
         
         const missingWorldQualities: string[] = []
-        WORLD_QUALITIES.forEach((name) => {
-            if (!this.knownWorldQualities.has(name)) {
-                missingWorldQualities.push(name);
-            }
+
+        Object.values(this.worldQualities).forEach((quality) => {
+            if (!quality.result) {
+                missingWorldQualities.push(quality.name);
+            }//todo if quality.time + something > now, add them to missing to get an update
         });
 
-        //TODO foreach(if time < now, add them to missing to get an update)
+        if (missingWorldQualities.length > 0 && !this.waitingOnApi) {
+            const qualityString = JSON.stringify(missingWorldQualities);
 
-        if (missingWorldQualities.length > 0) {
-            const qualityString = JSON.stringify(missingWorldQualities)
+            sendToServiceWorker(MSG_TYPE_WIKI_API_CALL, { missingQualities: qualityString });
+            this.waitingOnApi = true;
+        }
+    }
 
-            sendToServiceWorker(MSG_TYPE_WIKI_API_CALL, { missingQualities: qualityString })
+    removeOutdatedWorldQualities() {
+        const now = new Date();
+        for (const worldQuality of this.knownWorldQualities) {
+            ;//todo
         }
     }
 
@@ -651,7 +750,6 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
 
     parseSavedMessages(messages: FLMessage[]) {
         for (const message of messages) {
-            console.log(message.description)
             for (const messageType of Object.values(MESSAGE_STRINGS)) {
 
                 if (message.description.startsWith(messageType)) {
