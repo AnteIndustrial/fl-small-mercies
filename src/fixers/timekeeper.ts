@@ -1,3 +1,4 @@
+/* eslint-disable no-prototype-builtins */
 import { IMutationAware, INetworkAware, IStateAware } from "./base";
 import { SettingsObject } from "../settings";
 import { GameStateController, GameState } from "../game_state";
@@ -25,6 +26,17 @@ const MESSAGE_STRINGS = {
     CHIMES_MESSAGE: "The apparently illustrious voting body to which you belong" ,
 }
 
+const DAYS = { SUNDAY: 0, MONDAY: 1, TUESDAY: 2, WEDNESDAY: 3, THURSDAY: 4, FRIDAY: 5, SATURDAY: 6 };
+const RAT_MARKET_BUYING = {
+    "ALWAYS": [{ id: 142797, name: "Fourth-City Echo", price: 125 }],
+    "SAINTLY_DEMAND": [{ id: 123214, name: "Ratty Reliquary", price: 125 }],
+    "SOFT_DEMAND": [{ id: 924, name: "Parabola-Linen Scrap", price: 625 }, { id: 925, name: "Scrap of Ivory Organza", price: 3125 }],
+    "TEMPESTUOUS_DEMAND": [{ id: 849, name: "Storm-Threnody", price: 125 }, { id: 933, name: "Night-Whisper", price: 625 }],
+    "INSCRUTABLE_DEMAND": [{ id: 812, name: "Uncanny Incunabulum", price: 125 }, { id: 141189, name: "Cartographer's Hoard", price: 3125 }],
+    "INTRICATE_DEMAND": [{ id: 141946, name: "Unlawful Device", price: 125 }, { id: 142793, name: "Corresponding Sounder", price: 3125 }],
+    "MAUDLIN_DEMAND": [{ id: 142386, name: "Captivating Ballad", price: 625 }, { id: 142463, name: "Parabolan Parable", price: 3125 }]
+}
+
 type WorldQualityName = "SAINTLY_DEMAND" | "SOFT_DEMAND" | "TEMPESTUOUS_DEMAND" | "INSCRUTABLE_DEMAND" | "INTRICATE_DEMAND" | "MAUDLIN_DEMAND" | "THE_RAT_SEASON" |
     "DIRECTION_OF_THE_RAT_WIND" | "PHASE_OF_THE_RAT_MOON" | "THE_FALSE_SEASON" | "THE_SEASON_IN_SOUP" | "BONE_MARKET_FLUCTUATIONS" | "ZOOLOGICAL_MANIA" |
     "HEARTS_GAME_SEASON" | "SEASON_OF_THE_SACROBOSCAN_CALENDAR"
@@ -35,7 +47,6 @@ interface WorldQuality { name: string, result?: WikiResult, resetDay: number }
 export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAware {
 
     private nextTthMoment: null | number = null;
-    private knownWorldQualities: Map<string, WikiResult> = new Map()
     private currentSettings!: SettingsObject;
     private currentState!: GameState;
     private displayTimekeeping = true;
@@ -47,21 +58,21 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     nextWaswoodMoment = 0;
 
     private worldQualities: Record<WorldQualityName, WorldQuality> = {
-        SAINTLY_DEMAND: { name: "Saintly Demand", result: undefined, resetDay: 1 }, //Monday
-        SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: 1 },
-        TEMPESTUOUS_DEMAND: { name: "Tempestuous Demand", result: undefined, resetDay: 1 },
-        INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: undefined, resetDay: 1 },
-        INTRICATE_DEMAND: { name: "Intricate Demand", result: undefined, resetDay: 1 },
-        MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: 1 },
-        THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: 1 },
-        DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: 1 },
-        PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: 1 },
-        THE_FALSE_SEASON: { name: "The False-Season:", result: undefined, resetDay: 1 },
-        THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: 1 },
-        BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: 2 }, //Tuesday
-        ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: 2 },
-        HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: undefined, resetDay: 2 }, //Only the first time each month
-        SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: undefined, resetDay: 4 }, //Thursday
+        SAINTLY_DEMAND: { name: "Saintly Demand", result: undefined, resetDay: DAYS.MONDAY },
+        SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: DAYS.MONDAY },
+        TEMPESTUOUS_DEMAND: { name: "Tempestuous Demand", result: undefined, resetDay: DAYS.MONDAY },
+        INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: undefined, resetDay: DAYS.MONDAY },
+        INTRICATE_DEMAND: { name: "Intricate Demand", result: undefined, resetDay: DAYS.MONDAY },
+        MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY },
+        THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY },
+        DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY },
+        PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY },
+        THE_FALSE_SEASON: { name: "The False-Season:", result: undefined, resetDay: DAYS.MONDAY },
+        THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY },
+        BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: DAYS.TUESDAY },
+        ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY },
+        HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: undefined, resetDay: DAYS.TUESDAY }, //Only the first time each month
+        SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: undefined, resetDay: DAYS.THURSDAY },
     };
 
     private characterQualities = {
@@ -120,6 +131,8 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         NULL_AND_VOID: { id: 141948, value: 0 },
         KHAGANS_PALACE_REPORT: { id: 142863, value: 0 }, //0 is available, 1 is not
         AGENT: { id: 142862, value: 0 },
+        JAUNT_WASWOOD: { id: 143416, value: 0 },
+
     }
 
     //private i = 0; //resets settings, for testing purposes
@@ -136,7 +149,6 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                             dirty = true;
                         }
                     });
-                    //todo check the timestamp
                 });
                 if (dirty) {
                     this.currentSettings.worldQualities = JSON.stringify(this.worldQualities)
@@ -463,7 +475,8 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             ;
         }
         if (this.currentSettings.waswood) {
-            ;
+            const waswoodPanel = this.buildWaswoodPanel();
+            livingStoryPanel.appendChild(waswoodPanel);
         }
         if (this.currentSettings.house_of_chimes) {
             ;
@@ -482,6 +495,23 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         }
 
         return livingStoryPanel;
+    }
+
+    buildWaswoodPanel() {
+        const waswoodPanel = document.createElement("div");
+        const waswoodHeader = document.createElement("h4");
+        waswoodHeader.textContent = "Waswood";
+        waswoodPanel.appendChild(waswoodHeader);
+        const waswoodList = document.createElement("ul");
+        waswoodList.classList.add("items", "items--list");
+        if (this.characterQualities.JAUNT_WASWOOD) {
+            const waswoodBlocked = document.createElement("li");
+            waswoodBlocked.textContent = "Waswood blocked for a week." //todo living story update
+            waswoodList.appendChild(waswoodBlocked);
+        }
+
+        waswoodPanel.appendChild(waswoodList);
+        return waswoodPanel;
     }
 
     private createKhanateDiv() {
@@ -607,57 +637,137 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         return khanateModal;
     }
 
-    private getNextTuesday() {
-        const now = new Date();
+    private getNextDay(startDate: Date, day: number) {
         const nextResetDay = new Date();
         nextResetDay.setUTCHours(11, 0, 0, 0);
 
-        if (now.getUTCDay() == 2) { //tuesday
-            if (now.getUTCHours() < 11) {
+        if (startDate.getUTCDay() == day) {
+            if (startDate.getUTCHours() < 11) {
                 //don't change the date
             } else {
                 nextResetDay.setUTCDate(nextResetDay.getUTCDate() + 7);
                 //next reset is nearly 7 days away
             }
         } else {
-            nextResetDay.setUTCDate(now.getUTCDate() + (2 + 7 - now.getUTCDay()) % 7)
+            nextResetDay.setUTCDate(startDate.getUTCDate() + (day + 7 - startDate.getUTCDay()) % 7)
             //next reset is 1-6 days away
         }
-        return this.calculateRemainingTime(nextResetDay.getTime());
+        return nextResetDay.getTime();
     }
 
     buildBoneMarketPanel(): HTMLElement {
         const boneMarketPanel = document.createElement("div");
         const boneMarketHeader = document.createElement("h4");
         boneMarketHeader.textContent = "Bone Market";
-        const preferredQualitySpan = document.createElement("span");
+        const boneMarketList = document.createElement("ul");
+        boneMarketList.classList.add("items", "items--list");
+        const preferredQualityItem = document.createElement("li");
         const preferredQuality = this.worldQualities.BONE_MARKET_FLUCTUATIONS.result?.value;
-        preferredQualitySpan.textContent = `Preferred Quality: ${preferredQuality}`;
-        const zoologicalManiaSpan = document.createElement("span");
+        preferredQualityItem.textContent = `Preferred Quality: ${preferredQuality}`;
+        const zoologicalManiaItem = document.createElement("li");
         const zoologicalMania = this.worldQualities.ZOOLOGICAL_MANIA.result?.value;
-        zoologicalManiaSpan.textContent = `Zoological Mania: ${zoologicalMania}`;
-        const refreshSpan = document.createElement("span");
+        zoologicalManiaItem.textContent = `Zoological Mania: ${zoologicalMania}`;
+        const refreshItem = document.createElement("li");
 
-        refreshSpan.textContent = `These values will change ${this.getNextTuesday()}`;
+        refreshItem.textContent = `These values will change ${this.calculateRemainingTime(this.getNextDay(new Date(), DAYS.TUESDAY))}`;
 
         const currentExhaustion = this.characterQualities.BONE_MARKET_EXHAUSTION.value;
-        const exhaustionSpan = document.createElement("span");
+        const exhaustionItem = document.createElement("li");
+        exhaustionItem.textContent = `You have ${currentExhaustion} exhaustion`
         if(this.nextTthMoment) {
-            exhaustionSpan.textContent = `You have ${currentExhaustion} exhaustion, reducing by 4 ${this.calculateRemainingTime(this.nextTthMoment)}`;
+            exhaustionItem.textContent += `, reducing by 4 ${this.calculateRemainingTime(this.nextTthMoment)}`;
         }
 
         boneMarketPanel.appendChild(boneMarketHeader);
-        boneMarketPanel.appendChild(preferredQualitySpan);
-        boneMarketPanel.appendChild(zoologicalManiaSpan);
-        boneMarketPanel.appendChild(refreshSpan);
-        boneMarketPanel.appendChild(exhaustionSpan);
+        boneMarketPanel.appendChild(boneMarketList);
+        boneMarketList.appendChild(preferredQualityItem);
+        boneMarketList.appendChild(zoologicalManiaItem);
+        boneMarketList.appendChild(refreshItem);
+        boneMarketList.appendChild(exhaustionItem);
         return boneMarketPanel;
     }
 
     buildRatMarketPanel(): HTMLElement {
         const ratMarketPanel = document.createElement("div");
+        const ratMarketHeader = document.createElement("h4");
+        ratMarketHeader.textContent = "Rat Market";
+        ratMarketPanel.appendChild(ratMarketHeader);
+        const ratMarketList = document.createElement("ul");
+        ratMarketList.classList.add("items", "items--list");
+        const now = new Date();
+        let open: boolean;
+        switch (now.getUTCDay()) {
+            case 6: //sat (out of place so it can fall through to sun)
+                ;//fallthrough
+            case 0: //sun
+                open = true;
+                break;
+            case 1: //mon
+                open = now.getUTCHours() < 11;
+                break;
+            case 2: //tues
+                ;//fallthrough
+            case 3: //wed
+                ; //fallthrough
+            case 4: //thur
+                open = false;
+                break;
+            case 5: //fri
+                open = now.getUTCHours() >= 11;
+                break;
+            default:
+                console.error("uh oh"); //I don't see how this can happen, so just make the compiler happy
+                return document.createElement("div"); //return an empty div?
+        }
+        const ratMarketOpenItem = document.createElement("li");
+        ratMarketOpenItem.textContent = open ? "The Rat Market is Open." : "The Rat Market is Closed.";
+        ratMarketList.appendChild(ratMarketOpenItem);
+        const tillNextRefresh = this.calculateRemainingTime(this.getNextDay(new Date(), DAYS.MONDAY))
+        if (open) {
+            const closingItem = document.createElement("li");
+            closingItem.textContent = `Closing ${tillNextRefresh}`;
+            ratMarketList.appendChild(closingItem);
+        } else {
+            const openingItem = document.createElement("li");
+            openingItem.textContent = `Opening ${this.calculateRemainingTime(this.getNextDay(new Date(), DAYS.FRIDAY))}`;
+            ratMarketList.appendChild(openingItem);
+        }
+        let totalSellPrice = 0;
+        const buyingFourthCityItem = document.createElement("li");
+        buyingFourthCityItem.textContent = "Always buying Fourth City Echoes for 125 Rat-Shillings.";
+        ratMarketList.appendChild(buyingFourthCityItem);
+        totalSellPrice += 125 * (this.currentState.getQualityById(RAT_MARKET_BUYING.ALWAYS[0].id)?.level || 0);
+        for (const [demand, items] of Object.entries(RAT_MARKET_BUYING)) {
+            const available = this.worldQualities[demand as WorldQualityName]?.result?.value
+            if (available === "1" || available === "2") {
+                for (const item of items) {
+                    const owned = this.currentState.getQualityById(item.id)?.level || 0;
+                    const ratMarketBuyingItem = document.createElement("li");
+                    ratMarketBuyingItem.textContent = `Buying ${item.name} for ${item.price}-${item.price * 1.32} Rat-Shillings.`;
+                    ratMarketBuyingItem.textContent += available === "1" ? ` Also buying next week.` : ` Last week.`
+                    totalSellPrice += item.price * owned;
+                    ratMarketList.appendChild(ratMarketBuyingItem);
+                }
+            }
+        };
+        let sellPriceMarkedUp = 0;
+        if (totalSellPrice > 18000) { //over 1800 echoes there's no markup
+            sellPriceMarkedUp += (totalSellPrice - 18000);
+        }
+        if (totalSellPrice > 6500) { //650-1800 echoes there's 12% markup
+            sellPriceMarkedUp += (Math.min(totalSellPrice, 18000) - 6500) * 1.12;
+        }
+        sellPriceMarkedUp += Math.min(totalSellPrice, 6500) * 1.32;
+        const sellPriceListItem = document.createElement("li");
+        sellPriceListItem.textContent = `Sale price of all sellable items is ${sellPriceMarkedUp} Rat-Shillings.`;
+        ratMarketList.appendChild(sellPriceListItem);
+
+        const nextRefreshItem = document.createElement("li");
+        nextRefreshItem.textContent = `New items will be selected ${tillNextRefresh}`;
+        ratMarketList.appendChild(nextRefreshItem);
         //get what the rats are buying and selling.
         //check inventory for useful things that could be picked up.check inventory for rat - shilling value of current items
+        ratMarketPanel.appendChild(ratMarketList);
         return ratMarketPanel;
     }
 
@@ -683,7 +793,12 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         }*/ //clears saved qualities
         this.displayTimekeeping = this.currentSettings.display_timekeeping as boolean;
         if (this.currentSettings.worldQualities) {
-            this.worldQualities = JSON.parse(this.currentSettings.worldQualities as string)
+            const temp = JSON.parse(this.currentSettings.worldQualities as string)
+            if (temp.hasOwnProperty("Saintly Demand")) {
+                delete this.currentSettings.worldQualities;
+            } else if (temp.hasOwnProperty("SAINTLY_DEMAND")){
+                this.worldQualities = JSON.parse(this.currentSettings.worldQualities as string)
+            }
             this.removeOutdatedWorldQualities();
         }
         if (settings.nextTthMoment) {
@@ -710,10 +825,16 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     }
 
     removeOutdatedWorldQualities() {
-        const now = new Date();
-        for (const worldQuality of this.knownWorldQualities) {
-            ;//todo
-        }
+        const now = new Date().getTime();
+        Object.values(this.worldQualities).forEach((quality) => {
+            if (quality.result) {
+                const retrievedTime = new Date(quality.result.timestamp);
+                const changeTime = this.getNextDay(retrievedTime, quality.resetDay)
+                if (now > changeTime) {
+                    quality.result = undefined;
+                }
+            }
+        });
     }
 
     linkNetworkTools(interceptor: FLApiInterceptor): void {
