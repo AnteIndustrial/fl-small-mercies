@@ -1,6 +1,6 @@
 import {debug, log} from "./logging";
 import {sendToServiceWorker} from "./comms";
-import {MSG_TYPE_CURRENT_SETTINGS, MSG_TYPE_SAVE_SETTINGS} from "./constants";
+import {MSG_TYPE_CURRENT_SETTINGS, MSG_TYPE_SAVE_SETTINGS, MSG_TYPE_UPDATE_SETTINGS} from "./constants";
 import Tab = chrome.tabs.Tab;
 
 type MultipleChoices = [string, string][];
@@ -357,8 +357,8 @@ class FLSettingsBackend {
         });
     }
 
-    isMessageRelevant(message: {[key: string]: boolean | string}) {
-        return message.action == MSG_TYPE_CURRENT_SETTINGS || message.action == MSG_TYPE_SAVE_SETTINGS;
+    isMessageRelevant(message: { [key: string]: boolean | string }) {
+        return message.action == MSG_TYPE_CURRENT_SETTINGS || message.action == MSG_TYPE_SAVE_SETTINGS || MSG_TYPE_UPDATE_SETTINGS;
     }
 
     handleMessage(message: SettingsMessage | TTHMessage) {
@@ -371,7 +371,6 @@ class FLSettingsBackend {
                     if (chrome.runtime.lastError) {
                         log("Could not load settings from DB, doing nothing.");
                     } else {
-                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                         result.settings.nextTthMoment = message.TTH_MSG
                         this.handleMessage({ action: MSG_TYPE_SAVE_SETTINGS, settings: result.settings })
                     }
@@ -407,6 +406,23 @@ class FLSettingsBackend {
                     );
                 } else {
                     this.getFallenLondonTabs().then((tabs) => this.sendStateToTabs(tabs, result.settings));
+                }
+            });
+        }
+
+        if (message.action === MSG_TYPE_UPDATE_SETTINGS) {
+            //log(Object.keys(((message as SettingsMessage).settings || {})).toString())
+            chrome.storage.local.get(["settings"], (result) => {
+                if (chrome.runtime.lastError) {
+                    log("Could not load settings from DB, doing nothing.");
+                } else {
+                    const settingsMessage = message as SettingsMessage;
+                    if (settingsMessage.settings) {
+                        for (const [key, val] of Object.entries(settingsMessage.settings)) {
+                            result.settings[key] = val;
+                        }
+                    }
+                    this.handleMessage({ action: MSG_TYPE_SAVE_SETTINGS, settings: result.settings })
                 }
             });
         }

@@ -3,7 +3,7 @@ import { IMutationAware, INetworkAware, IStateAware } from "./base";
 import { SettingsObject } from "../settings";
 import { GameStateController, GameState } from "../game_state";
 import { getSingletonByClassName } from "../utils";
-import { MSG_TYPE_SAVE_SETTINGS, MSG_TYPE_WIKI_API_CALL, MSG_TYPE_WIKI_API_RESPONSE } from "../constants";
+import { MSG_TYPE_SAVE_SETTINGS, MSG_TYPE_UPDATE_SETTINGS, MSG_TYPE_WIKI_API_CALL, MSG_TYPE_WIKI_API_RESPONSE } from "../constants";
 import { sendToServiceWorker } from "../comms";
 import { WikiResult } from "../wiki";
 import { FLApiInterceptor } from "../api_interceptor";
@@ -37,12 +37,21 @@ const RAT_MARKET_BUYING = {
     "MAUDLIN_DEMAND": [{ id: 142386, name: "Captivating Ballad", price: 625 }, { id: 142463, name: "Parabolan Parable", price: 3125 }]
 }
 
+const WASWOOD_ITEMS: {[key: string]: string[]} = {
+    "1": ["JENNYS_WIMPLE"],
+    "2": ["ANON_WHITE_MASK"],
+    "3": ["VISCOUNT_COLLAR", "VISCOUNTESS_COLLAR"],
+    "8": ["STURDY_PICK", "SPEAKING_TUBE", "M_D_A_FOR_F", "DRINKING_VESSEL", "POISONED_PEN", "WAX_BOOTS", "WORK_GLOVES"],
+    "9": ["MINIATURE_MUSEUM", "PERFUMERS_ARTS", "GEBRANDTS_ADDRESS_BOOK"]
+}
+
 type WorldQualityName = "SAINTLY_DEMAND" | "SOFT_DEMAND" | "TEMPESTUOUS_DEMAND" | "INSCRUTABLE_DEMAND" | "INTRICATE_DEMAND" | "MAUDLIN_DEMAND" | "THE_RAT_SEASON" |
     "DIRECTION_OF_THE_RAT_WIND" | "PHASE_OF_THE_RAT_MOON" | "THE_FALSE_SEASON" | "THE_SEASON_IN_SOUP" | "BONE_MARKET_FLUCTUATIONS" | "ZOOLOGICAL_MANIA" |
     "HEARTS_GAME_SEASON" | "SEASON_OF_THE_SACROBOSCAN_CALENDAR"
 
 type FLMessage = { type: string, image: string, relatedId: number, description: string, date: string, ago: string };
 interface WorldQuality { name: string, result?: WikiResult, resetDay: number }
+interface CharacterQuality {id: number, value: number, name?: string }
 
 export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAware {
 
@@ -56,6 +65,8 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     nextKhanateMoment = 0;
     nextWellspringMoment = 0;
     nextWaswoodMoment = 0;
+    private sidebar?: HTMLDivElement;
+    private wrapperDiv?: HTMLDivElement;
 
     private worldQualities: Record<WorldQualityName, WorldQuality> = {
         SAINTLY_DEMAND: { name: "Saintly Demand", result: undefined, resetDay: DAYS.MONDAY },
@@ -75,7 +86,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: undefined, resetDay: DAYS.THURSDAY },
     };
 
-    private characterQualities = {
+    private characterQualities: Record<string, CharacterQuality> = {
         MAKING_WAVES: { id: 545, value: 0 },
         NOTABILITY: { id: 101305, value: 0 },
         BENEFICENCE: { id: 141145, value: 0 },
@@ -113,14 +124,20 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         RADIANT_BEARING: { id: 145010, value: 0 },
         HALLOW_VESSEL: { id: 145013, value: 0 },
         VOTES_CAST: { id: 144587, value: 0 },
-        JENNYS_WIMPLE: { id: 128206, value: 0 },
-        M_D_A_FOR_F: { id: 142997, value: 0 },
-        DRINKING_VESSEL: { id: 127174, value: 0 },
-        WAX_BOOTS: { id: 127177, value: 0 },
-        WORK_GLOVES: { id: 142999, value: 0 },
-        MINIATURE_MUSEUM: { id: 143538, value: 0 },
-        PERFUMERS_ARTS: { id: 143748, value: 0 },
-        GEBRANDTS_ADDRESS_BOOK: { id: 143752, value: 0 },
+        JENNYS_WIMPLE: { id: 128206, value: 0, name: "Sinning Jenny's Forsaken Wimple" },
+        ANON_WHITE_MASK: { id: 140461, value: 0, name: "Anonymous White Mask, Zee-Stained and Mildewy" },
+        VISCOUNT_COLLAR: { id: 141787, value: 0, name: "Viscount's Bejewelled Collar" },
+        VISCOUNTESS_COLLAR: { id: 141789, value: 0, name: "Viscountess' Bejewelled Collar" },
+        STURDY_PICK: { id: 142967, value: 0, name: "Sturdy Pick" },
+        SPEAKING_TUBE: { id: 126636, value: 0, name: "A Pre-Lapsarian Speaking Tube" },
+        M_D_A_FOR_F: { id: 142997, value: 0, name: "M. D_____' A_____ for _______: F____ Edition" },
+        DRINKING_VESSEL: { id: 127174, value: 0, name: "Polythreme Drinking Vessel" },
+        POISONED_PEN: { id: 127175, value: 0, name: "A Poisoned Pen" },
+        WAX_BOOTS: { id: 127177, value: 0, name: "Wax-Hardened Boots" },
+        WORK_GLOVES: { id: 142999, value: 0, name: "Singed and Stained Work Gloves" },
+        MINIATURE_MUSEUM: { id: 143538, value: 0, name: "Memory of a Miniature Museum" },
+        PERFUMERS_ARTS: { id: 143748, value: 0, name: "An Initiate into the Perfumer's Arts" },
+        GEBRANDTS_ADDRESS_BOOK: { id: 143752, value: 0, name: "Your Name in F.F. Gebrandt's Address Book" },
         NASCENCY: { id: 144836, value: 0 },
         EXCESS: { id: 144837, value: 0 },
         DARES: { id: 144838, value: 0 },
@@ -135,7 +152,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
 
     }
 
-    //private i = 0; //resets settings, for testing purposes
+    private i = 1; //i = 0 resets settings, for testing purposes
 
     constructor() {
         window.addEventListener("message", (event) => {
@@ -174,76 +191,70 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             });
         });
     }
-    //todo does this do anything?
-    currentRetries = 0;
-    node?: HTMLElement;
 
     onNodeAdded(node: HTMLElement): void {
-        this.node = node;
-        const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
-        const waitForSettings = async () => {
-            await delay(100);
-            console.log("Waited 100ms");
-        };
-        const maxRetries = 5;
-        console.log(Date.now())
-        if (!(this.currentState && this.currentSettings) && this.currentRetries < maxRetries) {
-            console.log(Date.now())
-            this.currentRetries++;
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            waitForSettings().then(() => this.onNodeAdded(this.node!));
-        }
+        const start = performance.now();
         const travelColumn = getSingletonByClassName(node, "travel");
         if (!travelColumn) return;
 
-        let sidebar = document.getElementById("right-sidebar");
-        if (!sidebar) {
-            sidebar = document.createElement("div");
-            sidebar.setAttribute("id", "right-sidebar");
-            sidebar.classList.add("sidebar");
+        let sidebarOnPage = document.getElementById("right-sidebar");
+        if (!sidebarOnPage) {
+            this.sidebar = document.createElement("div");
+            this.sidebar.setAttribute("id", "right-sidebar");
+            this.sidebar.classList.add("sidebar");
 
             if (travelColumn.querySelector("div[class='snippet']")) {
                 // Give some clearance in case snippets are not disabled.
-                (sidebar as HTMLElement).style.cssText = "margin-top: 30px";
+                (this.sidebar as HTMLElement).style.cssText = "margin-top: 30px";
             }
+            sidebarOnPage = this.sidebar;
         }
 
-        let timekeeperPanel = document.getElementById("timekeeper-panel");
+        const timekeeperPanelOnPage = document.getElementById("timekeeper-panel");
         // Trackers are already created and visible, nothing to do here.
-        if (!timekeeperPanel) {
-            const fragment = document.createDocumentFragment();
-
-            const timekeeperHeader = document.createElement("p");
-            timekeeperHeader.classList.add("heading", "heading--4");
-            timekeeperHeader.textContent = "Timekeeper";
-            fragment.appendChild(timekeeperHeader);
-
-            timekeeperPanel = document.createElement("ul");
-            timekeeperPanel.id = "timekeeper-panel";
-            timekeeperPanel.classList.add("items", "items--list");
-            if (this.currentSettings.tth) {
-                timekeeperPanel.appendChild(this.buildTthPanel());
-            }
-            if (this.currentSettings.wellspring || this.currentSettings.waswood || this.currentSettings.house_of_chimes || this.currentSettings.balmoral ||
-                this.currentSettings.khanate || this.currentSettings.boons_and_burdens) {
-
-                timekeeperPanel.appendChild(this.buildLivingStoryPanel());
-            }
-            if (this.currentSettings.rat_market) {
-                timekeeperPanel.appendChild(this.buildRatMarketPanel());
-            }
-            if (this.currentSettings.bone_market_trends) {
-                timekeeperPanel.appendChild(this.buildBoneMarketPanel());
+        if (!timekeeperPanelOnPage) {
+            if (!this.wrapperDiv) {
+                this.wrapperDiv = this.createTimekeeperPanel();
             }
 
-            fragment.appendChild(timekeeperPanel);
-
-            sidebar.appendChild(fragment);
+            sidebarOnPage.appendChild(this.wrapperDiv);
         }
 
-        if (!travelColumn.contains(sidebar)) {
-            travelColumn.appendChild(sidebar);
+        if (!travelColumn.contains(sidebarOnPage)) {
+            travelColumn.appendChild(sidebarOnPage);
         }
+        const end = performance.now();
+        console.log(`creating timekeeper took ${end - start} milliseconds`);
+    }
+
+    private createTimekeeperPanel() {
+        const wrapperDiv = document.createElement("div");
+        const timekeeperHeader = document.createElement("p");
+        timekeeperHeader.classList.add("heading", "heading--4");
+        timekeeperHeader.textContent = "Timekeeper";
+        wrapperDiv.appendChild(timekeeperHeader);
+        timekeeperHeader.id = Date.now().toString(36) + Math.random().toString(36)
+        console.log(timekeeperHeader.id)
+
+        const timekeeperPanel = document.createElement("ul");
+        timekeeperPanel.id = "timekeeper-panel";
+        timekeeperPanel.classList.add("items", "items--list");
+        if (this.currentSettings.tth) {
+            timekeeperPanel.appendChild(this.buildTthPanel());
+        }
+        if (this.currentSettings.wellspring || this.currentSettings.waswood || this.currentSettings.house_of_chimes || this.currentSettings.balmoral ||
+            this.currentSettings.khanate || this.currentSettings.boons_and_burdens) {
+
+            timekeeperPanel.appendChild(this.buildLivingStoryPanel());
+        }
+        if (this.currentSettings.rat_market) {
+            timekeeperPanel.appendChild(this.buildRatMarketPanel());
+        }
+        if (this.currentSettings.bone_market_trends) {
+            timekeeperPanel.appendChild(this.buildBoneMarketPanel());
+        }
+        wrapperDiv.appendChild(timekeeperPanel);
+        return wrapperDiv;
     }
 
     //only works with strings, but string | boolean makes it play nicer with settings
@@ -497,17 +508,41 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         return livingStoryPanel;
     }
 
-    buildWaswoodPanel() {
+    buildWaswoodPanel(): HTMLElement {
+        if (!this.worldQualities.SEASON_OF_THE_SACROBOSCAN_CALENDAR.result) {
+            const failure = document.createElement("div")
+            failure.textContent = "Could not get Waswood season.";
+            return failure;
+        }
         const waswoodPanel = document.createElement("div");
         const waswoodHeader = document.createElement("h4");
         waswoodHeader.textContent = "Waswood";
         waswoodPanel.appendChild(waswoodHeader);
         const waswoodList = document.createElement("ul");
         waswoodList.classList.add("items", "items--list");
-        if (this.characterQualities.JAUNT_WASWOOD) {
+        if (this.characterQualities.JAUNT_WASWOOD.value) {
             const waswoodBlocked = document.createElement("li");
             waswoodBlocked.textContent = "Waswood blocked for a week." //todo living story update
             waswoodList.appendChild(waswoodBlocked);
+        }
+        let startAt = Number(this.worldQualities.SEASON_OF_THE_SACROBOSCAN_CALENDAR.result.value);
+        if (startAt >= 4 && startAt <= 7) {
+            startAt = 8;
+        }
+        const keys = Object.keys(WASWOOD_ITEMS).sort((a, b) => { return Number(a) - Number(b) });
+        while (Number(keys[0]) !== startAt) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            keys.push(keys.shift()!);
+        }
+        for (const key of keys) {
+            for (const item of (WASWOOD_ITEMS[key])) {
+                if (this.characterQualities[item].value === 0) {
+                    const missingItem = this.characterQualities[item]
+                    const waswoodListItem = document.createElement("li");
+                    waswoodListItem.textContent = `${missingItem.name} is available.` //todo when
+                    waswoodList.appendChild(waswoodListItem);
+                }
+            }
         }
 
         waswoodPanel.appendChild(waswoodList);
@@ -527,7 +562,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 nextKhanateReport = this.calculateRemainingTime(nextKhanateMoment);
             } else {
                 //No saved moment, or moment in past. Check backup (taken from messages)
-                
+
                 const backupString = this.backupMoments.get(MESSAGE_STRINGS.KHANATE_MESSAGE);
                 if (backupString) {
                     const nextBackupDate = new Date(this.backupMoments.get(MESSAGE_STRINGS.KHANATE_MESSAGE) as string)
@@ -553,13 +588,13 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         nextReportMessage.id = "next-khanate-report-message";
         nextReportMessage.textContent = nextKhanateReport;
 
-        const khanateModal = this.createKhanateModal();
+        this.createKhanateModal();
 
         const modalButton = document.createElement("button");
         modalButton.classList.add("js-tt", "button", "button--primary", "button--go");
         modalButton.style.padding = "2px 5px";
         modalButton.addEventListener("click", () => {
-            khanateModal.showModal();
+            (document.getElementById("khanate-modal") as HTMLDialogElement).showModal();
         });
         const editText = document.createElement("span");
         editText.textContent = "Edit time";
@@ -599,7 +634,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         const khanateModalCancel = document.createElement("button");
         khanateModalCancel.textContent = "Cancel";
         khanateModalCancel.addEventListener("click", () => {
-            khanateModal.close();
+            (document.getElementById("khanate-modal") as HTMLDialogElement).close();
         });
         khanateModalCancel.classList.add("js-tt", "button", "button--primary", "button--go");
         khanateModalCancel.style.padding = "2px 5px";
@@ -607,7 +642,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         const khanateModalConfirm = document.createElement("button");
         khanateModalConfirm.textContent = "Confirm";
         khanateModalConfirm.addEventListener("click", () => {
-            const nextKhanateMoment = khanateDatePicker.value + "Z";
+            const nextKhanateMoment = (document.getElementById("khanate-date-picker") as HTMLInputElement).value + "Z";
             this.currentSettings.nextKhanateMoment = new Date(nextKhanateMoment).toISOString();
             sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
             const nextKhanateReport = "A 'report' from Khagan's Palace is due " + this.calculateRemainingTimeFromIsoOrNumberString(nextKhanateMoment);
@@ -615,7 +650,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             if (nextKhanateReportSpan) {
                 nextKhanateReportSpan.textContent = nextKhanateReport;
             }
-            khanateModal.close();
+            (document.getElementById("khanate-modal") as HTMLDialogElement).close();
         });
         khanateModalConfirm.classList.add("js-tt", "button", "button--primary", "button--go");
         khanateModalConfirm.style.padding = "2px 5px";
@@ -627,8 +662,8 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         khanateForm.appendChild(khanateModalCancel);
         khanateForm.appendChild(khanateModalConfirm);
         khanateModal.addEventListener("click", (event) => {
-            if (event.target === khanateModal) {
-                khanateModal.close();
+            if (event.target === (document.getElementById("khanate-modal") as HTMLDialogElement)) { //todo check this
+                (document.getElementById("khanate-modal") as HTMLDialogElement).close();
             }
         });
         khanateModal.style.padding = "0";
@@ -674,7 +709,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         const currentExhaustion = this.characterQualities.BONE_MARKET_EXHAUSTION.value;
         const exhaustionItem = document.createElement("li");
         exhaustionItem.textContent = `You have ${currentExhaustion} exhaustion`
-        if(this.nextTthMoment) {
+        if (this.nextTthMoment) {
             exhaustionItem.textContent += `, reducing by 4 ${this.calculateRemainingTime(this.nextTthMoment)}`;
         }
 
@@ -782,21 +817,26 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         if (document.getElementById("main") == null) {
             return false;
         }
-        return document.getElementById("timekeeper-panel") == null;
+        if (!this.currentSettings || !this.currentState) {
+            console.log("returning false");
+            return false;
+        }
+        return document.getElementById("timekeeper-panel") == null
     }
 
     applySettings(settings: SettingsObject): void {
         this.currentSettings = settings;
-        /*if (this.i === 0) {
+        if (this.i === 0) {
             this.currentSettings.worldQualities = ""
+            this.currentSettings.nextTthMoment = ""
             this.i = 1;
-        }*/ //clears saved qualities
+        } //clears saved qualities
         this.displayTimekeeping = this.currentSettings.display_timekeeping as boolean;
         if (this.currentSettings.worldQualities) {
             const temp = JSON.parse(this.currentSettings.worldQualities as string)
             if (temp.hasOwnProperty("Saintly Demand")) {
                 delete this.currentSettings.worldQualities;
-            } else if (temp.hasOwnProperty("SAINTLY_DEMAND")){
+            } else if (temp.hasOwnProperty("SAINTLY_DEMAND")) {
                 this.worldQualities = JSON.parse(this.currentSettings.worldQualities as string)
             }
             this.removeOutdatedWorldQualities();
@@ -804,10 +844,9 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         if (settings.nextTthMoment) {
             this.nextTthMoment = new Date(settings.nextTthMoment as string).getTime();
         } else {
-            console.log("no tth")
-            //todo something?
+            this.getNextTthMoment(); 
         }
-        
+
         const missingWorldQualities: string[] = []
 
         Object.values(this.worldQualities).forEach((quality) => {
@@ -824,6 +863,13 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         }
     }
 
+    private async getNextTthMoment() {
+        FLApiInterceptor.getInstance().getTTHMoment()
+            .then(nextMomentString => this.currentSettings.nextTthMoment = nextMomentString)
+            .then(() => sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings }))
+    }
+
+
     removeOutdatedWorldQualities() {
         const now = new Date().getTime();
         Object.values(this.worldQualities).forEach((quality) => {
@@ -838,30 +884,29 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     }
 
     linkNetworkTools(interceptor: FLApiInterceptor): void {
+        const displayTimekeeping = this.displayTimekeeping;
         interceptor.onResponseReceived("/api/storylet/choosebranch", (request, response) => {
-            if (!this.displayTimekeeping) {
+            if (!displayTimekeeping || !response.messages) {
                 return;
             }
 
             if (response.messages && KHANATE_REPORT_BRANCH_IDS.includes(request.branchId)) {
-                this.nextKhanateMoment = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
-
-                this.currentSettings.nextKhanateMoment = this.nextKhanateMoment.toString();
-                sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
+                const nextKhanateMoment = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
+                sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextKhanateMoment: nextKhanateMoment } });
             }
             if (BALMORAL_GIFT_BRANCH_IDS.includes(request.branchId)) {
-                this.nextBalmoralMoment = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
-                sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
+                const nextBalmoralMoment = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
+                sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextBalmoralMoment: nextBalmoralMoment } });
             }
 
             if (WELLSPRING_BRANCH_IDS.includes(request.branchId)) {
-                this.nextWellspringMoment = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
-                sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
+                const nextWellspringMoment = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
+                sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextWellspringMoment: nextWellspringMoment } });
             }
 
             if (WASWOOD_CALENDAR_BRANCH_IDS.includes(request.branchId)) {
-                this.nextWaswoodMoment = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
-                sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
+                const nextWaswoodMoment = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
+                sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextWaswoodMoment: nextWaswoodMoment } });
             }
 
             return;

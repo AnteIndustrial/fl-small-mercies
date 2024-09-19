@@ -2,7 +2,7 @@ import { IMutationAware, IStateAware } from "./base";
 import { SettingsObject } from "../settings";
 import { GameState, GameStateController } from "../game_state";
 import { getSingletonByClassName } from "../utils";
-import { MSG_TYPE_SAVE_SETTINGS } from "../constants";
+import { MSG_TYPE_SAVE_SETTINGS, MSG_TYPE_UPDATE_SETTINGS } from "../constants";
 import { sendToServiceWorker } from "../comms";
 
 // Mapping of favour name to its respective image
@@ -32,9 +32,14 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
     private qualityNames: string[] = [];
     private currentState?: GameState;
     private currentSettings!: SettingsObject;
+    editModal?: HTMLDialogElement;
+    wrapperDiv?: HTMLDivElement;
+    sidebar?: HTMLDivElement;
+
 
     constructor() {
-        ;
+        console.log("constructor: " + Date.now().toString(36) + Math.random().toString(36))
+        sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, {settings: { foo: "bar" }});
     }
 
     applySettings(settings: SettingsObject): void {
@@ -117,6 +122,8 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
 
     //create the html element to track one quality
     private createTracker(quality: TrackedQuality, editMode: boolean): HTMLElement {
+
+        console.log("creating tracker: " + quality.name + " " + Date.now().toString(36) + Math.random().toString(36))
         const title = quality.name;
         const initialValue = quality.currentValue;
         const targetValue = quality.targetValue;
@@ -153,6 +160,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         nameSpan.textContent = title;
 
         const valueAndTargetSpan = document.createElement("span");
+        valueAndTargetSpan.id = editMode ? `${title}-tracker-value-and-target` : `${title}-tracker-value-and-target-edit`
         valueAndTargetSpan.classList.add("item__value");
         valueAndTargetSpan.textContent = ` ${initialValue} / ${targetValue}`;
 
@@ -160,6 +168,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         progressBarDiv.classList.add("progress-bar");
 
         const progressBarSpan = document.createElement("span");
+        progressBarSpan.id = editMode ? `${title}-tracker-progress` : `${title}-tracker-progress-edit`;
         progressBarSpan.classList.add("progress-bar__stripe", "progress-bar__stripe--has-transition");
         let percentage = (initialValue / targetValue) * 100;
         if (percentage > 100) {
@@ -193,31 +202,36 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             targetInput.style.width = "6ch";
             newTargetSpan.appendChild(targetInput);
             const newTargetButton = document.createElement("button");
+            newTargetButton.id = Date.now().toString(36) + Math.random().toString(36)
+            console.log(`adding listener to new target button ${newTargetButton.id}`);
             newTargetButton.classList.add("js-tt", "button", "button--primary", "button--margin", "button--go");
             newTargetButton.addEventListener("click", () => {
-                const newTargetNumber = Number(targetInput.value);
+                const targetInputEnclosed = document.getElementById(`${title}-new-target-number`) as HTMLInputElement;
+                const newTargetNumber = Number(targetInputEnclosed?.value);
 
                 this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
 
                 sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
 
-                const updatedQuality = this.trackedQualities.get(quality.name);
+                const updatedQuality = this.trackedQualities.get(title);
                 //getting an updated version. If this handler tries to get quality, it's sometimes out of date.
                 if (updatedQuality) {
                     const currentValue = updatedQuality.currentValue;
-                    valueAndTargetSpan.textContent = ` ${currentValue} / ${newTargetNumber}`;
+                    const valueAndTargetSpanEnclosed = document.getElementById(`${title}-tracker-value-and-target-edit`) as HTMLSpanElement;
+                    valueAndTargetSpanEnclosed.textContent = ` ${currentValue} / ${newTargetNumber}`;
                     let updatedPercentage = (currentValue / newTargetNumber) * 100;
                     if (updatedPercentage > 100) {
                         updatedPercentage = 100;
                     }
-                    progressBarSpan.style.cssText = `width: ${updatedPercentage}%;`;
+                    const progressBarSpanEnclosed = document.getElementById(`${title}-tracker-progress-edit`) as HTMLSpanElement;
+                    progressBarSpanEnclosed.style.cssText = `width: ${updatedPercentage}%;`;
 
                     const mirrorItem = document.getElementById(`${title}-tracker`);
                     const mirrorTargetText = mirrorItem?.getElementsByClassName("item__value").item(0);
                     const mirrorTargetBar = mirrorItem?.getElementsByClassName("progress-bar__stripe").item(0) as HTMLSpanElement;
                     if (mirrorTargetText && mirrorTargetBar) {
-                        mirrorTargetText.textContent = valueAndTargetSpan.textContent;
-                        mirrorTargetBar.style.cssText = progressBarSpan.style.cssText;
+                        mirrorTargetText.textContent = valueAndTargetSpanEnclosed.textContent;
+                        mirrorTargetBar.style.cssText = progressBarSpanEnclosed.style.cssText;
                     }
                 }
             });
@@ -246,23 +260,26 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             deleteSpan1.appendChild(deleteSpan2);
             deleteSpan1.appendChild(deleteSpan3);
             deleteSpan1.appendChild(deleteSpan4);
+            deleteButton.id = Date.now().toString(36) + Math.random().toString(36)
+            console.log(`Adding listener to delete button ${deleteButton.id}`)
             deleteButton.addEventListener("click", () => {
-                const editPanel = qualityListItem.parentElement;
                 document.getElementById(`${title}-tracker`)?.remove();
                 document.getElementById(`${title}-tracker-edit`)?.remove();
                 this.trackedQualities.delete(title);
 
                 this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
                 sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
-                this.hideUpAndDownButtons(editPanel as HTMLUListElement);
+                this.hideUpAndDownButtons();
             });
             qualityListItem.appendChild(deleteButton);
 
             const upAndDownButtonSpan = document.createElement("span");
             const upButton = document.createElement("button");
             upButton.classList.add("js-tt", "button", "button--primary", "button--margin", "button--go", "up-button");
+            upButton.id = Date.now().toString(36) + Math.random().toString(36)
+            console.log(`Adding listener to up button ${upButton.id}`)
             upButton.addEventListener("click", () => {
-                this.moveItem(title, qualityListItem, "UP");
+                this.moveItem(title, "UP");
             });
             const upButtonText = document.createElement("span");
             upButtonText.textContent = "Up";
@@ -271,8 +288,10 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
 
             const downButton = document.createElement("button");
             downButton.classList.add("js-tt", "button", "button--primary", "button--margin", "button--go", "down-button");
+            downButton.id = Date.now().toString(36) + Math.random().toString(36)
+            console.log(`Adding listener to down button ${downButton.id}`)
             downButton.addEventListener("click", () => {
-                this.moveItem(title, qualityListItem, "DOWN");
+                this.moveItem(title, "DOWN");
             });
             const downButtonText = document.createElement("span");
             downButtonText.textContent = "Down";
@@ -285,7 +304,9 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         return qualityListItem;
     }
 
-    private moveItem(title: string, qualityListItem: HTMLLIElement, upOrDown: UpOrDown) {
+    private moveItem(title: string, upOrDown: UpOrDown) {
+        const editItem = document.getElementById(`${title}-tracker-edit`) as HTMLLIElement;
+        const mainPageItem = document.getElementById(`${title}-tracker`) as HTMLLIElement;
         const qualityKeys = Array.from(this.trackedQualities.keys());
         let currentIndex = -1;
         for (let i = 0; i < qualityKeys.length; i++) {
@@ -294,9 +315,8 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 break;
             }
         }
-        const editPanel = qualityListItem.parentElement as HTMLUListElement;
+        const editPanel = document.getElementById("quality-tracker-edit") as HTMLUListElement;
         const mainPanel = document.getElementById("quality-tracker") as HTMLUListElement;
-        const thisQualityOnTheMainPanel = document.getElementById(`${title}-tracker`) as HTMLLIElement;
         if (editPanel && mainPanel && currentIndex !== -1) {
             if (upOrDown === "UP") {
                 qualityKeys.splice(currentIndex - 1, 0, qualityKeys.splice(currentIndex, 1)[0]);
@@ -305,18 +325,21 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 qualityKeys.splice(currentIndex + 1, 0, qualityKeys.splice(currentIndex, 1)[0]);
             }
         }
-        this.moveItemInOnePanel(qualityListItem, upOrDown, editPanel);
-        this.moveItemInOnePanel(thisQualityOnTheMainPanel, upOrDown, mainPanel);
+        this.moveItemInOnePanel(editItem, upOrDown, editPanel);
+        this.moveItemInOnePanel(mainPageItem, upOrDown, mainPanel);
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.trackedQualities = new Map(qualityKeys.map((key) => [key, this.trackedQualities.get(key)!]));
         this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
         sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
 
-        this.hideUpAndDownButtons(editPanel);
+        this.hideUpAndDownButtons();
     }
 
     private moveItemInOnePanel(qualityListItem: HTMLLIElement, upOrDown: UpOrDown, panel: HTMLUListElement) {
+        if (!qualityListItem) {
+            return;
+        }
         let insertBeforeTarget: Node | undefined | null;
         if (upOrDown === "UP") {
 
@@ -384,53 +407,71 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         if (node.getElementsByClassName("travel").length === 0) {
             return false;
         }
+        if (!this.currentSettings || !this.currentState) {
+            console.log("returning false");
+            return false;
+        }
         return document.getElementById("quality-tracker") == null;
     }
 
     onNodeAdded(node: HTMLElement): void {
+        const start = performance.now();
         const travelColumn = getSingletonByClassName(node, "travel");
         if (!travelColumn) return;
 
-        let sidebar = document.getElementById("right-sidebar");
-        if (!sidebar) {
-            sidebar = document.createElement("div");
-            sidebar.setAttribute("id", "right-sidebar");
-            sidebar.classList.add("sidebar");
-
+        let sidebarOnPage = document.getElementById("right-sidebar");
+        if (!sidebarOnPage) {
+            if (!this.sidebar) {
+                this.sidebar = document.createElement("div");
+                this.sidebar.setAttribute("id", "right-sidebar");
+                this.sidebar.classList.add("sidebar");
+            }
             if (travelColumn.querySelector("div[class='snippet']")) {
                 // Give some clearance in case snippets are not disabled.
-                (sidebar as HTMLElement).style.cssText = "margin-top: 30px";
+                (this.sidebar as HTMLElement).style.cssText = "margin-top: 30px";
             }
+            sidebarOnPage = this.sidebar;
         }
 
-        const qualityTrackerPanel = document.getElementById("quality-tracker");
+        const qualityTrackerPanelOnPage = document.getElementById("quality-tracker");
         // Trackers are already created and visible, nothing to do here.
-        if (!qualityTrackerPanel) {
-            const fragment = this.createTrackerPanel(false);
+        if (!qualityTrackerPanelOnPage) {
+            if (!this.wrapperDiv) {
+                this.wrapperDiv = this.createTrackerPanel(false);
+            }
 
-            this.createEditModal();
-
-            sidebar.appendChild(fragment);
+            if (!this.editModal) {
+                this.createEditModal();
+            }
+            if (this.editModal && !document.getElementById(this.editModal.id)) {
+                document.body.appendChild(this.editModal);
+            }
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            sidebarOnPage!.appendChild(this.wrapperDiv);
         }
 
-        if (!travelColumn.contains(sidebar)) {
-            travelColumn.appendChild(sidebar);
+        if (!travelColumn.contains(sidebarOnPage)) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            travelColumn.appendChild(sidebarOnPage!);
         }
+        const end = performance.now();
+        console.log(`creating misc tracker took ${end - start} milliseconds`);
     }
 
     private createTrackerPanel(editMode: boolean) {
-        const fragment = document.createDocumentFragment();
-
+        const wrapperDiv = document.createElement("div");
         const qualityTrackerHeader = document.createElement("p");
+        qualityTrackerHeader.id = Date.now().toString(36) + Math.random().toString(36)
+        console.log(qualityTrackerHeader.id)
         qualityTrackerHeader.classList.add("heading", "heading--4");
         qualityTrackerHeader.textContent = "Tracked Qualities";
-        fragment.appendChild(qualityTrackerHeader);
+        wrapperDiv.appendChild(qualityTrackerHeader);
 
         const qualityTrackerPanel = document.createElement("ul");
         const panelId = editMode ? "quality-tracker-edit" : "quality-tracker";
         qualityTrackerPanel.setAttribute("id", panelId);
         qualityTrackerPanel.classList.add("items", "items--list");
-        fragment.appendChild(qualityTrackerPanel);
+        wrapperDiv.appendChild(qualityTrackerPanel);
 
         for (const quality of this.trackedQualities.values()) {
             const qualityDisplay = this.createTracker(quality, editMode);
@@ -438,12 +479,14 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         }
 
         if (editMode) {
-            this.hideUpAndDownButtons(qualityTrackerPanel);
+            this.hideUpAndDownButtons();
         } else {
             const modalButton = document.createElement("button");
             modalButton.id = "modal-button";
             modalButton.classList.add("js-tt", "button", "button--primary", "button--go");
             modalButton.style.padding = "2px 5px";
+            modalButton.setAttribute("foo", Date.now().toString(36) + Math.random().toString(36))
+            console.log(`Adding listener to modal button ${modalButton.getAttribute("foo")}`)
             modalButton.addEventListener("click", () => {
                 (document.getElementById("edit-modal") as HTMLDialogElement)?.showModal();
             });
@@ -453,43 +496,46 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
 
             qualityTrackerPanel.appendChild(modalButton);
         }
-        return fragment;
+        return wrapperDiv;
     }
 
     private createEditModal() {
-        const editModal = document.createElement("dialog");
-        document.body.appendChild(editModal);
-        editModal.setAttribute("id", "edit-modal");
+        this.editModal = document.createElement("dialog");
+        this.editModal.setAttribute("id", "edit-modal");
         const wrapperDiv = document.createElement("div");
         const editTrackerPanel = this.createTrackerPanel(true);
         editTrackerPanel.appendChild(this.createDropDownSelect());
         wrapperDiv.appendChild(editTrackerPanel);
-        editModal.appendChild(wrapperDiv);
+        this.editModal.appendChild(wrapperDiv);
         const closeModalButton = document.createElement("button");
         closeModalButton.textContent = "Close";
+        closeModalButton.id = Date.now().toString(36) + Math.random().toString(36)
+        console.log(`Adding listener to close modal button ${closeModalButton.id}`)
         closeModalButton.addEventListener("click", () => {
             const qualitySelect = document.getElementById("track-target-name") as HTMLInputElement;
             if (qualitySelect) {
                 qualitySelect.value = "";
             }
-            editModal.close();
+            (document.getElementById("edit-modal") as HTMLDialogElement)?.close();
         });
         closeModalButton.classList.add("js-tt", "button", "button--primary", "button--go");
         closeModalButton.style.padding = "2px 5px";
-        editModal.appendChild(closeModalButton);
-        editModal.addEventListener("click", (event) => {
-            if (event.target === editModal) {
+        this.editModal.appendChild(closeModalButton);
+        this.editModal.setAttribute("foo", Date.now().toString(36) + Math.random().toString(36));
+        console.log(`Adding listener to editModal button ${this.editModal.getAttribute("foo")}`)
+        this.editModal.addEventListener("click", (event) => {
+            if (event.target === (document.getElementById("edit-modal") as HTMLDialogElement)) { //todo check this
                 const qualitySelect = document.getElementById("track-target-name") as HTMLInputElement;
                 if (qualitySelect) {
                     qualitySelect.value = "";
                 }
-                editModal.close();
+                (document.getElementById("edit-modal") as HTMLDialogElement)?.close();
             }
         });
-        editModal.style.padding = "0";
+        this.editModal.style.padding = "0";
         wrapperDiv.style.margin = "0";
         wrapperDiv.style.padding = "1rem";
-        return editModal;
+        return this.editModal;
     }
 
 
@@ -524,9 +570,13 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         const trackButton = document.createElement("button");
         trackButton.classList.add("js-tt", "button", "button--primary", "button--go");
         trackButton.style.padding = "2px 5px";
+        trackButton.id = Date.now().toString(36) + Math.random().toString(36)
+        console.log(`Adding listener to track button ${trackButton.id}`)
         trackButton.addEventListener("click", () => {
-            const trackName = qualitySelect.value;
-            const trackNumber = Number(targetInput.value);
+            const qualitySelectEnclosed = document.getElementById("track-target-name") as HTMLInputElement;
+            const targetInputEnclosed = document.getElementById("track-target-number") as HTMLInputElement;
+            const trackName = qualitySelectEnclosed.value;
+            const trackNumber = Number(targetInputEnclosed.value);
             const trackCategory = this.qualityNameAndCategory.get(trackName) || "";
             const trackCurrent = this.currentState?.getQuality(trackCategory, trackName)?.level || 0;
             const trackImage = this.currentState?.getQuality(trackCategory, trackName)?.image || "question";
@@ -534,21 +584,20 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             this.trackedQualities.set(trackName, newQuality);
 
             this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
-            this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
 
             sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
             const editTrackerPanel = document.getElementById("quality-tracker-edit") as HTMLUListElement;
             if (editTrackerPanel) {
                 editTrackerPanel.insertBefore(this.createTracker(newQuality, true), null);
-                this.hideUpAndDownButtons(editTrackerPanel);
-                qualitySelect.value = "";
+                this.hideUpAndDownButtons();
+                qualitySelectEnclosed.value = "";
             }
             const baseTrackerPanel = document.getElementById("quality-tracker") as HTMLUListElement;
             const modalButton = document.getElementById("modal-button") as HTMLButtonElement;
             if (baseTrackerPanel && modalButton) {
                 baseTrackerPanel.insertBefore(this.createTracker(newQuality, false), modalButton);
-                this.hideUpAndDownButtons(editTrackerPanel);
-                qualitySelect.value = "";
+                this.hideUpAndDownButtons();
+                qualitySelectEnclosed.value = "";
             }
         });
         const trackText = document.createElement("span");
@@ -571,9 +620,10 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         }
     }
 
-    private hideUpAndDownButtons(qualityTrackerEditPanel: HTMLUListElement | null) {
-        if (!qualityTrackerEditPanel || qualityTrackerEditPanel.id !== "quality-tracker-edit") {
-            return; //no buttons to hide if you're not in edit mode
+    private hideUpAndDownButtons() {
+        const qualityTrackerEditPanel = document.getElementById("quality-tracker-edit");
+        if (!qualityTrackerEditPanel) {
+            return; //no buttons to hide if you're can't get the edit panel
         }
         const collectionItems = qualityTrackerEditPanel.getElementsByTagName("li");
         if (collectionItems) {
@@ -622,7 +672,6 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         }
     }
 }
-
 
 export interface TrackedQuality {
     name: string;
