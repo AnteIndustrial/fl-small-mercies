@@ -11,7 +11,6 @@ type SettingGroupDescriptor = {title: string; settings: {[key: string]: SettingD
 type SettingsSchema = SettingGroupDescriptor[];
 type SettingsObject = {[key: string]: boolean | string};
 type SettingsMessage = { action: string; settings?: SettingsObject };
-type TTHMessage = {action: string, TTH_MSG: string}
 
 function createDefaultSettings(schema: SettingsSchema): SettingsObject {
     const defaultSettings: {[key: string]: boolean | string} = {};
@@ -361,40 +360,28 @@ class FLSettingsBackend {
         return message.action == MSG_TYPE_CURRENT_SETTINGS || message.action == MSG_TYPE_SAVE_SETTINGS || MSG_TYPE_UPDATE_SETTINGS;
     }
 
-    handleMessage(message: SettingsMessage | TTHMessage) {
+    handleMessage(message: SettingsMessage) {
         log("settings is handling this message");
         log(message.action);
         if (message.action === MSG_TYPE_SAVE_SETTINGS) {
-            if ('TTH_MSG' in message) {
-                log(message.TTH_MSG)
-                chrome.storage.local.get(["settings"], (result) => {
-                    if (chrome.runtime.lastError) {
-                        log("Could not load settings from DB, doing nothing.");
-                    } else {
-                        result.settings.nextTthMoment = message.TTH_MSG
-                        this.handleMessage({ action: MSG_TYPE_SAVE_SETTINGS, settings: result.settings })
-                    }
-                });
-            } else {
-                log(Object.keys(((message as SettingsMessage).settings || {})).toString())
-                chrome.storage.local.set(
-                    {
-                        settings: message.settings,
-                    },
-                    () => {
-                        // Send out new state to the FL tabs
-                        this.getFallenLondonTabs().then((tabs) => {
-                            if (message.settings == null) {
-                                return;
-                            }
+            log(Object.keys(((message as SettingsMessage).settings || {})).toString())
+            chrome.storage.local.set(
+                {
+                    settings: message.settings,
+                },
+                () => {
+                    // Send out new state to the FL tabs
+                    this.getFallenLondonTabs().then((tabs) => {
+                        if (message.settings == null) {
+                            return;
+                        }
 
-                            this.sendStateToTabs(tabs, message.settings);
-                        });
+                        this.sendStateToTabs(tabs, message.settings);
+                    });
 
-                        log("Saved settings to local storage.");
-                    }
-                );
-            }
+                    log("Saved settings to local storage.");
+                }
+            );
         }
 
         if (message.action === MSG_TYPE_CURRENT_SETTINGS) {
@@ -411,7 +398,7 @@ class FLSettingsBackend {
         }
 
         if (message.action === MSG_TYPE_UPDATE_SETTINGS) {
-            //log(Object.keys(((message as SettingsMessage).settings || {})).toString())
+            log(Object.keys(((message as SettingsMessage).settings || {})).toString())
             chrome.storage.local.get(["settings"], (result) => {
                 if (chrome.runtime.lastError) {
                     log("Could not load settings from DB, doing nothing.");
@@ -419,7 +406,11 @@ class FLSettingsBackend {
                     const settingsMessage = message as SettingsMessage;
                     if (settingsMessage.settings) {
                         for (const [key, val] of Object.entries(settingsMessage.settings)) {
-                            result.settings[key] = val;
+                            if (val) {
+                                result.settings[key] = val;
+                            } else {
+                                delete result.settings[key];
+                            }
                         }
                     }
                     this.handleMessage({ action: MSG_TYPE_SAVE_SETTINGS, settings: result.settings })

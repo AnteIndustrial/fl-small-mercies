@@ -19,7 +19,8 @@ script.onload = function () {
 (document.head || document.documentElement).appendChild(script);
 
 console.log(`[FL Small Mercies] Setting up comms repeater...`);
-["FL_SM_saveSettings", "FL_SM_updateSettings", "FL_SM_currentSettings", "FL_SM_callWiki", "FL_SM_wikiResponse"].forEach((eventType) => {
+["FL_SM_saveSettings", "FL_SM_updateSettings", "FL_SM_currentSettings",
+    "FL_SM_callWiki", "FL_SM_wikiResponse", "FL_SM_getTth", "FL_SM_tthResponse"].forEach((eventType) => {
     window.addEventListener(eventType, (event) => {
         chrome.runtime.sendMessage({
             action: eventType,

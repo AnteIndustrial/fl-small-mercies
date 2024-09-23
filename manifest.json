@@ -3,7 +3,7 @@
   "description": "Set of small 'fixes' for Fallen London UI.",
   "version": "3.2.0",
   "manifest_version": 2,
-  "permissions": ["storage", "tabs", "https://fallenlondon.wiki/*"],
+  "permissions": [ "storage", "tabs", "https://fallenlondon.wiki/*", "https://api.fallenlondon.com/*" ],
   "background": {
     "page": "dist/background.html",
     "persistent": true

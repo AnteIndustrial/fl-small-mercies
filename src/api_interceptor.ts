@@ -254,31 +254,4 @@ export class FLApiInterceptor {
 
         return response;
     }
-
-    public async getTTHMoment() {
-        const response = await fetch(
-            "https://api.fallenlondon.com/api/settings/timethehealer",
-            {
-                headers: {
-                    "Authorization": "Bearer " + this.currentToken
-                },
-            }
-        );
-        if (!response.ok) {
-            throw new Error("FL API did not like our request");
-        }
-
-        const userData = await response.json();
-        if (!userData.isSuccess) {
-            throw new Error("Could not retrieve Time The Healer moment")
-        }
-
-        const stringifiedTime = userData.dateTimeToExecute;
-        console.log("got tth")
-        console.log(stringifiedTime)
-        return stringifiedTime;
-        /*const settings: SettingsObject = {};
-        settings.TTH_MSG = stringifiedTime
-        sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, settings)*/
-    }
 }
