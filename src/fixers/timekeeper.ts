@@ -3,7 +3,7 @@ import { IMutationAware, INetworkAware, IStateAware } from "./base";
 import { SettingsObject } from "../settings";
 import { GameStateController, GameState } from "../game_state";
 import { getSingletonByClassName } from "../utils";
-import { MSG_TYPE_SAVE_SETTINGS, MSG_TYPE_TTH_API_CALL, MSG_TYPE_TTH_API_RESPONSE, MSG_TYPE_UPDATE_SETTINGS, MSG_TYPE_WIKI_API_CALL, MSG_TYPE_WIKI_API_RESPONSE } from "../constants";
+import { MSG_TYPE_SAVE_SETTINGS, MSG_TYPE_UPDATE_SETTINGS, MSG_TYPE_WIKI_API_CALL, MSG_TYPE_WIKI_API_RESPONSE } from "../constants";
 import { sendToServiceWorker } from "../comms";
 import { WikiResult } from "../wiki";
 import { FLApiInterceptor } from "../api_interceptor";
@@ -19,45 +19,58 @@ const BALMORAL_GIFT_BRANCH_IDS = [243583, 243592, 243600];
 const KHANATE_REPORT_BRANCH_IDS = [250681];
 const WELLSPRING_BRANCH_IDS = [244785, 244786];
 const WASWOOD_CALENDAR_BRANCH_IDS = [254769, 254764, 254597, 254763, 254765, 254599, 254598, 254767, 254768, 234347, 254844, 254842, 234348, 254510, 254511, 224801, 254843];
+const CHIMES_BOONS_BRANCH_IDS = [261036, 261037, 261025, 261029, 261030, 261031, 261032, 261033, 261034, 261035];
+const CHIMES_BOONS_BRANCHES: Record<number, string> = {
+    261036: "A Remarkable Tolerance for Your Eccentric Behaviour" ,
+    261037: "A Remarkable Reluctance to Observe Your Misdeeds",
+    261025: "A Machiavellian Mien",
+    261029: "A Pseudoscientific Seeming",
+    261030: "A Reflective Reputation",
+    261031: "A Poisonous Prestige",
+    261032: "A Generous Guise",
+    261033: "A Cryptoanatomical Celebrity",
+    261034: "A Protean Prominence",
+    261035: "A Zalty Ztature"
+}//calling Object.keys() on this returns string keys. swapping key/value means using values to look up key. Duplicating key list seemed the best option.
 
 interface LivingStory { ids: number[], story: string, timer: number };
 
-const MISC_LIVING_STORIES: LivingStory[] = [
-    { ids: [263646, 263647, 263648, 263645], story: "Another Volume for the Library", timer: SEVEN_DAYS_IN_MILLISECONDS },
-    { ids: [9650, 9651], story: "The Enterprising Astronomer's Gift", timer: 2 * MILLISECONDS_IN_DAY },
-    { ids: [9448, 9449], story: "The Disgruntled Naval Officer's Gift", timer: 2 * MILLISECONDS_IN_DAY },
-    { ids: [9647, 9648], story: "The Masked Clay Man's Gift", timer: 2 * MILLISECONDS_IN_DAY },
-    { ids: [235721], story: "An Invitation from Mr Cups", timer: MILLISECONDS_IN_DAY },
-    { ids: [240193, 240200], story: "Mr Hearts' Congratulations", timer: MILLISECONDS_IN_DAY },
-    { ids: [244394, 244395], story: "A Missive from Marigold", timer: SEVEN_DAYS_IN_MILLISECONDS },
-    { ids: [247112, 247109, 247111, 247511, 247110], story: "The Fate of the Clay Highwayman (Living Story)", timer: MILLISECONDS_IN_DAY },
-    { ids: [9756, 9757, 9758], story: "A meeting of the Dilmun Club", timer: MILLISECONDS_IN_DAY },
-    { ids: [5636, 5639, 5637, 5638, 5634, 5635, 5632, 5633, 5498, 5485], story: "You're calmer now.", timer: MILLISECONDS_IN_HOUR },
-    { ids: [4401, 258747, 4402, 119565], story: "Tutorial: Social Engagements", timer: MILLISECONDS_IN_DAY },
-    { ids: [260400, 260679, 260401], story: "The Rose in Burrow", timer: 2 * MILLISECONDS_IN_DAY },
-    { ids: [238909, 238944, 238122, 238073, 238077, 238078, 238072, 238076, 238075, 238079], story: "Weeks have passed since you last saw Clara", timer: MILLISECONDS_IN_DAY },
-    { ids: [41166, 119377], story: "Your Pristine Raven's Egg is hatching!", timer: MILLISECONDS_IN_DAY },
-    { ids: [239468, 239462], story: "Waiting for the Next Bout", timer: MILLISECONDS_IN_DAY },
-    { ids: [265642, 265643], story: "Your Airship, under construction", timer: SEVEN_DAYS_IN_MILLISECONDS },
-    { ids: [128567, 128568], story: "A Legend Among Ratkind (Living Story)", timer: 2 * MILLISECONDS_IN_DAY },
-    { ids: [237941, 237940], story: "Attending to a Matter at Home", timer: MILLISECONDS_IN_DAY }, //missing id for 'introduce your friend'
-    { ids: [245936, 245568, 245563], story: "The Master's Departure", timer: MILLISECONDS_IN_DAY },
-    { ids: [40919], story: "A Raven's triumphant return!", timer: MILLISECONDS_IN_DAY },
-    { ids: [], story: "An Invitation from the Efficient Commissioner", timer: MILLISECONDS_IN_DAY }, //missing ids
-    { ids: [260678], story: "A Regimental Rose", timer: MILLISECONDS_IN_DAY },
-    { ids: [260398], story: "A Missive, on a Rose", timer: MILLISECONDS_IN_DAY },
-    { ids: [240114], story: "An Invitation From Mister Hearts", timer: MILLISECONDS_IN_DAY },
-    { ids: [266863, 266862, 266860, 266864, 266865, 266866], story: "Oenophilic Ardour", timer: MILLISECONDS_IN_DAY },
-    { ids: [250116], story: "A Minting, Completed", timer: MILLISECONDS_IN_DAY },
-    { ids: [238693], story: "Your Whitsun Egg is Hatching!", timer: 23 * MILLISECONDS_IN_HOUR },
-    { ids: [235720], story: "A Clean Escape?", timer: MILLISECONDS_IN_DAY }
-]
+const MISC_LIVING_STORIES: Record<string, LivingStory> = {
+    "livingStoryBookBoon": { ids: [263646, 263647, 263648, 263645], story: "Another Volume for the Library", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    "livingStoryAstronomerMap": {  ids: [9650, 9651], story: "The Enterprising Astronomer's Gift", timer: 2 * MILLISECONDS_IN_DAY },
+    "livingStoryNavalOfficerMap": { ids: [9448, 9449], story: "The Disgruntled Naval Officer's Gift", timer: 2 * MILLISECONDS_IN_DAY },
+    "livingStoryClayManMap": { ids: [9647, 9648], story: "The Masked Clay Man's Gift", timer: 2 * MILLISECONDS_IN_DAY },
+    "livingStoryMrCups": { ids: [235721], story: "An Invitation from Mr Cups", timer: MILLISECONDS_IN_DAY },
+    "livingStoryMrHearts": { ids: [240193, 240200], story: "Mr Hearts' Congratulations", timer: MILLISECONDS_IN_DAY },
+    "livingStoryMarigold": { ids: [244394, 244395], story: "A Missive from Marigold", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    "livingStoryHighwayman": { ids: [247112, 247109, 247111, 247511, 247110], story: "The Fate of the Clay Highwayman (Living Story)", timer: MILLISECONDS_IN_DAY },
+    "livingStoryDilmun": { ids: [9756, 9757, 9758], story: "A meeting of the Dilmun Club", timer: MILLISECONDS_IN_DAY },
+    "livingStoryCalmer": { ids: [5636, 5639, 5637, 5638, 5634, 5635, 5632, 5633], story: "You're calmer now.", timer: MILLISECONDS_IN_HOUR }, //todo 5498 and 5485, but only on a rare success
+    "livingStoryTutorial": { ids: [4401, 258747, 4402, 119565], story: "Tutorial: Social Engagements", timer: MILLISECONDS_IN_DAY },
+    "livingStoryRoseInBurrow": { ids: [260400, 260679, 260401], story: "The Rose in Burrow", timer: 2 * MILLISECONDS_IN_DAY },
+    "livingStoryClara": { ids: [238909, 238944, 238122, 238073, 238077, 238078, 238072, 238076, 238075, 238079], story: "Weeks have passed since you last saw Clara", timer: MILLISECONDS_IN_DAY },
+    "livingStoryPristineEgg": { ids: [41166, 119377], story: "Your Pristine Raven's Egg is hatching!", timer: MILLISECONDS_IN_DAY },
+    "livingStoryNextBout": { ids: [239468, 239462], story: "Waiting for the Next Bout", timer: MILLISECONDS_IN_DAY },
+    "livingStoryAirship": { ids: [265642, 265643], story: "Your Airship, under construction", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    "livingStoryRatkind": { ids: [128567, 128568], story: "A Legend Among Ratkind (Living Story)", timer: 2 * MILLISECONDS_IN_DAY },
+    "livingStoryMatterAtHome": { ids: [237941, 237940], story: "Attending to a Matter at Home", timer: MILLISECONDS_IN_DAY }, //missing id for 'introduce your friend'
+    "livingStoryDeparture": { ids: [245936, 245568, 245563], story: "The Master's Departure", timer: MILLISECONDS_IN_DAY },
+    "livingStoryRaven": { ids: [40919], story: "A Raven's triumphant return!", timer: MILLISECONDS_IN_DAY },
+    "livingStoryEfficient": { ids: [], story: "An Invitation from the Efficient Commissioner", timer: MILLISECONDS_IN_DAY }, //missing ids
+    "livingStoryRegimental": { ids: [260678], story: "A Regimental Rose", timer: MILLISECONDS_IN_DAY },
+    "livingStoryMissive": { ids: [260398], story: "A Missive, on a Rose", timer: MILLISECONDS_IN_DAY },
+    "livingStoryInvitation": { ids: [240114], story: "An Invitation From Mister Hearts", timer: MILLISECONDS_IN_DAY },
+    "livingStoryArdour": { ids: [266863, 266862, 266860, 266864, 266865, 266866], story: "Oenophilic Ardour", timer: MILLISECONDS_IN_DAY },
+    "livingStoryMinting": { ids: [250116], story: "A Minting, Completed", timer: MILLISECONDS_IN_DAY },
+    "livingStoryWhitsun": { ids: [238693], story: "Your Whitsun Egg is Hatching!", timer: 23 * MILLISECONDS_IN_HOUR },
+    "livingStoryEscape": { ids: [235720], story: "A Clean Escape?", timer: MILLISECONDS_IN_DAY },
+    "livingStoryChristmas": { ids: [262517], story: "Dissipating Goodwill", timer: 2 * SEVEN_DAYS_IN_MILLISECONDS }
+}
 
 const MESSAGE_STRINGS = {
     KHANATE_MESSAGE: "You can pick up a new report from your agent",
     BALMORAL_MESSAGE: "Things change in Balmoral. The railway brings trade, resources, opportunities.",
     TTH_MESSAGE: "Memory fades; pain departs; rewards arrive!",
-    //CHIMES_MESSAGE: "The apparently illustrious voting body to which you belong",
 } as const;
 
 const DAYS = { SUNDAY: 0, MONDAY: 1, TUESDAY: 2, WEDNESDAY: 3, THURSDAY: 4, FRIDAY: 5, SATURDAY: 6 };
@@ -178,12 +191,13 @@ type WorldQualityName = typeof worldQualityNames[number];
 
 
 interface RatItem { id: number, name: string, price: number; };
-interface WorldQuality { name: string, result?: WikiResult, resetDay: number; }
+interface WorldQuality { name: string, result?: WikiResult, resetDay: number; blindspot?: boolean}
 interface CharacterQuality { id: number, value: number, name?: string; }
 
-const timekeeperSettings = ["KHANATE_MESSAGE", "BALMORAL_MESSAGE", "TTH_MESSAGE", "CHIMES_MESSAGE", "highestBDR", "nextTthIsoString",
-    "nextKhanateISOString", "nextBalmoralISOString", "nextWaswoodISOString", "nextWellspringISOString", "worldQualities"];
-
+const timekeeperSettings = ["KHANATE_MESSAGE", "BALMORAL_MESSAGE", "TTH_MESSAGE", "highestBDR", "nextTthISOString",
+    "nextKhanateISOString", "nextBalmoralISOString", "nextWaswoodISOString", "nextWellspringISOString", "nextChimesISOString", "worldQualities"];
+//todo update stuff. When the wiki gives a new world quality, update everything that uses it. Refresh all 'hours remaining' text. Update item quantities.
+//add panels when you get a boon. Remove panels when they expire. etc.
 export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAware {
 
     private currentSettings!: SettingsObject;
@@ -191,7 +205,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     private displayTimekeeping = true;
     private backupMoments: Map<string, string> = new Map();
     private waitingOnApi = false;
-
+    private activeLivingStories: Record<string, string> = {};
     private worldQualities: Record<WorldQualityName, WorldQuality> = {
         SAINTLY_DEMAND: { name: "Saintly Demand", result: undefined, resetDay: DAYS.MONDAY },
         SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: DAYS.MONDAY },
@@ -230,6 +244,9 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         FLEETING_RECOLLECTIONS: { id: 107562, value: 0 },
         PARABOLAN_COMPANY: { id: 142527, value: 0 },
         PARABOLAN_RAVAGES: { id: 141647, value: 0 },
+        PARABOLAN_CAMPAIGN: { id: 142468, value: 0 },
+        PARABOLAN_WAR_STAGE: {id: 142455, value: 0},
+        PARABOLAN_WAR_ADVANCE: {id: 142452, value: 0},
         TRUE_DENIZEN: { id: 140753, value: 0 },
         CONSEQUENCE: { id: 140799, value: 0 },
         ROUTE_BONE_MARKET: { id: 140958, value: 0 },
@@ -248,6 +265,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         RADIANT_BEARING: { id: 145010, value: 0 },
         HALLOW_VESSEL: { id: 145013, value: 0 },
         VOTES_CAST: { id: 144587, value: 0 },
+        VOTES_ALLOWED: {id: 144584, value: 0},
         JENNYS_WIMPLE: { id: 128206, value: 0, name: "Sinning Jenny's Forsaken Wimple" },
         ANON_WHITE_MASK: { id: 140461, value: 0, name: "Anonymous White Mask, Zee-Stained and Mildewy" },
         VISCOUNT_COLLAR: { id: 141787, value: 0, name: "Viscount's Bejewelled Collar" },
@@ -286,9 +304,11 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     };//these will not always be up to date
     //gamestate.onEquipmentChange returns their values before the change, which isn't super helpful
 
-    private i = 0; //i = 0 resets settings, for testing purposes
-
     constructor() {
+        /*const oldSettings = {
+            "nextTthIsoString": null, "nextKhanateIsoString": null, "nextBalmoralIsoString": null, "nextWaswoodIsoString": null, "CHIMES_MESSAGE": null,
+            "nextWellspringIsoString": null, "nextChimesIsoString": null, "nextKhanateMoment": null, "nextBalmoralMoment": null, "boons_and_burdens": null};
+        sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: oldSettings})*/
         window.addEventListener("message", (event) => {
             if (event.data.action === MSG_TYPE_WIKI_API_RESPONSE) {
                 const results: Map<string, WikiResult> = new Map(Object.entries(JSON.parse(event.data.results)));
@@ -306,11 +326,6 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                     sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
                 }
                 this.waitingOnApi = false;
-            }
-        });
-        window.addEventListener("message", (event) => {
-            if (event.data.action === MSG_TYPE_TTH_API_RESPONSE) {
-                sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextTthIsoString: event.data.result } });
             }
         });
     }
@@ -384,7 +399,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             timekeeperPanel.appendChild(this.buildTthPanel());
         }
         if (this.currentSettings.wellspring || this.currentSettings.waswood || this.currentSettings.house_of_chimes || this.currentSettings.balmoral ||
-            this.currentSettings.khanate || this.currentSettings.boons_and_burdens) {
+            this.currentSettings.khanate || this.currentSettings.chimes_boons) {
 
             timekeeperPanel.appendChild(this.buildLivingStoryPanel());
         }
@@ -459,7 +474,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
 
         const tthComingItem = document.createElement("li");
         tthComingItem.id = "tth-remaining-item";
-        const remainingText = this.calculateRemainingTimeFromIsoOrNumberString(this.currentSettings.nextTthIsoString);
+        const remainingText = this.calculateRemainingTimeFromIsoOrNumberString(this.currentSettings.nextTthISOString);
         tthComingItem.textContent = `Time the Healer cometh ${remainingText}`;
         tthPanel.appendChild(tthComingItem);
         const losingNotability = document.createElement("li");
@@ -563,17 +578,20 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             }
         }
         if (this.currentSettings.parabolan_ravages && this.characterQualities.PARABOLAN_COMPANY.value) {
-            if (this.characterQualities.PARABOLAN_RAVAGES.value < 10) {
-                paraRavages.textContent = "Your Parabolan Ravages is below 10";
-            }//todo something like if(active campaign and ravages < 10) or (no campaign and ravages 0) tell me
+            if (this.characterQualities.PARABOLAN_RAVAGES.value < 10 && this.characterQualities.PARABOLAN_CAMPAIGN.value) {
+                paraRavages.textContent = "Your Parabolan Ravages is below 10, you can continue your campaign.";
+            }//if(active campaign and ravages < 10) or (no campaign and ravages 0)
+            else if (this.characterQualities.PARABOLAN_RAVAGES.value === 0) {
+                paraRavages.textContent = "Your Parabolan Ravages is 0, you can begin a campaign.";
+            }
         }
         if (this.currentSettings.ambition_reward && this.characterQualities.TRUE_DENIZEN.value) {
             if (this.characterQualities.CONSEQUENCE.value === 4) {
                 ambitionItem.textContent = "You can collect your monthly Ambition reward";
             } else {
                 const weeksRemaining = 3 - this.characterQualities.CONSEQUENCE.value;
-                if (this.currentSettings.nextTthIsoString) {
-                    const nextTthDate = new Date(this.currentSettings.nextTthIsoString as string);
+                if (this.currentSettings.nextTthISOString) {
+                    const nextTthDate = new Date(this.currentSettings.nextTthISOString as string);
                     const ambitionDate = new Date(nextTthDate.getTime() + weeksRemaining * SEVEN_DAYS_IN_MILLISECONDS);
                     const ambitionText = this.calculateRemainingTime(ambitionDate.getTime());
                     ambitionItem.textContent = `Your ambition reward will be available in ${ambitionText}`;
@@ -592,7 +610,6 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             const bureaucraticAdvantageAvailable = this.characterQualities.RAILWAY_VENTURE.value > 0 &&
                 this.characterQualities.RAILWAY_VENTURE.value < 121 &&
                 this.characterQualities.BUREAUCRATIC_ADVANTAGE.value === 0;
-            //this should return true if the quality = 0, or if the quality is not set (which it probably shouldn't be if it's 0)
 
             const meetingAvailable = this.characterQualities.DELAY_NEXT_MEETING.value === 0;
             if (bureaucraticAdvantageAvailable) {
@@ -606,7 +623,15 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                     boardMeetingItem.textContent = "You can call a GHR Board meeting.";
                 }
             }
+            if (this.characterQualities.PARABOLAN_COMPANY.value && (bureaucraticAdvantageAvailable || meetingAvailable)) {
+                if (this.characterQualities.PARABOLAN_WAR_ADVANCE.value === 0 &&
+                        this.characterQualities.PARABOLAN_CAMPAIGN.value > 0 &&
+                        this.characterQualities.PARABOLAN_CAMPAIGN.value < 7 &&
+                        this.characterQualities.PARABOLAN_RAVAGES.value < 3) {
 
+                    boardMeetingItem.textContent += " Now would be a good time to send your train to fight in Parabola."
+                    }
+            }
         }
         if (this.currentSettings.visit_hell && this.characterQualities.APPROACHING_HELL.value === 777) {
             if (!this.characterQualities.VISITOR_TO_HELL.value && !this.characterQualities.FLOWER_FROM_HELL.value) {
@@ -619,13 +644,16 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             }
         }
         if (this.currentSettings.ecdysis && this.characterQualities.ECDYSIS.value) {
+            const sharpened = this.currentState.getQuality("Boon", "Sharpened");
             if (!(this.characterQualities.WIDE_EYED.value ||
-                //this.characterQualities.SHARPENED) ||
+                sharpened || //this.characterQualities.SHARPENED) ||
                 this.characterQualities.PARTIALLY_BONELESS.value ||
                 this.characterQualities.RADIANT_BEARING.value ||
                 this.characterQualities.HALLOW_VESSEL.value)) {
 
                 ecdysisItem.textContent = "You can get a boon from Ecdysis.";
+            } else {
+                ecdysisItem.textContent = "Your Ecdysis boon will end when TtH arrives.";
             }
         }
         if (this.currentSettings.hearts_game) {
@@ -640,6 +668,10 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             if (!chapmansItem) {
                 return;
             }
+        }
+        if (this.worldQualities.THE_SEASON_IN_SOUP.blindspot) {
+            chapmansItem.textContent = `The Season in Soup World Quality is changing now, which can lead to inaccuracies. Try again in around 30 minutes.`;
+            return;
         }
         //if you can do something, and haven't maxed your acquaintance yet
         if (this.characterQualities.WHISPERS.value && this.characterQualities.ACQUAINTANCE_MRS_CHAPMAN.value < 4) {
@@ -669,7 +701,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                             }
                     }
                 } else {
-                    chapmansItem.textContent = "Could not determine if you can visit Mrs Chapman."
+                    chapmansItem.textContent = "Could not determine if you can visit Mrs Chapman.";
                 }
             }
         }
@@ -681,6 +713,10 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             if (!heartsGameItem) {
                 return;
             }
+        }
+        if (this.worldQualities.HEARTS_GAME_SEASON.blindspot) {
+            heartsGameItem.textContent = `The Hearts' Game Season World Quality is changing now, which can lead to inaccuracies. Try again in around 30 minutes.`;
+            return;
         }
         const season = this.worldQualities.HEARTS_GAME_SEASON.result?.value;
         if (season) {
@@ -802,7 +838,22 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         }
 
         if (this.currentSettings.house_of_chimes) {
-            ;
+            const chimesItem = document.createElement("li");
+            chimesItem.id = "chimes-item";
+            if (this.characterQualities.VOTES_ALLOWED.value) {
+                const cast = this.characterQualities.VOTES_CAST.value;
+                const remaining = this.characterQualities.VOTES_ALLOWED.value - cast;
+                if (remaining) {
+                    chimesItem.textContent = `You have ${remaining} votes remaining at the House of Chimes.`;
+                } else {
+                    chimesItem.textContent = `All House of Chimes votes used.`;
+                }
+                if (this.currentSettings.nextChimesISOString) {
+                    chimesItem.textContent += ` Votes will refresh ${this.calculateRemainingTimeFromIsoOrNumberString(this.currentSettings.nextChimesISOString)}`;
+                } else {
+                    chimesItem.textContent += ` Could not determine when votes will refresh.`
+                }
+            }
         }
 
         if (this.currentSettings.balmoral && this.characterQualities.BALMORAL_CASTELLAN) {
@@ -826,8 +877,21 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
 
             livingStoryPanel.appendChild(khanateDiv);
         }
-        if (this.currentSettings.boons_and_burdens) {
-            ;
+        if (this.currentSettings.chimes_boons) {
+            const chimesBoons = document.createElement("div");
+            for (const [id, boonName] of Object.entries(CHIMES_BOONS_BRANCHES)) {
+                if (this.currentSettings[boonName]) {
+                    const expiryDate = this.currentSettings[boonName];
+                    if (new Date(expiryDate as string).getTime() > new Date().getTime()) {
+                        const boonItem = document.createElement("li");
+                        boonItem.id = `chimes-item-${id}`;
+                        const remaining = this.calculateRemainingTimeFromIsoOrNumberString(expiryDate);
+                        boonItem.textContent = `${boonName} will expire ${remaining}`;
+                        chimesBoons.appendChild(boonItem);
+                    }
+                }
+            }
+            livingStoryPanel.appendChild(chimesBoons);
         }
 
         return livingStoryPanel;
@@ -840,6 +904,10 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             return failure;
         }
         const waswoodPanel = document.createElement("div");
+        if (this.worldQualities.SEASON_OF_THE_SACROBOSCAN_CALENDAR.blindspot) {
+            waswoodPanel.textContent = `The Season of the Sacroboscan Calendar World Quality is changing now, which can lead to inaccuracies. Try again in around 30 minutes.`;
+            return waswoodPanel;
+        }
         const waswoodHeader = document.createElement("h4");
         waswoodHeader.textContent = "Waswood";
         waswoodPanel.appendChild(waswoodHeader);
@@ -847,7 +915,17 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         waswoodList.classList.add("items", "items--list");
         if (this.characterQualities.JAUNT_WASWOOD.value) {
             const waswoodBlocked = document.createElement("li");
-            waswoodBlocked.textContent = "Waswood blocked for a week."; //todo living story update
+            if (this.currentSettings.nextWaswoodISOString) {
+                const unblocked = new Date(this.currentSettings.nextWaswoodISOString as string);
+                if (unblocked.getTime() > new Date().getTime()) {
+                    const remaining = this.calculateRemainingTime(unblocked.getTime());
+                    waswoodBlocked.textContent = `Waswood will open ${remaining}`;
+                } else {
+                    waswoodBlocked.textContent = `Waswood will open in 0 to 7 days.`;
+                }
+            } else {
+                waswoodBlocked.textContent = `Waswood will open in 0 to 7 days.`;
+            }
             waswoodList.appendChild(waswoodBlocked);
         }
         let startAt = Number(this.worldQualities.SEASON_OF_THE_SACROBOSCAN_CALENDAR.result.value);
@@ -947,7 +1025,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     }
 
     createSettingsModal() {
-        //todo repurpose this into a general options modal
+        //todo add options to manually enter any recurring time (I think this can ignore the one-off living stories)
         if (document.getElementById("timekeeper-modal")) {
             return;
         }
@@ -1001,12 +1079,11 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         khanateConfirm.style.padding = "2px 5px";
 
         const tthButton = document.createElement("button");
-        tthButton.textContent = "Refresh TTH timer";
+        tthButton.textContent = "Clear TTH timer";
         tthButton.classList.add("js-tt", "button", "button--primary", "button--go");
         tthButton.style.padding = "2px 5px";
         tthButton.addEventListener("click", () => {
-            sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextTthIsoString: "" } });
-            sendToServiceWorker(MSG_TYPE_TTH_API_CALL, { authToken: "" });
+            sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextTthISOString: null } });
         });
 
         timekeeperModal.appendChild(modalWrapperDiv);
@@ -1063,6 +1140,10 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
 
     buildBoneMarketPanel(): HTMLElement {
         const boneMarketPanel = document.createElement("div");
+        if (this.worldQualities.BONE_MARKET_FLUCTUATIONS.blindspot) {
+            boneMarketPanel.textContent = `The Bone Market's World Qualities are changing now, which can lead to inaccuracies. Try again in around 30 minutes.`;
+            return boneMarketPanel;
+        }
         const boneMarketHeader = document.createElement("h4");
         boneMarketHeader.textContent = "Bone Market";
         const boneMarketList = document.createElement("ul");
@@ -1080,8 +1161,8 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         const currentExhaustion = this.characterQualities.BONE_MARKET_EXHAUSTION.value;
         const exhaustionItem = document.createElement("li");
         exhaustionItem.textContent = `You have ${currentExhaustion} exhaustion`;
-        if (this.currentSettings.nextTthIsoString) {
-            exhaustionItem.textContent += `, reducing by 4 ${this.calculateRemainingTimeFromIsoOrNumberString(this.currentSettings.nextTthIsoString)}`;
+        if (this.currentSettings.nextTthISOString) {
+            exhaustionItem.textContent += `, reducing by 4 ${this.calculateRemainingTimeFromIsoOrNumberString(this.currentSettings.nextTthISOString)}`;
         }
 
         boneMarketPanel.appendChild(boneMarketHeader);
@@ -1095,6 +1176,10 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
 
     buildRatMarketPanel(): HTMLElement {
         const ratMarketPanel = document.createElement("div");
+        if (this.worldQualities.SAINTLY_DEMAND.blindspot) {
+            ratMarketPanel.textContent = `The Rat Market's World Qualities are changing now, which can lead to inaccuracies. Try again in around 30 minutes.`;
+            return ratMarketPanel;
+        }
         const ratMarketHeader = document.createElement("h4");
         ratMarketHeader.textContent = "Rat Market";
         ratMarketPanel.appendChild(ratMarketHeader);
@@ -1207,8 +1292,12 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         if (document.getElementById("main") == null) {
             return false;
         }
-        if (!this.currentSettings || !this.currentState) {
-            console.log("returning false");
+        if (!this.currentSettings) {
+            console.log("no settings");
+            return false;
+        }
+        if (!this.currentState) {
+            console.log("no state");
             return false;
         }
         return document.getElementById("timekeeper-panel") == null;
@@ -1216,21 +1305,11 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
 
     applySettings(settings: SettingsObject): void {
         this.currentSettings = settings;
-        if (this.i === 0) {
-            //this.currentSettings.worldQualities = ""
-            this.currentSettings.nextTthIsoString = "";
-            delete this.currentSettings.TTH_MSG;
-            delete this.currentSettings.foo;
-            delete this.currentSettings.nextTthMoment;
-            delete this.currentSettings.tthMoment;
-            sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
-            this.i = 1;
-        } //clears saved qualities
         this.displayTimekeeping = this.currentSettings.display_timekeeping as boolean;
-        if (this.displayTimekeeping && this.currentSettings.nextTthIsoString) {
+        if (this.displayTimekeeping && this.currentSettings.nextTthISOString) {
             const tthListItem = document.getElementById("tth-remaining-item");
             if (tthListItem) {
-                const remainingText = this.calculateRemainingTimeFromIsoOrNumberString(this.currentSettings.nextTthIsoString);
+                const remainingText = this.calculateRemainingTimeFromIsoOrNumberString(this.currentSettings.nextTthISOString);
                 tthListItem.textContent = `Time the Healer cometh ${remainingText}`;
             }
         }
@@ -1244,7 +1323,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         Object.values(this.worldQualities).forEach((quality) => {
             if (!quality.result) {
                 missingWorldQualities.push(quality.name);
-            }//todo if quality.time + something > now, add them to missing to get an update
+            }
         });
 
         if (missingWorldQualities.length > 0 && !this.waitingOnApi) {
@@ -1253,6 +1332,11 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             sendToServiceWorker(MSG_TYPE_WIKI_API_CALL, { missingQualities: qualityString });
             this.waitingOnApi = true;
         }
+        for (const key of Object.keys(MISC_LIVING_STORIES)) {
+            if (this.currentSettings[key]) {
+                this.activeLivingStories[key] = this.currentSettings[key] as string;
+            }
+        }
     }
 
     removeOutdatedWorldQualities() {
@@ -1260,16 +1344,18 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         for (const [name, quality] of Object.entries(this.worldQualities)) {
             if (quality.result) {
                 const retrievedTime = new Date(quality.result.timestamp);
-                let changeTime = this.getNextDay(retrievedTime, quality.resetDay);
+                let changeTime;
                 if (name === "HEARTS_GAME_SEASON") {
-                    const changeDate = new Date(changeTime);
-                    while (changeDate.getUTCDate() > 7) {
-                        changeDate.setUTCDate(changeDate.getUTCDate() + 7);
-                    }
-                    changeTime = changeDate.getTime();
+                    changeTime = this.getNextHeartsGameReset(retrievedTime).getTime();
+                } else {
+                    changeTime = this.getNextDay(retrievedTime, quality.resetDay);
                 }
                 if (now.getTime() > changeTime + 30 * MILLISECONDS_IN_MINUTE) { //wiki takes about 15 minutes to update - todo add a notification when this happens
                     quality.result = undefined;
+                } else if (now.getTime() > changeTime && now.getTime() < changeTime + 30 * MILLISECONDS_IN_MINUTE) {
+                    quality.blindspot = true;
+                } else {
+                    quality.blindspot = false;
                 }
             }
 
@@ -1282,7 +1368,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 return;
             }
 
-            if (response.messages && KHANATE_REPORT_BRANCH_IDS.includes(request.branchId)) {
+            if (KHANATE_REPORT_BRANCH_IDS.includes(request.branchId)) {
                 const nextKhanateMoment = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
                 sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextKhanateISOString: new Date(nextKhanateMoment).toISOString() } });
             }
@@ -1295,12 +1381,21 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 const nextWellspringMoment = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
                 sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextWellspringISOString: new Date(nextWellspringMoment).toISOString() } });
             }
-
             if (WASWOOD_CALENDAR_BRANCH_IDS.includes(request.branchId)) {
                 const nextWaswoodMoment = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
                 sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextWaswoodISOString: new Date(nextWaswoodMoment).toISOString() } });
             }
-
+            if (CHIMES_BOONS_BRANCH_IDS.includes(request.branchId)) {
+                const boonExpires = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
+                const boonName = CHIMES_BOONS_BRANCHES[request.branchId]
+                sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { [boonName]: new Date(boonExpires).toISOString() } });
+            }
+            for (const [title, livingStory] of Object.entries(MISC_LIVING_STORIES)) {
+                if (livingStory.ids.includes(request.branchId)) {
+                    const expiryTime = new Date().getTime() + livingStory.timer + EVENT_TRIGGER_LEEWAY;
+                    sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { [title]: new Date(expiryTime).toISOString() } });
+                }
+            }
             return;
         });
         interceptor.onResponseReceived("/api/messages", (_, response) => {
@@ -1315,7 +1410,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                         iter++;
                     }
                     if (nextChimesVote > now) {
-                        data.set("nextChimesIsoString", new Date(nextChimesVote).toISOString());
+                        data.set("nextChimesISOString", new Date(nextChimesVote).toISOString());
                     }
                 } else {
                     for (const [key, messageType] of Object.entries(MESSAGE_STRINGS)) {
@@ -1334,11 +1429,8 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         });
         interceptor.onResponseReceived("/api/settings/timethehealer", (_, response) => {
             if (response.dateTimeToExecute) {
-                sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextTthIsoString: response.dateTimeToExecute } });
+                sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextTthISOString: response.dateTimeToExecute } });
             }
-        });
-        interceptor.onTokenChanged((_, token) => {
-            sendToServiceWorker(MSG_TYPE_TTH_API_CALL, { authToken: token });
         });
     }
 }

@@ -2,7 +2,7 @@ import { IMutationAware, IStateAware } from "./base";
 import { SettingsObject } from "../settings";
 import { GameState, GameStateController } from "../game_state";
 import { getSingletonByClassName } from "../utils";
-import { MSG_TYPE_SAVE_SETTINGS } from "../constants";
+import { MSG_TYPE_SAVE_SETTINGS, MSG_TYPE_UPDATE_SETTINGS } from "../constants";
 import { sendToServiceWorker } from "../comms";
 
 // Mapping of favour name to its respective image
@@ -44,6 +44,27 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             this.populateDefaultTrackedQualities();
         } else {
             this.trackedQualities = new Map(Object.entries(JSON.parse(temp)));
+            //if a quality is cleared (not like you have a thing, then sell it, but removed or set to 0) it seems to be missed by onQualityChanged
+            //so settings can have 'tracking this, it's 5', and if you look it up in state, no result (because it's gone,  and everything that's 0 is gone)
+            //and then when something makes the game realise it's not there, it's still not saved to settings, so it comes back on refresh.
+            if (this.currentState) {
+                let dirty = false;
+                for (const [key, quality] of this.trackedQualities) {
+                    const fromState = this.currentState.getQuality(quality.category, key);
+                    if (fromState) {
+                        if (fromState.level !== quality.currentValue) {
+                            quality.currentValue = fromState.level;
+                            dirty = true;
+                        }
+                    } else if(quality.currentValue) {
+                        quality.currentValue = 0;
+                        dirty = true;
+                    }
+                }
+                if (dirty) {
+                    sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { trackedQualities: JSON.stringify(Object.fromEntries(this.trackedQualities))}})
+                }
+            }
         }
         this.displayQualityTracker = this.currentSettings.display_quality_tracker as boolean;
     }
@@ -51,6 +72,8 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
     linkState(state: GameStateController): void {
         const stringSorter = (s1: string, s2: string) => (s1 > s2 ? 1 : -1);
         state.onCharacterDataLoaded((g) => {
+        //todo I thought this only happened on first load, but it happens every tab change (eg from story to possessions to myself)
+        //so I can probably put if(this.currentState){return}, but I don't know for sure if anything will be missed then. Need to check.
             this.currentState = g;
             const unsortedQualityNames: string[] = [];
             for (const quality of g.enumerateQualities()) {
@@ -94,7 +117,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 this.qualityNames = this.qualityNames.sort(stringSorter);
                 this.qualityNameAndCategory.set(quality.name, quality.category);
 
-                const qualityList = document.getElementById("quality-list");
+                const qualityList = document.getElementById("quality-list");//todo avoid dupes, sort
                 const option = document.createElement("option");
                 option.value = quality.name;
                 option.text = quality.name;

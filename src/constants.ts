@@ -9,8 +9,6 @@ const MSG_TYPE_UPDATE_SETTINGS = `${EXTENSION_ID}_updateSettings`;
 const MSG_TYPE_CURRENT_SETTINGS = `${EXTENSION_ID}_currentSettings`;
 const MSG_TYPE_WIKI_API_CALL = `${EXTENSION_ID}_callWiki`;
 const MSG_TYPE_WIKI_API_RESPONSE = `${EXTENSION_ID}_wikiResponse`;
-const MSG_TYPE_TTH_API_CALL = `${EXTENSION_ID}_getTth`;
-const MSG_TYPE_TTH_API_RESPONSE = `${EXTENSION_ID}_tthResponse`;
 
 
 const SETTINGS_SCHEMA: SettingsSchema = [
@@ -322,8 +320,8 @@ const SETTINGS_SCHEMA: SettingsSchema = [
                 description: "Notify if a reward from the Khanate is available.",
                 default: true,
             },
-            boons_and_burdens: {
-                description: "Notify when boons and burdens expire.",
+            chimes_boons: {
+                description: "Notify when boons from the House of Chimes will expire.",
                 default: true,
             },
         }
@@ -455,8 +453,6 @@ export {
     MSG_TYPE_CURRENT_SETTINGS,
     MSG_TYPE_WIKI_API_CALL,
     MSG_TYPE_WIKI_API_RESPONSE,
-    MSG_TYPE_TTH_API_CALL,
-    MSG_TYPE_TTH_API_RESPONSE,
     SETTINGS_SCHEMA,
     COMMUNITY_SNIPPETS,
 };
