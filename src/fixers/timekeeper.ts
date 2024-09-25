@@ -1128,7 +1128,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             if (startDate.getUTCHours() < 11) {
                 //don't change the date
             } else {
-                nextResetDay.setUTCDate(nextResetDay.getUTCDate() + 7);
+                nextResetDay.setUTCDate(startDate.getUTCDate() + 7);
                 //next reset is nearly 7 days away
             }
         } else {
