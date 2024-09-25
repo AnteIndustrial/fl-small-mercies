@@ -72,8 +72,6 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
     linkState(state: GameStateController): void {
         const stringSorter = (s1: string, s2: string) => (s1 > s2 ? 1 : -1);
         state.onCharacterDataLoaded((g) => {
-        //todo I thought this only happened on first load, but it happens every tab change (eg from story to possessions to myself)
-        //so I can probably put if(this.currentState){return}, but I don't know for sure if anything will be missed then. Need to check.
             this.currentState = g;
             const unsortedQualityNames: string[] = [];
             for (const quality of g.enumerateQualities()) {
@@ -118,10 +116,27 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 this.qualityNameAndCategory.set(quality.name, quality.category);
 
                 const qualityList = document.getElementById("quality-list");//todo avoid dupes, sort
-                const option = document.createElement("option");
-                option.value = quality.name;
-                option.text = quality.name;
-                qualityList?.appendChild(option);
+                let found = false;
+                if (qualityList) {
+                    for (const existingOption of qualityList.getElementsByClassName("option") as HTMLCollectionOf<HTMLOptionElement>) {
+                        if (existingOption.value === quality.name) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        const option = document.createElement("option");
+                        option.value = quality.name;
+                        option.text = quality.name;
+                        const nextElementName = this.qualityNames[this.qualityNames.indexOf(quality.name) + 1];
+                        const nextElement = document.getElementById(`option-${nextElementName}`);
+                        if (nextElement) {
+                            qualityList.insertBefore(option, nextElement);
+                        } else {
+                            qualityList.appendChild(option);
+                        }
+                    }
+                }
             }
             if (this.trackedQualities.has(quality.name)) {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -545,6 +560,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             const option = document.createElement("option");
             option.value = qualityName;
             option.text = qualityName;
+            option.id = `option-${qualityName}`;
             dataList.appendChild(option);
         }
         qualityPicker.appendChild(dataList);
