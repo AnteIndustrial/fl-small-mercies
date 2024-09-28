@@ -32,6 +32,9 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
     private qualityNames: string[] = [];
     private currentState?: GameState;
     private currentSettings!: SettingsObject;
+    //todo consider reworking all this to use quality ID rather than name
+    //the quality Advance! just moved from category progress to sidebartransient, which broke tracking for that quality
+    //presumably other qualities could move at any time, if the developers want them to
 
     constructor() {
         ;

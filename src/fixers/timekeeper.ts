@@ -8,6 +8,7 @@ import { sendToServiceWorker } from "../comms";
 import { WikiResult } from "../wiki";
 import { FLApiInterceptor } from "../api_interceptor";
 
+
 const MILLISECONDS_IN_MINUTE = 60 * 1000;
 const MILLISECONDS_IN_HOUR = 60 * MILLISECONDS_IN_MINUTE;
 const MILLISECONDS_IN_DAY = 24 * MILLISECONDS_IN_HOUR;
@@ -15,13 +16,13 @@ const SEVEN_DAYS_IN_MILLISECONDS = 7 * MILLISECONDS_IN_DAY;
 // Sometimes "living story" events do not trigger strictly on the hour,
 // so it is good to give them some leeway.
 const EVENT_TRIGGER_LEEWAY = 10 * MILLISECONDS_IN_MINUTE;
-const BALMORAL_GIFT_BRANCH_IDS = [243583, 243592, 243600];
-const KHANATE_REPORT_BRANCH_IDS = [250681];
-const WELLSPRING_BRANCH_IDS = [244785, 244786];
-const WASWOOD_CALENDAR_BRANCH_IDS = [254769, 254764, 254597, 254763, 254765, 254599, 254598, 254767, 254768, 234347, 254844, 254842, 234348, 254510, 254511, 224801, 254843];
-const CHIMES_BOONS_BRANCH_IDS = [261036, 261037, 261025, 261029, 261030, 261031, 261032, 261033, 261034, 261035];
+const BALMORAL_GIFT_BRANCH_IDS = [243583, 243592, 243600] as const;
+const KHANATE_REPORT_BRANCH_IDS = [250681] as const;
+const WELLSPRING_BRANCH_IDS = [244785, 244786] as const;
+const WASWOOD_CALENDAR_BRANCH_IDS = [254769, 254764, 254597, 254763, 254765, 254599, 254598, 254767, 254768, 234347, 254844, 254842, 234348, 254510, 254511, 224801, 254843] as const;
+const CHIMES_BOONS_BRANCH_IDS = [261036, 261037, 261025, 261029, 261030, 261031, 261032, 261033, 261034, 261035] as const;
 const CHIMES_BOONS_BRANCHES: Record<number, string> = {
-    261036: "A Remarkable Tolerance for Your Eccentric Behaviour" ,
+    261036: "A Remarkable Tolerance for Your Eccentric Behaviour",
     261037: "A Remarkable Reluctance to Observe Your Misdeeds",
     261025: "A Machiavellian Mien",
     261029: "A Pseudoscientific Seeming",
@@ -31,41 +32,45 @@ const CHIMES_BOONS_BRANCHES: Record<number, string> = {
     261033: "A Cryptoanatomical Celebrity",
     261034: "A Protean Prominence",
     261035: "A Zalty Ztature"
-}//calling Object.keys() on this returns string keys. swapping key/value means using values to look up key. Duplicating key list seemed the best option.
+} as const;//calling Object.keys() on this returns string keys. swapping key/value means using values to look up key. Duplicating key list seemed the best option.
 
-interface LivingStory { ids: number[], story: string, timer: number };
-
-const MISC_LIVING_STORIES: Record<string, LivingStory> = {
-    "livingStoryBookBoon": { ids: [263646, 263647, 263648, 263645], story: "Another Volume for the Library", timer: SEVEN_DAYS_IN_MILLISECONDS },
-    "livingStoryAstronomerMap": {  ids: [9650, 9651], story: "The Enterprising Astronomer's Gift", timer: 2 * MILLISECONDS_IN_DAY },
-    "livingStoryNavalOfficerMap": { ids: [9448, 9449], story: "The Disgruntled Naval Officer's Gift", timer: 2 * MILLISECONDS_IN_DAY },
-    "livingStoryClayManMap": { ids: [9647, 9648], story: "The Masked Clay Man's Gift", timer: 2 * MILLISECONDS_IN_DAY },
-    "livingStoryMrCups": { ids: [235721], story: "An Invitation from Mr Cups", timer: MILLISECONDS_IN_DAY },
-    "livingStoryMrHearts": { ids: [240193, 240200], story: "Mr Hearts' Congratulations", timer: MILLISECONDS_IN_DAY },
-    "livingStoryMarigold": { ids: [244394, 244395], story: "A Missive from Marigold", timer: SEVEN_DAYS_IN_MILLISECONDS },
-    "livingStoryHighwayman": { ids: [247112, 247109, 247111, 247511, 247110], story: "The Fate of the Clay Highwayman (Living Story)", timer: MILLISECONDS_IN_DAY },
-    "livingStoryDilmun": { ids: [9756, 9757, 9758], story: "A meeting of the Dilmun Club", timer: MILLISECONDS_IN_DAY },
-    "livingStoryCalmer": { ids: [5636, 5639, 5637, 5638, 5634, 5635, 5632, 5633], story: "You're calmer now.", timer: MILLISECONDS_IN_HOUR }, //todo 5498 and 5485, but only on a rare success
-    "livingStoryTutorial": { ids: [4401, 258747, 4402, 119565], story: "Tutorial: Social Engagements", timer: MILLISECONDS_IN_DAY },
-    "livingStoryRoseInBurrow": { ids: [260400, 260679, 260401], story: "The Rose in Burrow", timer: 2 * MILLISECONDS_IN_DAY },
-    "livingStoryClara": { ids: [238909, 238944, 238122, 238073, 238077, 238078, 238072, 238076, 238075, 238079], story: "Weeks have passed since you last saw Clara", timer: MILLISECONDS_IN_DAY },
-    "livingStoryPristineEgg": { ids: [41166, 119377], story: "Your Pristine Raven's Egg is hatching!", timer: MILLISECONDS_IN_DAY },
-    "livingStoryNextBout": { ids: [239468, 239462], story: "Waiting for the Next Bout", timer: MILLISECONDS_IN_DAY },
-    "livingStoryAirship": { ids: [265642, 265643], story: "Your Airship, under construction", timer: SEVEN_DAYS_IN_MILLISECONDS },
-    "livingStoryRatkind": { ids: [128567, 128568], story: "A Legend Among Ratkind (Living Story)", timer: 2 * MILLISECONDS_IN_DAY },
-    "livingStoryMatterAtHome": { ids: [237941, 237940], story: "Attending to a Matter at Home", timer: MILLISECONDS_IN_DAY }, //missing id for 'introduce your friend'
-    "livingStoryDeparture": { ids: [245936, 245568, 245563], story: "The Master's Departure", timer: MILLISECONDS_IN_DAY },
-    "livingStoryRaven": { ids: [40919], story: "A Raven's triumphant return!", timer: MILLISECONDS_IN_DAY },
-    "livingStoryEfficient": { ids: [], story: "An Invitation from the Efficient Commissioner", timer: MILLISECONDS_IN_DAY }, //missing ids
-    "livingStoryRegimental": { ids: [260678], story: "A Regimental Rose", timer: MILLISECONDS_IN_DAY },
-    "livingStoryMissive": { ids: [260398], story: "A Missive, on a Rose", timer: MILLISECONDS_IN_DAY },
-    "livingStoryInvitation": { ids: [240114], story: "An Invitation From Mister Hearts", timer: MILLISECONDS_IN_DAY },
-    "livingStoryArdour": { ids: [266863, 266862, 266860, 266864, 266865, 266866], story: "Oenophilic Ardour", timer: MILLISECONDS_IN_DAY },
-    "livingStoryMinting": { ids: [250116], story: "A Minting, Completed", timer: MILLISECONDS_IN_DAY },
-    "livingStoryWhitsun": { ids: [238693], story: "Your Whitsun Egg is Hatching!", timer: 23 * MILLISECONDS_IN_HOUR },
-    "livingStoryEscape": { ids: [235720], story: "A Clean Escape?", timer: MILLISECONDS_IN_DAY },
-    "livingStoryChristmas": { ids: [262517], story: "Dissipating Goodwill", timer: 2 * SEVEN_DAYS_IN_MILLISECONDS }
-}
+interface LivingStory { ids: readonly number[], story: string, timer: number; };
+const LIVING_STORY_NAMES = ["livingStoryBookBoon", "livingStoryAstronomerMap", "livingStoryNavalOfficerMap", "livingStoryClayManMap", "livingStoryMrCups", "livingStoryMrHearts",
+    "livingStoryMarigold", "livingStoryHighwayman", "livingStoryDilmun", "livingStoryCalmer", "livingStoryTutorial", "livingStoryRoseInBurrow", "livingStoryClara",
+    "livingStoryPristineEgg", "livingStoryNextBout",  "livingStoryAirship", "livingStoryRatkind", "livingStoryMatterAtHome", "livingStoryDeparture", "livingStoryRaven", "livingStoryEfficient", "livingStoryRegimental",
+    "livingStoryMissive", "livingStoryInvitation", "livingStoryArdour", "livingStoryMinting", "livingStoryWhitsun", "livingStoryEscape", "livingStoryChristmas"] as const
+type LivingStoryName = typeof LIVING_STORY_NAMES[number];
+const MISC_LIVING_STORIES: Record<LivingStoryName, LivingStory> = {
+    livingStoryBookBoon: { ids: [263646, 263647, 263648, 263645], story: "Another Volume for the Library", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryAstronomerMap: {  ids: [9650, 9651], story: "The Enterprising Astronomer's Gift", timer: 2 * MILLISECONDS_IN_DAY },
+    livingStoryNavalOfficerMap: { ids: [9448, 9449], story: "The Disgruntled Naval Officer's Gift", timer: 2 * MILLISECONDS_IN_DAY },
+    livingStoryClayManMap: { ids: [9647, 9648], story: "The Masked Clay Man's Gift", timer: 2 * MILLISECONDS_IN_DAY },
+    livingStoryMrCups: { ids: [235721], story: "An Invitation from Mr Cups", timer: MILLISECONDS_IN_DAY },
+    livingStoryMrHearts: { ids: [240193, 240200], story: "Mr Hearts' Congratulations", timer: MILLISECONDS_IN_DAY },
+    livingStoryMarigold: { ids: [244394, 244395], story: "A Missive from Marigold", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryHighwayman: { ids: [247112, 247109, 247111, 247511, 247110], story: "The Fate of the Clay Highwayman (Living Story)", timer: MILLISECONDS_IN_DAY },
+    livingStoryDilmun: { ids: [9756, 9757, 9758], story: "A meeting of the Dilmun Club", timer: MILLISECONDS_IN_DAY },
+    livingStoryCalmer: { ids: [5636, 5639, 5637, 5638, 5634, 5635, 5632, 5633], story: "You're calmer now.", timer: MILLISECONDS_IN_HOUR }, //todo 5498 and 5485, but only on a rare success
+    livingStoryTutorial: { ids: [4401, 258747, 4402, 119565], story: "Tutorial: Social Engagements", timer: MILLISECONDS_IN_DAY },
+    livingStoryRoseInBurrow: { ids: [260400, 260679, 260401], story: "The Rose in Burrow", timer: 2 * MILLISECONDS_IN_DAY },
+    livingStoryClara: { ids: [238909, 238944, 238122, 238073, 238077, 238078, 238072, 238076, 238075, 238079], story: "Weeks have passed since you last saw Clara", timer: MILLISECONDS_IN_DAY },
+    livingStoryPristineEgg: { ids: [41166, 119377], story: "Your Pristine Raven's Egg is hatching!", timer: MILLISECONDS_IN_DAY },
+    livingStoryNextBout: { ids: [239468, 239462], story: "Waiting for the Next Bout", timer: MILLISECONDS_IN_DAY },
+    livingStoryAirship: { ids: [265642, 265643], story: "Your Airship, under construction", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryRatkind: { ids: [128567, 128568], story: "A Legend Among Ratkind (Living Story)", timer: 2 * MILLISECONDS_IN_DAY },
+    livingStoryMatterAtHome: { ids: [237941, 237940], story: "Attending to a Matter at Home", timer: MILLISECONDS_IN_DAY }, //missing id for 'introduce your friend'
+    livingStoryDeparture: { ids: [245936, 245568, 245563], story: "The Master's Departure", timer: MILLISECONDS_IN_DAY },
+    livingStoryRaven: { ids: [40919], story: "A Raven's triumphant return!", timer: MILLISECONDS_IN_DAY },
+    livingStoryEfficient: { ids: [], story: "An Invitation from the Efficient Commissioner", timer: MILLISECONDS_IN_DAY }, //missing ids
+    livingStoryRegimental: { ids: [260678], story: "A Regimental Rose", timer: MILLISECONDS_IN_DAY },
+    livingStoryMissive: { ids: [260398], story: "A Missive, on a Rose", timer: MILLISECONDS_IN_DAY },
+    livingStoryInvitation: { ids: [240114], story: "An Invitation From Mister Hearts", timer: MILLISECONDS_IN_DAY },
+    livingStoryArdour: { ids: [266863, 266862, 266860, 266864, 266865, 266866], story: "Oenophilic Ardour", timer: MILLISECONDS_IN_DAY },
+    livingStoryMinting: { ids: [250116], story: "A Minting, Completed", timer: MILLISECONDS_IN_DAY },
+    livingStoryWhitsun: { ids: [238693], story: "Your Whitsun Egg is Hatching!", timer: 23 * MILLISECONDS_IN_HOUR },
+    livingStoryEscape: { ids: [235720], story: "A Clean Escape?", timer: MILLISECONDS_IN_DAY },
+    livingStoryChristmas: { ids: [262517], story: "Dissipating Goodwill", timer: 2 * SEVEN_DAYS_IN_MILLISECONDS }
+} as const
 
 const MESSAGE_STRINGS = {
     KHANATE_MESSAGE: "You can pick up a new report from your agent",
@@ -73,12 +78,12 @@ const MESSAGE_STRINGS = {
     TTH_MESSAGE: "Memory fades; pain departs; rewards arrive!",
 } as const;
 
-const DAYS = { SUNDAY: 0, MONDAY: 1, TUESDAY: 2, WEDNESDAY: 3, THURSDAY: 4, FRIDAY: 5, SATURDAY: 6 };
+const DAYS = { SUNDAY: 0, MONDAY: 1, TUESDAY: 2, WEDNESDAY: 3, THURSDAY: 4, FRIDAY: 5, SATURDAY: 6 } as const;
 
 
 const RattyDemands = ["ALWAYS", "SAINTLY_DEMAND", "SOFT_DEMAND", "TEMPESTUOUS_DEMAND", "INSCRUTABLE_DEMAND", "INTRICATE_DEMAND", "MAUDLIN_DEMAND"] as const;
 type RattyDemand = typeof RattyDemands[number];
-const RAT_MARKET_BUYING: Record<RattyDemand, RatItem[]> = {
+const RAT_MARKET_BUYING: Record<RattyDemand, readonly RatItem[]> = {
     ALWAYS: [{ id: 142797, name: "Fourth-City Echo", price: 125 }],
     SAINTLY_DEMAND: [{ id: 123214, name: "Ratty Reliquary", price: 125 }, { id: 142249, name: "False Hagiotoponym", price: 625 }],
     SOFT_DEMAND: [{ id: 924, name: "Parabola-Linen Scrap", price: 625 }, { id: 925, name: "Scrap of Ivory Organza", price: 3125 }],
@@ -86,7 +91,7 @@ const RAT_MARKET_BUYING: Record<RattyDemand, RatItem[]> = {
     INSCRUTABLE_DEMAND: [{ id: 812, name: "Uncanny Incunabulum", price: 125 }, { id: 141189, name: "Cartographer's Hoard", price: 3125 }],
     INTRICATE_DEMAND: [{ id: 141946, name: "Unlawful Device", price: 125 }, { id: 142793, name: "Corresponding Sounder", price: 3125 }],
     MAUDLIN_DEMAND: [{ id: 142386, name: "Captivating Ballad", price: 625 }, { id: 142463, name: "Parabolan Parable", price: 3125 }]
-};
+} as const;
 
 
 const ratItemNames = ["WATCH", "UMBRELLA", "PIECE", "CANE", "TIARA", "LENGUALS", "SMOCK", "VAKEBOOTS", "AMBER", "IRRIGO", "GOGGLES", "CINDER", "SKULL",
@@ -124,7 +129,7 @@ const RAT_MARKET_ITEMS: Record<RatItemName, RatItem> = {
     HAIRS: { id: 143303, name: "Seven of St Eligius' Very Own Beard Hairs", price: 10000 },
     CATALOGUE: { id: 143415, name: "False-Star Catalogue", price: 10000 },
     KNIFE: { id: 143625, name: "Leviathan-Bone Knife", price: 10000 }
-};
+} as const;
 
 
 const ratWinds = ["East", "South", "West", "North"] as const;
@@ -138,7 +143,7 @@ const falseSeasons = ["Autumn", "Winter", "Spring", "Summer"] as const;
 type FalseSeason = typeof falseSeasons[number];
 type RatSellingCategory = RatWind | RatMoon | RatSeason | FalseSeason;
 
-const RAT_MARKET_SELLING: Record<RatSellingCategory, RatItem[]> = {
+const RAT_MARKET_SELLING: Record<RatSellingCategory, readonly RatItem[]> = {
     "East": [RAT_MARKET_ITEMS.WATCH],
     "South": [RAT_MARKET_ITEMS.UMBRELLA],
     "West": [RAT_MARKET_ITEMS.PIECE],
@@ -163,19 +168,21 @@ const RAT_MARKET_SELLING: Record<RatSellingCategory, RatItem[]> = {
     "Winter": [RAT_MARKET_ITEMS.HAIRS],
     "Spring": [RAT_MARKET_ITEMS.CATALOGUE],
     "Summer": [RAT_MARKET_ITEMS.KNIFE]
-};
+} as const;
 Object.freeze(RAT_MARKET_SELLING);
 
-const WASWOOD_ITEMS: { [key: string]: string[]; } = {
+type SeasonWithItems = "1" | "2" | "3" | "8" | "9";
+const WASWOOD_ITEMS: Record<SeasonWithItems, readonly CharacterQualityName[]> = {
     "1": ["JENNYS_WIMPLE"],
     "2": ["ANON_WHITE_MASK"],
     "3": ["VISCOUNT_COLLAR", "VISCOUNTESS_COLLAR"],
     "8": ["STURDY_PICK", "SPEAKING_TUBE", "M_D_A_FOR_F", "DRINKING_VESSEL", "POISONED_PEN", "WAX_BOOTS", "WORK_GLOVES"],
     "9": ["MINIATURE_MUSEUM", "PERFUMERS_ARTS", "GEBRANDTS_ADDRESS_BOOK"]
-};
-Object.freeze(WASWOOD_ITEMS);
+} as const;
 
-const HEARTS_GAME_SEASON_TO_DISTINCTION: Record<string, string> = {
+type HeartsGameSeason = "Nascency" | "Excess" | "Dares" | "Devotions" | "Irreverences" | "Duplicities"
+type HeartsGameDistinction = "NASCENCY" | "EXCESS" | "DARES" | "DEVOTION" | "IRREVERENCE" | "DUPLICITY";
+const HEARTS_GAME_SEASON_TO_DISTINCTION: Record<HeartsGameSeason, HeartsGameDistinction> = {
     Nascency: "NASCENCY",
     Excess: "EXCESS",
     Dares: "DARES",
@@ -189,24 +196,32 @@ const worldQualityNames = ["SAINTLY_DEMAND", "SOFT_DEMAND", "TEMPESTUOUS_DEMAND"
     "HEARTS_GAME_SEASON", "SEASON_OF_THE_SACROBOSCAN_CALENDAR"] as const;
 type WorldQualityName = typeof worldQualityNames[number];
 
+type CharacterQualityName = "MAKING_WAVES" | "NOTABILITY" | "BENEFICENCE" | "FREE_EVENING" | "MIRED_IN_MAIL" | "WHISPERS" | "A_KNOCK" | "A_SUSURRUS" | "UNEARTHLY_WHISPER" |
+    "BACKSTAGE" | "ACQUAINTANCE_MRS_CHAPMAN" | "FAVOURABLE_CIRCUMSTANCE" | "PAYMENT" | "PROFESSIONAL_PERK" | "ROUTE_NADIR" | "IRRIGO" | "FLEETING_RECOLLECTIONS" | "PARABOLAN_COMPANY" |
+    "PARABOLAN_RAVAGES" | "PARABOLAN_CAMPAIGN" | "PARABOLAN_WAR_STAGE" | "PARABOLAN_WAR_ADVANCE" | "TRUE_DENIZEN" | "CONSEQUENCE" | "ROUTE_BONE_MARKET" | "BONE_MARKET_EXHAUSTION" |
+    "DELAY_NEXT_MEETING" | "RAILWAY_VENTURE" | "BUREAUCRATIC_ADVANTAGE" | "APPROACHING_HELL" | "VISITOR_TO_HELL" | "FLOWER_FROM_HELL" | "STARVED_EXCHANGE" | "ECDYSIS" | "WIDE_EYED" |
+    "PARTIALLY_BONELESS" | "RADIANT_BEARING" | "HALLOW_VESSEL" | "VOTES_CAST" | "VOTES_ALLOWED" | "JENNYS_WIMPLE" | "ANON_WHITE_MASK" | "VISCOUNT_COLLAR" | "VISCOUNTESS_COLLAR" | "STURDY_PICK" |
+    "SPEAKING_TUBE" | "M_D_A_FOR_F" | "DRINKING_VESSEL" | "POISONED_PEN" | "WAX_BOOTS" | "WORK_GLOVES" | "MINIATURE_MUSEUM" | "PERFUMERS_ARTS" | "GEBRANDTS_ADDRESS_BOOK" | "NASCENCY" |
+    "EXCESS" | "DARES" | "DEVOTION" | "IRREVERENCE" | "DUPLICITY" | "BALMORAL" | "NULL_AND_VOID" | "KHAGANS_PALACE_REPORT" | "AGENT" | "JAUNT_WASWOOD" | "DISCOVERED_WELLSPRING" |
+    "GLOWING_VIRIC" | "BALMORAL_CASTELLAN" | "BALMORAL_GIFT"
 
 interface RatItem { id: number, name: string, price: number; };
 interface WorldQuality { name: string, result?: WikiResult, resetDay: number; blindspot?: boolean}
 interface CharacterQuality { id: number, value: number, name?: string; }
 
 const timekeeperSettings = ["KHANATE_MESSAGE", "BALMORAL_MESSAGE", "TTH_MESSAGE", "highestBDR", "nextTthISOString",
-    "nextKhanateISOString", "nextBalmoralISOString", "nextWaswoodISOString", "nextWellspringISOString", "nextChimesISOString", "worldQualities"];
+    "nextKhanateISOString", "nextBalmoralISOString", "nextWaswoodISOString", "nextWellspringISOString", "nextChimesISOString"];
 //todo update stuff. When the wiki gives a new world quality, update everything that uses it. Refresh all 'hours remaining' text. Update item quantities.
 //add panels when you get a boon. Remove panels when they expire. etc.
 export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAware {
 
-    private currentSettings!: SettingsObject;
-    private currentState!: GameState;
-    private displayTimekeeping = true;
-    private backupMoments: Map<string, string> = new Map();
-    private waitingOnApi = false;
-    private activeLivingStories: Record<string, string> = {};
-    private worldQualities: Record<WorldQualityName, WorldQuality> = {
+    currentSettings!: SettingsObject;
+    currentState!: GameState;
+    displayTimekeeping = true;
+    backupMoments: Map<string, string> = new Map();
+    waitingOnApi = false;
+    activeLivingStories: Record<string, string> = {};
+    worldQualities: Record<WorldQualityName, WorldQuality> = {
         SAINTLY_DEMAND: { name: "Saintly Demand", result: undefined, resetDay: DAYS.MONDAY },
         SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: DAYS.MONDAY },
         TEMPESTUOUS_DEMAND: { name: "Tempestuous Demand", result: undefined, resetDay: DAYS.MONDAY },
@@ -222,9 +237,9 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY },
         HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: undefined, resetDay: DAYS.TUESDAY }, //Only the first time each month
         SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: undefined, resetDay: DAYS.THURSDAY },
-    };
+    };//todo I'm saving the whole thing, maybe just save the results?
 
-    private characterQualities: Record<string, CharacterQuality> = {
+    private characterQualities: Record<CharacterQualityName, CharacterQuality> = {
         MAKING_WAVES: { id: 545, value: 0 },
         NOTABILITY: { id: 101305, value: 0 },
         BENEFICENCE: { id: 141145, value: 0 },
@@ -322,8 +337,8 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                     });
                 });
                 if (dirty) {
-                    this.currentSettings.worldQualities = JSON.stringify(this.worldQualities);
-                    sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
+                    this.removeOutdatedWorldQualities(new Date());
+                    sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { worldQualities: JSON.stringify(this.worldQualities) } });
                 }
                 this.waitingOnApi = false;
             }
@@ -441,8 +456,6 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         const daysLeft = hoursLeft >= 24 ? Math.ceil(hoursLeft / 24) : 0;
 
         let remainingText;
-
-        console.log(`Time till this moment comes: ${daysLeft} days or ${hoursLeft} hours or ${minutesLeft} minutes.`);
 
         if (daysLeft > 0) {
             const unit = daysLeft === 1 ? "day" : "days";
@@ -646,7 +659,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         if (this.currentSettings.ecdysis && this.characterQualities.ECDYSIS.value) {
             const sharpened = this.currentState.getQuality("Boon", "Sharpened");
             if (!(this.characterQualities.WIDE_EYED.value ||
-                sharpened || //this.characterQualities.SHARPENED) ||
+                sharpened || //this.characterQualities.SHARPENED.value) ||
                 this.characterQualities.PARTIALLY_BONELESS.value ||
                 this.characterQualities.RADIANT_BEARING.value ||
                 this.characterQualities.HALLOW_VESSEL.value)) {
@@ -718,12 +731,12 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             heartsGameItem.textContent = `The Hearts' Game Season World Quality is changing now, which can lead to inaccuracies. Try again in around 30 minutes.`;
             return;
         }
-        const season = this.worldQualities.HEARTS_GAME_SEASON.result?.value;
+        const season = this.worldQualities.HEARTS_GAME_SEASON.result?.value as HeartsGameSeason;
         if (season) {
             const distinctionKey = HEARTS_GAME_SEASON_TO_DISTINCTION[season];
             if (this.characterQualities[distinctionKey]?.value) {
                 let nextMissingDistinction;
-                const seasons = Object.keys(HEARTS_GAME_SEASON_TO_DISTINCTION);
+                const seasons = Object.keys(HEARTS_GAME_SEASON_TO_DISTINCTION) as HeartsGameSeason[];
                 let idx = seasons.indexOf(season) + 1;
                 if (idx >= seasons.length) {
                     idx = 0;
@@ -763,7 +776,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         }
     }
 
-    private getNextHeartsGameReset(start: Date): Date {
+    getNextHeartsGameReset(start: Date): Date {
         const changeDate = new Date(this.getNextDay(start, this.worldQualities.HEARTS_GAME_SEASON.resetDay));
         while (changeDate.getUTCDate() > 7) {
             changeDate.setUTCDate(changeDate.getUTCDate() + 7);
@@ -854,9 +867,10 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                     chimesItem.textContent += ` Could not determine when votes will refresh.`
                 }
             }
+            livingStoryPanel.appendChild(chimesItem);
         }
 
-        if (this.currentSettings.balmoral && this.characterQualities.BALMORAL_CASTELLAN) {
+        if (this.currentSettings.balmoral && this.characterQualities.BALMORAL_CASTELLAN.value) {
             const balmoralItem = document.createElement("li");
             balmoralItem.id = "balmoral-item";
             if (this.characterQualities.BALMORAL_GIFT.value) {
@@ -870,6 +884,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             } else {
                 balmoralItem.textContent = "You can receive a gift from Balmoral now.";
             }
+            livingStoryPanel.appendChild(balmoralItem);
         }
 
         if (this.currentSettings.khanate && this.characterQualities.AGENT.value) {
@@ -932,7 +947,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         if (startAt >= 4 && startAt <= 7) {
             startAt = 8;
         }
-        const keys = Object.keys(WASWOOD_ITEMS).sort((a, b) => { return Number(a) - Number(b); });
+        const keys = Object.keys(WASWOOD_ITEMS).sort((a, b) => { return Number(a) - Number(b); }) as SeasonWithItems[];
         while (Number(keys[0]) !== startAt) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             keys.push(keys.shift()!);
@@ -1114,19 +1129,46 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             clearButton.classList.add("js-tt", "button", "button--primary", "button--go");
             clearButton.style.padding = "2px 5px";
         }
+        const worldQualities: Record<WorldQualityName, WorldQuality> = JSON.parse(this.currentSettings.worldQualities as string);
+        for (const [key, val] of Object.entries(worldQualities)) {
+            const wqItem = document.createElement("li");
+            const timestamp = val.result ? new Date(val.result.timestamp).toISOString() : "unknown";
+            wqItem.textContent = `[${key}]: ${val.result?.value}, timestamp: ${timestamp}, blindspot: ${val.blindspot}`;
+            settingsList.appendChild(wqItem);
+        }
+        const clearButton = document.createElement("button");
+        clearButton.textContent = `Clear World Qualities`;
+        clearButton.addEventListener("click", () => {
+            sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { worldQualities: "" } });
+        });
+        settingsList.appendChild(clearButton);
+        clearButton.classList.add("js-tt", "button", "button--primary", "button--go");
+        clearButton.style.padding = "2px 5px";
+
+        const charQuals = document.createElement("li");
+        for (const [name, qual] of Object.entries(this.characterQualities)) {
+            charQuals.textContent += `{${name}: ${qual.value}}, `
+        }
+        for (const [name, qual] of Object.entries(this.characterEffectiveQualities)) {
+            charQuals.textContent += `{${name}: ${qual.value}}, `;
+        }
+
+        settingsList.appendChild(charQuals);
 
         timekeeperModal.style.padding = "0";
         modalWrapperDiv.style.margin = "0";
         modalWrapperDiv.style.padding = "1rem";
     }
 
-    private getNextDay(startDate: Date, day: number) {
-        const nextResetDay = new Date();
-        nextResetDay.setUTCHours(11, 0, 0, 0);
+    getNextDay(startDate: Date, day: number) {
 
+        const nextResetDay = new Date();
+        nextResetDay.setUTCFullYear(startDate.getUTCFullYear());
+        nextResetDay.setUTCMonth(startDate.getUTCMonth());
+        nextResetDay.setUTCHours(11, 0, 0, 0);
         if (startDate.getUTCDay() == day) {
             if (startDate.getUTCHours() < 11) {
-                //don't change the date
+                nextResetDay.setUTCDate(startDate.getUTCDate());
             } else {
                 nextResetDay.setUTCDate(startDate.getUTCDate() + 7);
                 //next reset is nearly 7 days away
@@ -1306,6 +1348,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     applySettings(settings: SettingsObject): void {
         this.currentSettings = settings;
         this.displayTimekeeping = this.currentSettings.display_timekeeping as boolean;
+        //todo if tth in the past, add 7 days
         if (this.displayTimekeeping && this.currentSettings.nextTthISOString) {
             const tthListItem = document.getElementById("tth-remaining-item");
             if (tthListItem) {
@@ -1315,13 +1358,16 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         }
         if (this.currentSettings.worldQualities) {
             this.worldQualities = JSON.parse(this.currentSettings.worldQualities as string);
-            this.removeOutdatedWorldQualities();
+            const dirty = this.removeOutdatedWorldQualities(new Date());
+            if (dirty) {
+                sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { worldQualities: JSON.stringify(this.worldQualities) } });
+            }
         }
 
         const missingWorldQualities: string[] = [];
 
         Object.values(this.worldQualities).forEach((quality) => {
-            if (!quality.result) {
+            if (!quality.result && !quality.blindspot) {
                 missingWorldQualities.push(quality.name);
             }
         });
@@ -1339,27 +1385,58 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         }
     }
 
-    removeOutdatedWorldQualities() {
-        const now = new Date();
+    removeOutdatedWorldQualities(now: Date): boolean {
+        let dirty = false;
         for (const [name, quality] of Object.entries(this.worldQualities)) {
             if (quality.result) {
                 const retrievedTime = new Date(quality.result.timestamp);
+                if (retrievedTime.getUTCDay() === quality.resetDay && retrievedTime.getUTCHours() === 11 && retrievedTime.getUTCMinutes() < 30) {
+                    //result was retrieved during blindspot, may be up to date, or not, best delete it.
+                    quality.result = undefined;
+                    dirty = true;
+                }
                 let changeTime;
                 if (name === "HEARTS_GAME_SEASON") {
                     changeTime = this.getNextHeartsGameReset(retrievedTime).getTime();
                 } else {
                     changeTime = this.getNextDay(retrievedTime, quality.resetDay);
                 }
-                if (now.getTime() > changeTime + 30 * MILLISECONDS_IN_MINUTE) { //wiki takes about 15 minutes to update - todo add a notification when this happens
+                //wiki takes about 15 minutes to update - todo add a notification when this happens
+                if (now.getTime() > changeTime + 30 * MILLISECONDS_IN_MINUTE) {
+                    if (quality.result) {
+                        dirty = true;
+                    }
                     quality.result = undefined;
-                } else if (now.getTime() > changeTime && now.getTime() < changeTime + 30 * MILLISECONDS_IN_MINUTE) {
+                    quality.blindspot = false;
+                }
+
+                if (now.getTime() > changeTime && now.getTime() < changeTime + 30 * MILLISECONDS_IN_MINUTE) {
+                    if (quality.result || !quality.blindspot) {
+                        dirty = true;
+                    }
+                    quality.blindspot = true;
+                    quality.result = undefined;
+                } else {
+                    if (quality.blindspot) {
+                        dirty = true;
+                    }
+                    quality.blindspot = false;
+                }
+            } else {
+                if (now.getUTCDay() === quality.resetDay && now.getUTCHours() === 11 && now.getUTCMinutes() < 30) {
+                    if (!quality.blindspot) {
+                        dirty = true;
+                    }
                     quality.blindspot = true;
                 } else {
+                    if (quality.blindspot) {
+                        dirty = true;
+                    }
                     quality.blindspot = false;
                 }
             }
-
         }
+        return dirty;
     }
 
     linkNetworkTools(interceptor: FLApiInterceptor): void {
@@ -1434,3 +1511,5 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         });
     }
 }
+
+export { DAYS, WorldQualityName, WorldQuality };

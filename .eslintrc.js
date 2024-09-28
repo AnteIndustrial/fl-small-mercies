@@ -23,5 +23,13 @@ module.exports = {
                 "caughtErrorsIgnorePattern": "^_"
             }
         ]
-    }
+    },
+    "overrides": [
+        {
+            "files": ["tests/**/*"],
+            "env": {
+                "jest": true
+            }
+        }
+    ]
 };
