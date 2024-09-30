@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { TimeKeeperFixer, DAYS, WorldQualityName, WorldQuality } from "./fixers/timekeeper";
 import {sendToServiceWorker} from "./comms";
-import { TrackedQuality } from "./fixers/misc_tracker";
+import { MiscTrackerFixer, TrackedQuality } from "./fixers/misc_tracker";
 
 jest.mock("./comms");
 
@@ -162,8 +162,111 @@ describe('testAsuite', () => {
     })
 
     it('testTrackerParseJSON', () => {
-        const foo: Map<string, TrackedQuality[]> = new Map(Object.entries(JSON.parse(`{"142454":[{"name":"Campaign Morale","category":"Progress","currentValue":13,"targetValue":16,"image":"flag"}],"142452":[{"name":"Advance!","category":"SidebarTransient","currentValue":0,"targetValue":24,"image":"drum"},{"name":"Advance!","category":"SidebarTransient","currentValue":0,"targetValue":12,"image":"drum"}]}`)));
-        expect(foo.get("142454")!.at(0)!.name).toEqual("Campaign Morale");
-        expect(foo.get(""))
+        const foo: Map<string, TrackedQuality> = new Map(Object.entries(JSON.parse(`{"Campaign Morale":{"name":"Campaign Morale","category":"Progress","currentValue":13,"targetValues":[16],"image":"flag"},"Advance!":{"name":"Advance!","category":"SidebarTransient","currentValue":0,"targetValues":[24],"image":"drum"}}`)));
+        expect(foo.get("Campaign Morale")!.category).toEqual("Progress");
+        expect(foo.get("Advance!")!.targetValues![0]).toEqual(24)
     });
+
+    it('testTrackerReplaceElements', () => {
+        
+        document.body.innerHTML = `<div>a<span id="b" /><button id="c" /><ul id="foo"><li id="1-tracker" /><li id="2-tracker" /></ul><ul id="foo-edit"><li id="1-tracker-edit" /><li id="2-tracker-edit" /></ul></div>`;
+        const quality: TrackedQuality = { name: "1", category: "", currentValue: 1, image: "" };
+        const tracker = new MiscTrackerFixer();
+        tracker.regenerateTracker(quality);
+        expect(document.getElementById("1-tracker")?.classList.contains("tracked-quality")).toEqual(true);
+        expect(document.getElementById("1-tracker-value-and-target-no-target")?.textContent).toEqual("1");
+        expect(document.getElementById("2-tracker")?.children.length).toEqual(0);
+        expect(document.getElementById("1-tracker-edit")?.classList.contains("tracked-quality-edit")).toEqual(true);
+    })
+
+    it('testTrackerMoveItem', () => {
+        document.body.innerHTML = `<ul id="quality-tracker"><li id="1-tracker" /><li id="2-tracker" /><li id="3-tracker" /></ul>` +
+            `<ul id="quality-tracker-edit"><li id="1-tracker-edit" /><li id="2-tracker-edit" /><li id="3-tracker-edit" /></ul>`
+        const tracker = new MiscTrackerFixer();
+        tracker.currentSettings = {};
+        tracker.trackedQualities = new Map();
+        tracker.trackedQualities.set("1", { name: "1", category: "1", currentValue: 1, image: "1" });
+        tracker.trackedQualities.set("2", { name: "2", category: "2", currentValue: 2, image: "2" });
+        tracker.trackedQualities.set("3", { name: "3", category: "3", currentValue: 3, image: "3" });
+
+        tracker.moveItem("1", "DOWN");//1,2,3 -> 2,1,3
+        let qualities = document.getElementById("quality-tracker")!.children;
+        expect(qualities[0].id).toEqual("2-tracker");
+        expect(qualities[1].id).toEqual("1-tracker");
+        expect(qualities[2].id).toEqual("3-tracker");
+        let qualitiesEdit = document.getElementById("quality-tracker-edit")!.children;
+        expect(qualitiesEdit[0].id).toEqual("2-tracker-edit");
+        expect(qualitiesEdit[1].id).toEqual("1-tracker-edit");
+        expect(qualitiesEdit[2].id).toEqual("3-tracker-edit");
+        expect(Array.from(tracker.trackedQualities.keys())).toEqual(["2", "1", "3"]);
+        expect(sendToServiceWorker).toHaveBeenCalled();
+        (sendToServiceWorker as jest.MockedFunction<typeof sendToServiceWorker>).mockClear();
+
+        tracker.moveItem("2", "UP");//2 already at top, do nothing
+        qualities = document.getElementById("quality-tracker")!.children;
+        expect(qualities[0].id).toEqual("2-tracker");
+        expect(qualities[1].id).toEqual("1-tracker");
+        expect(qualities[2].id).toEqual("3-tracker");
+        qualitiesEdit = document.getElementById("quality-tracker-edit")!.children;
+        expect(qualitiesEdit[0].id).toEqual("2-tracker-edit");
+        expect(qualitiesEdit[1].id).toEqual("1-tracker-edit");
+        expect(qualitiesEdit[2].id).toEqual("3-tracker-edit");
+        expect(Array.from(tracker.trackedQualities.keys())).toEqual(["2", "1", "3"]);
+        expect(sendToServiceWorker).not.toHaveBeenCalled();
+        (sendToServiceWorker as jest.MockedFunction<typeof sendToServiceWorker>).mockClear();
+
+        tracker.moveItem("3", "DOWN");//3 already at bottom, do nothing
+        qualities = document.getElementById("quality-tracker")!.children;
+        expect(qualities[0].id).toEqual("2-tracker");
+        expect(qualities[1].id).toEqual("1-tracker");
+        expect(qualities[2].id).toEqual("3-tracker");
+        qualitiesEdit = document.getElementById("quality-tracker-edit")!.children;
+        expect(qualitiesEdit[0].id).toEqual("2-tracker-edit");
+        expect(qualitiesEdit[1].id).toEqual("1-tracker-edit");
+        expect(qualitiesEdit[2].id).toEqual("3-tracker-edit");
+        expect(Array.from(tracker.trackedQualities.keys())).toEqual(["2", "1", "3"]);
+        expect(sendToServiceWorker).not.toHaveBeenCalled();
+        (sendToServiceWorker as jest.MockedFunction<typeof sendToServiceWorker>).mockClear();
+
+        tracker.moveItem("3", "UP");//2,1,3 -> 2,3,1
+        qualities = document.getElementById("quality-tracker")!.children;
+        expect(qualities[0].id).toEqual("2-tracker");
+        expect(qualities[1].id).toEqual("3-tracker");
+        expect(qualities[2].id).toEqual("1-tracker");
+        qualitiesEdit = document.getElementById("quality-tracker-edit")!.children;
+        expect(qualitiesEdit[0].id).toEqual("2-tracker-edit");
+        expect(qualitiesEdit[1].id).toEqual("3-tracker-edit");
+        expect(qualitiesEdit[2].id).toEqual("1-tracker-edit");
+        expect(Array.from(tracker.trackedQualities.keys())).toEqual(["2", "3", "1"]);
+        expect(sendToServiceWorker).toHaveBeenCalled();
+        (sendToServiceWorker as jest.MockedFunction<typeof sendToServiceWorker>).mockClear();
+    })
+
+    it('testTrackerHideUpAndDownButtons', () => {
+        document.body.innerHTML = `<ul id="quality-tracker-edit"><li id="1-tracker-edit"><button class="up-button" /><button class="down-button" hidden disabled style="opacity: 0"/></li>` +
+            `<li id="2-tracker-edit"><button class="up-button" hidden disabled style="opacity: 0" /><button class="down-button" /></li>` +
+            `<li id="3-tracker-edit"><button class="up-button" style="opacity: 1"/><button class="down-button" hidden disabled style="opacity: 0" /></li>`;
+        const tracker = new MiscTrackerFixer();
+        tracker.hideUpAndDownButtons();
+        
+        const buttons = document.getElementsByTagName("button") as HTMLCollectionOf<HTMLButtonElement>;
+        expect(buttons[0].getAttribute("hidden")).toStrictEqual("");
+        expect(buttons[1].getAttribute("hidden")).toStrictEqual(null);
+        expect(buttons[2].getAttribute("hidden")).toStrictEqual(null);
+        expect(buttons[3].getAttribute("hidden")).toStrictEqual(null);
+        expect(buttons[4].getAttribute("hidden")).toStrictEqual(null);
+        expect(buttons[5].getAttribute("hidden")).toStrictEqual("");
+        expect(buttons[0].getAttribute("disabled")).toStrictEqual("");
+        expect(buttons[1].getAttribute("disabled")).toStrictEqual(null);
+        expect(buttons[2].getAttribute("disabled")).toStrictEqual(null);
+        expect(buttons[3].getAttribute("disabled")).toStrictEqual(null);
+        expect(buttons[4].getAttribute("disabled")).toStrictEqual(null);
+        expect(buttons[5].getAttribute("disabled")).toStrictEqual("");
+        expect(buttons[0].style.opacity).toStrictEqual("0");
+        expect(buttons[1].style.opacity).toStrictEqual("1");
+        expect(buttons[2].style.opacity).toStrictEqual("1");
+        expect(buttons[3].style.opacity).toStrictEqual("1");
+        expect(buttons[4].style.opacity).toStrictEqual("1");
+        expect(buttons[5].style.opacity).toStrictEqual("0");
+    })
 });

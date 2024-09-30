@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebuggerFlavor>LaunchJsonDebugger</DebuggerFlavor>
+    <LaunchJsonTarget>{
+  "name": "Jest Tests Debug",
+  "type": "node",
+  "request": "launch",
+  "program": "./node_modules/jest/bin/jest.js",
+  "skipFiles": [
+    "&lt;node_internals&gt;/**"
+  ],
+  "args": [
+    "-i"
+  ],
+  "preLaunchTask": "build",
+  "internalConsoleOptions": "openOnSessionStart",
+  "outFiles": [
+    "${workspaceRoot}/dist/**/*"
+  ],
+  "envFile": "${workspaceRoot}/.env",
+  "sourceMaps": true
+}</LaunchJsonTarget>
+  </PropertyGroup>
+</Project>

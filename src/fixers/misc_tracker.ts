@@ -27,11 +27,11 @@ type UpOrDown = "UP" | "DOWN";
 export class MiscTrackerFixer implements IMutationAware, IStateAware {
 
     private displayQualityTracker = true;
-    private trackedQualities: Map<string, TrackedQuality> = new Map();
+    trackedQualities: Map<string, TrackedQuality> = new Map();
     private qualityNameAndCategory: Map<string, string> = new Map();
     private qualityNames: string[] = [];
     private currentState?: GameState;
-    private currentSettings!: SettingsObject;
+    currentSettings!: SettingsObject;
     //todo consider reworking all this to use quality ID rather than name
     //the quality Advance! just moved from category progress to sidebartransient, which broke tracking for that quality
     //presumably other qualities could move at any time, if the developers want them to
@@ -63,8 +63,18 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                         quality.currentValue = 0;
                         dirty = true;
                     }
+                    if (quality.targetValue) {
+                        if (quality.targetValues) {
+                            quality.targetValues.push(quality.targetValue);
+                        } else {
+                            quality.targetValues = [quality.targetValue];
+                        }
+                        quality.targetValue = undefined;
+                        dirty = true;
+                    }
                 }
                 if (dirty) {
+                    this.regenerateTrackers();
                     sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { trackedQualities: JSON.stringify(Object.fromEntries(this.trackedQualities))}})
                 }
             }
@@ -82,33 +92,42 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 unsortedQualityNames.push(quality.name);
             }
             this.qualityNames = unsortedQualityNames.sort(stringSorter);
+            let dirty = false;
             for (const [trackedQualityName, trackedQuality] of this.trackedQualities) {
-                let dirty = false;
                 if (trackedQuality.category === "") {
                     trackedQuality.category = this.qualityNameAndCategory.get(trackedQualityName) || "";
                     trackedQuality.image = this.currentState?.getQuality(trackedQuality.category, trackedQualityName)?.image || "question";
                     if (trackedQuality.image !== "question") {
                         const trackerIcon = document.getElementById(`${trackedQualityName}-tracker-icon`);
-                        trackerIcon?.setAttribute("src", `//images.fallenlondon.com/icons/${trackedQuality.image}.png`);
+                        trackerIcon?.setAttribute("src", `//images.fallenlondon.com/icons/${trackedQuality.image}small.png`);
                     }
                     dirty = trackedQuality.category !== "";
                 }
                 if (trackedQuality.category !== "") {
                     const quality = g.getQuality(trackedQuality.category, trackedQualityName);
                     if (quality) {
+                        if (trackedQuality.currentValue !== quality.level) {
+                            dirty = true;
+                        }
                         trackedQuality.currentValue = quality.level;
                         if (trackedQuality.image === "question") {
+                            if (quality.image !== "question") {
+                                dirty = true;
+                            }
                             trackedQuality.image = quality.image;
                         }
                     } else {
+                        if (trackedQuality.currentValue !== 0) {
+                            dirty = true;
+                        }
                         trackedQuality.currentValue = 0;
                     }
-                    this.updateQualityOnPage(trackedQuality);
                 }
-                if (dirty && this.currentSettings) {
-                    this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
-                    sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
-                }
+            }
+            if (dirty && this.currentSettings) {
+                this.regenerateTrackers();
+                this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
+                sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
             }
         });
 
@@ -118,7 +137,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 this.qualityNames = this.qualityNames.sort(stringSorter);
                 this.qualityNameAndCategory.set(quality.name, quality.category);
 
-                const qualityList = document.getElementById("quality-list");//todo avoid dupes, sort
+                const qualityList = document.getElementById("quality-list");
                 let found = false;
                 if (qualityList) {
                     for (const existingOption of qualityList.getElementsByClassName("option") as HTMLCollectionOf<HTMLOptionElement>) {
@@ -149,18 +168,33 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                     updatedQuality.category = this.qualityNameAndCategory.get(quality.name) || "";
                 }
                 updatedQuality.image = quality.image || "question";
-                this.updateQualityOnPage(updatedQuality);
+                this.regenerateTracker(updatedQuality);
                 this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
                 sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
             }
         });
     }
 
+    //replace the HTML element on the main page and the edit modal for one tracker
+    regenerateTracker(quality: TrackedQuality) {
+        const original = document.getElementById(`${quality.name}-tracker`);
+        const originalEdit = document.getElementById(`${quality.name}-tracker-edit`);
+        original?.parentNode?.replaceChild(this.createTracker(quality, false), original);
+        originalEdit?.parentNode?.replaceChild(this.createTracker(quality, true), originalEdit);
+    }
+
+    //replace the HTML element on the main page and the edit modal for all trackers
+    regenerateTrackers() {
+        for (const [_, quality] of this.trackedQualities) {
+            this.regenerateTracker(quality);
+        }
+    }
+
     //create the html element to track one quality
-    private createTracker(quality: TrackedQuality, editMode: boolean): HTMLElement {
+    createTracker(quality: TrackedQuality, editMode: boolean): HTMLElement {
         const title = quality.name;
         const initialValue = quality.currentValue;
-        const targetValue = quality.targetValue;
+        const targetValues = quality.targetValues;
         let icon = quality.image;
         if (icon === "question" && quality.category) {
             icon = this.currentState?.getQuality(quality.category, title)?.image || "question";
@@ -169,98 +203,84 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         const qualityListItem = document.createElement("li");
         if (editMode) {
             qualityListItem.id = `${title}-tracker-edit`;
-            qualityListItem.classList.add("js-item", "item", "sidebar-quality", "tracked-quality-edit");
+            qualityListItem.classList.add("js-item", "item", "tracked-quality-edit");//"sidebar-quality", 
         } else {
             qualityListItem.id = `${title}-tracker`;
-            qualityListItem.classList.add("js-item", "item", "sidebar-quality", "tracked-quality");
+            qualityListItem.classList.add("js-item", "item", "tracked-quality"); //"sidebar-quality", 
         }
-        qualityListItem.style.cssText = "text-align: left";
+        qualityListItem.style.textAlign = "left";
         qualityListItem.dataset.qualityName = title;
 
-        const div = document.createElement("div");
-        div.classList.add("js-icon", "icon", "js-tt", "icon--circular");
-
-        const div2 = document.createElement("div");
-        div2.classList.add("item__desc");
-
-        const div3 = document.createElement("div");
-        div3.setAttribute("tabindex", "0");
-        div3.setAttribute("role", "button");
-        div3.setAttribute("aria-label", title);
-        div3.style.cssText = "outline: 0px; outline-offset: 0px; cursor: default;";
-
-        const nameSpan = document.createElement("span");
-        nameSpan.classList.add("js-item-name", "item__name");
-        nameSpan.textContent = title;
-
-        const valueAndTargetSpan = document.createElement("span");
-        valueAndTargetSpan.id = editMode ? `${title}-tracker-value-and-target-edit` : `${title}-tracker-value-and-target`
-        valueAndTargetSpan.classList.add("item__value");
-        valueAndTargetSpan.textContent = ` ${initialValue} / ${targetValue}`;
-
-        const progressBarDiv = document.createElement("div");
-        progressBarDiv.classList.add("progress-bar");
-
-        const progressBarSpan = document.createElement("span");
-        progressBarSpan.id = editMode ? `${title}-tracker-progress-edit` : `${title}-tracker-progress`;
-        progressBarSpan.classList.add("progress-bar__stripe", "progress-bar__stripe--has-transition");
-        let percentage = (initialValue / targetValue) * 100;
-        if (percentage > 100) {
-            percentage = 100;
-        }
-        progressBarSpan.style.cssText = `width: ${percentage}%;`;
+        const iconDiv = document.createElement("div");
+        iconDiv.classList.add("js-icon", "icon", "js-tt", "icon--circular");
 
         const img = document.createElement("img");
         img.classList.add("cursor-default");
         const imgIcon = editMode ? `${title}-tracker-icon-edit` : `${title}-tracker-icon`;
         img.setAttribute("id", imgIcon);
         img.setAttribute("alt", `${title}`);
-        img.setAttribute("src", `//images.fallenlondon.com/icons/${icon}.png`);
+        img.setAttribute("src", `//images.fallenlondon.com/icons/${icon}small.png`);
         img.setAttribute("aria-label", `${title}`);
 
-        qualityListItem.appendChild(div);
-        qualityListItem.appendChild(div2);
-        div.appendChild(div3);
-        div2.appendChild(nameSpan);
-        div2.appendChild(valueAndTargetSpan);
-        div2.appendChild(progressBarDiv);
-        div3.appendChild(img);
-        progressBarDiv.appendChild(progressBarSpan);
+        const innerIconDiv = document.createElement("div");
+        innerIconDiv.setAttribute("tabindex", "0");
+        innerIconDiv.setAttribute("role", "button");
+        innerIconDiv.setAttribute("aria-label", title);
+        innerIconDiv.style.cssText = "outline: 0px; outline-offset: 0px; cursor: default;";
+        iconDiv.appendChild(innerIconDiv);
+        innerIconDiv.appendChild(img);
 
-        if (editMode) {
+        const nameDiv = document.createElement("div");
+        nameDiv.classList.add("js-item-name", "item__name");
+        nameDiv.textContent = title;
+
+        const targetElementsToAdd: HTMLElement[] = this.generateTargetElements(title,targetValues, initialValue, editMode);
+        
+
+        if (!editMode) {
+            qualityListItem.appendChild(iconDiv);
+            const wrapperDiv = document.createElement("div");
+            wrapperDiv.id = `${title}-tracker-inner-div`;
+            wrapperDiv.style.width = "100%";
+            wrapperDiv.appendChild(nameDiv);
+            for (const targetElement of targetElementsToAdd) {
+                wrapperDiv.appendChild(targetElement);
+            }
+            qualityListItem.appendChild(wrapperDiv);
+        } else {
+            qualityListItem.appendChild(iconDiv);
+            qualityListItem.appendChild(nameDiv);
+            for (const [idx, targetElement] of targetElementsToAdd.entries()) {
+                targetElement.style.gridArea = `${idx + 2} / 2`;
+                qualityListItem.appendChild(targetElement);
+            }
+            const editDiv = document.createElement("div");
+            qualityListItem.style.display = "grid";
+            qualityListItem.style.gridTemplateColumns = "1fr 8fr 4fr";
+            iconDiv.style.gridArea = "1 / 1";
+            nameDiv.style.gridArea = "1 / 2";
+            nameDiv.style.textAlign = "left";
+            editDiv.style.gridArea = "1 / 3";
+            editDiv.style.textAlign = "right";
             const newTargetSpan = document.createElement("span");
             const targetInput = document.createElement("input");
             targetInput.id = `${title}-new-target-number`;
             targetInput.type = "number";
-            targetInput.value = `${targetValue}`;
             targetInput.style.width = "6ch";
             newTargetSpan.appendChild(targetInput);
             const newTargetButton = document.createElement("button");
             newTargetButton.classList.add("js-tt", "button", "button--primary", "button--margin", "button--go");
+            newTargetButton.style.padding = "2px 5px";
             newTargetButton.addEventListener("click", () => {
                 const targetInputEnclosed = document.getElementById(`${title}-new-target-number`) as HTMLInputElement;
                 const newTargetNumber = Number(targetInputEnclosed?.value);
 
                 const updatedQuality = this.trackedQualities.get(title);
                 if (updatedQuality) {
-                    const currentValue = updatedQuality.currentValue;
-                    updatedQuality.targetValue = newTargetNumber;
-                    const valueAndTargetSpanEnclosed = document.getElementById(`${title}-tracker-value-and-target-edit`) as HTMLSpanElement;
-                    valueAndTargetSpanEnclosed.textContent = ` ${currentValue} / ${newTargetNumber}`;
-                    let updatedPercentage = (currentValue / newTargetNumber) * 100;
-                    if (updatedPercentage > 100) {
-                        updatedPercentage = 100;
-                    }
-                    const progressBarSpanEnclosed = document.getElementById(`${title}-tracker-progress-edit`) as HTMLSpanElement;
-                    progressBarSpanEnclosed.style.cssText = `width: ${updatedPercentage}%;`;
+                    updatedQuality.targetValues ? updatedQuality.targetValues.push(newTargetNumber) : updatedQuality.targetValues = [newTargetNumber];
+                    this.regenerateTracker(updatedQuality);
+                    //(document.getElementById("edit-modal") as HTMLDialogElement).showModal();
 
-                    const mirrorItem = document.getElementById(`${title}-tracker`);
-                    const mirrorTargetText = mirrorItem?.getElementsByClassName("item__value").item(0);
-                    const mirrorTargetBar = mirrorItem?.getElementsByClassName("progress-bar__stripe").item(0) as HTMLSpanElement;
-                    if (mirrorTargetText && mirrorTargetBar) {
-                        mirrorTargetText.textContent = valueAndTargetSpanEnclosed.textContent;
-                        mirrorTargetBar.style.cssText = progressBarSpanEnclosed.style.cssText;
-                    }
                     this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
 
                     sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
@@ -268,10 +288,9 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             });
             const newTargetText = document.createElement("span");
             newTargetText.textContent = "New Target";
-            newTargetButton.style.padding = "2px 5px";
             newTargetButton.appendChild(newTargetText);
             newTargetSpan.appendChild(newTargetButton);
-            qualityListItem.appendChild(newTargetSpan);
+            editDiv.appendChild(newTargetSpan);
 
             const deleteButton = document.createElement("button");
             deleteButton.classList.add("buttonlet-container");
@@ -294,19 +313,18 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             deleteButton.addEventListener("click", () => {
                 document.getElementById(`${title}-tracker`)?.remove();
                 document.getElementById(`${title}-tracker-edit`)?.remove();
-                this.trackedQualities.delete(title); //todo this
+                this.trackedQualities.delete(title);
 
                 this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
                 sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
                 this.hideUpAndDownButtons();
             });
-            qualityListItem.appendChild(deleteButton);
 
             const upAndDownButtonSpan = document.createElement("span");
             const upButton = document.createElement("button");
             upButton.classList.add("js-tt", "button", "button--primary", "button--margin", "button--go", "up-button");
             upButton.addEventListener("click", () => {
-                this.moveItem(title, "UP"); //todo this
+                this.moveItem(title, "UP");
             });
             const upButtonText = document.createElement("span");
             upButtonText.textContent = "Up";
@@ -316,7 +334,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             const downButton = document.createElement("button");
             downButton.classList.add("js-tt", "button", "button--primary", "button--margin", "button--go", "down-button");
             downButton.addEventListener("click", () => {
-                this.moveItem(title, "DOWN"); //todo this
+                this.moveItem(title, "DOWN");
             });
             const downButtonText = document.createElement("span");
             downButtonText.textContent = "Down";
@@ -324,21 +342,137 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             downButton.appendChild(downButtonText);
             upAndDownButtonSpan.appendChild(upButton);
             upAndDownButtonSpan.appendChild(downButton);
-            qualityListItem.appendChild(upAndDownButtonSpan);
+            editDiv.appendChild(upAndDownButtonSpan);
+            editDiv.appendChild(deleteButton);
+            qualityListItem.appendChild(editDiv);
+
+            if (targetValues) {
+                for (const [idx, target] of targetValues.entries()) {
+                    const editTargetDiv = document.createElement("div");
+                    editTargetDiv.style.gridArea = `${2 * idx + 2} / 3`;
+                    qualityListItem.appendChild(editTargetDiv);
+                    const editTargetInput = document.createElement("input");
+                    editTargetInput.id = `${title}-edit-target-number-${idx}`;
+                    editTargetInput.type = "number";
+                    editTargetInput.value = target.toString();
+                    editTargetInput.style.width = "6ch";
+                    editTargetDiv.appendChild(editTargetInput);
+
+                    const editTargetButton = document.createElement("button");
+                    editTargetButton.classList.add("js-tt", "button", "button--primary", "button--margin", "button--go");
+                    editTargetButton.style.padding = "2px 5px";
+                    editTargetButton.addEventListener("click", () => {
+                        const editQuality = this.trackedQualities.get(title);
+                        const newTarget = Number((document.getElementById(`${title}-edit-target-number-${idx}`) as HTMLInputElement).value);
+                        if (editQuality) {
+                            try {
+                                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                                editQuality.targetValues![idx] = newTarget;
+
+                                this.regenerateTracker(editQuality);
+                                //(document.getElementById("edit-modal") as HTMLDialogElement).showModal();
+
+                                this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
+                                sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
+                            } catch (error) {
+                                console.error(`Could not find item ${editQuality.name} at index ${idx}`)
+                            }
+
+                        }
+                    });
+                    const editTargetText = document.createElement("span");
+                    editTargetText.textContent = "Edit Target";
+                    editTargetButton.appendChild(editTargetText);
+                    editTargetDiv.appendChild(editTargetButton);
+
+                    const deleteTargetButton = document.createElement("button");
+                    deleteTargetButton.classList.add("buttonlet-container");
+                    deleteTargetButton.setAttribute("aria-label", "Stop Tracking");
+                    deleteTargetButton.setAttribute("type", "button");
+                    const deleteTargetSpan1 = document.createElement("span");
+                    deleteTargetSpan1.classList.add("buttonlet", "fa-stack", "fa-lg", "buttonlet-enabled", "buttonlet-delete");
+                    deleteTargetSpan1.setAttribute("title", "Delete Target");
+                    const deleteTargetSpan2 = document.createElement("span");
+                    deleteTargetSpan2.classList.add("fa", "fa-circle", "fa-stack-2x");
+                    const deleteTargetSpan3 = document.createElement("span");
+                    deleteTargetSpan3.classList.add("fa", "fa-inverse", "fa-stack-1x", "fa-times");
+                    const deleteTargetSpan4 = document.createElement("span");
+                    deleteTargetSpan4.classList.add("u-visually-hidden");
+                    deleteTargetSpan4.textContent = "delete target";
+                    deleteTargetButton.appendChild(deleteTargetSpan1);
+                    deleteTargetSpan1.appendChild(deleteTargetSpan2);
+                    deleteTargetSpan1.appendChild(deleteTargetSpan3);
+                    deleteTargetSpan1.appendChild(deleteTargetSpan4);
+                    deleteTargetButton.addEventListener("click", () => {
+                        const editQuality = this.trackedQualities.get(title);
+                        if (editQuality) {
+                            editQuality.targetValues?.splice(idx, 1);
+                            this.regenerateTracker(editQuality);
+                            this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
+                            sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
+                        }
+                    });
+                    editTargetDiv.appendChild(deleteTargetButton);
+                }
+            }
         }
         return qualityListItem;
     }
 
-    private moveItem(title: string, upOrDown: UpOrDown) {
+    //create the HTML elements that track progress towards a target
+    generateTargetElements(title: string, targetValues: number[] | undefined, initialValue: number, editMode: boolean): HTMLElement[] {
+        const targetElementsToAdd: HTMLElement[] = [];
+        if (targetValues && targetValues.length) {
+            for (const [idx, target] of targetValues.entries()) {
+                const valueAndTargetSpan = document.createElement("span");
+                valueAndTargetSpan.id = editMode ? `${title}-tracker-value-and-target-edit-${idx}` : `${title}-tracker-value-and-target-${idx}`;
+                valueAndTargetSpan.classList.add("item__value");
+                if (target === 0) {
+                    valueAndTargetSpan.textContent = ` ${initialValue}`;
+                } else {
+                    valueAndTargetSpan.textContent = ` ${initialValue} / ${target}`;
+                }
+
+                const progressBarDiv = document.createElement("div");
+                if (target === 0) {
+                    targetElementsToAdd.push(valueAndTargetSpan);
+                    targetElementsToAdd.push(progressBarDiv);
+                    continue;
+                }
+                progressBarDiv.classList.add("progress-bar");
+                const progressBarSpan = document.createElement("span");
+                progressBarSpan.id = editMode ? `${title}-tracker-progress-edit-${idx}` : `${title}-tracker-progress-${idx}`;
+                progressBarSpan.classList.add("progress-bar__stripe", "progress-bar__stripe--has-transition");
+                let percentage = (initialValue / target) * 100;
+                if (percentage > 100) {
+                    percentage = 100;
+                }
+                progressBarSpan.style.cssText = `width: ${percentage}%;`;
+                progressBarDiv.appendChild(progressBarSpan);
+                targetElementsToAdd.push(valueAndTargetSpan);
+                targetElementsToAdd.push(progressBarDiv);
+            }
+        } else {
+            const valueAndTargetSpan = document.createElement("span");
+            valueAndTargetSpan.id = editMode ? `${title}-tracker-value-and-target-edit-no-target` : `${title}-tracker-value-and-target-no-target`;
+            valueAndTargetSpan.classList.add("item__value");
+            valueAndTargetSpan.textContent = initialValue.toString();
+            targetElementsToAdd.push(valueAndTargetSpan);
+        }
+        return targetElementsToAdd;
+    }
+
+    moveItem(title: string, upOrDown: UpOrDown) {
         const editItem = document.getElementById(`${title}-tracker-edit`) as HTMLLIElement;
         const mainPageItem = document.getElementById(`${title}-tracker`) as HTMLLIElement;
         const qualityKeys = Array.from(this.trackedQualities.keys());
-        let currentIndex = -1;
-        for (let i = 0; i < qualityKeys.length; i++) {
-            if (qualityKeys[i] === title) {
-                currentIndex = i;
-                break;
-            }
+
+        const currentIndex = qualityKeys.indexOf(title);
+        if (currentIndex === 0 && upOrDown === "UP") {
+            return;
+        }
+        if (currentIndex === qualityKeys.length - 1 && upOrDown === "DOWN") {
+            return;
         }
         const editPanel = document.getElementById("quality-tracker-edit") as HTMLUListElement;
         const mainPanel = document.getElementById("quality-tracker") as HTMLUListElement;
@@ -382,48 +516,6 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         panel.insertBefore(qualityListItem, insertBeforeTarget || null);
     }
 
-    //find the element, update the number
-    private updateQualityOnPage(quality: TrackedQuality) {
-        const qualityDisplays: HTMLElement[] = [];
-        const existingDisplays = document.getElementsByClassName("tracked-quality");
-        const existingEdits = document.getElementsByClassName("tracked-quality-edit");
-        for (const display of existingDisplays) {
-            const displayTitle = (display as HTMLElement).dataset.qualityName;
-            if (displayTitle === quality.name) {
-                qualityDisplays.push(display as HTMLElement);
-            }
-        }
-        for (const display of existingEdits) {
-            const displayTitle = (display as HTMLElement).dataset.qualityName;
-            if (displayTitle === quality.name) {
-                qualityDisplays.push(display as HTMLElement);
-            }
-        }
-
-        for (const qualityDisplay of qualityDisplays) {
-            const valueSpan = getSingletonByClassName(qualityDisplay, "item__value");
-            const target = quality.targetValue;
-            if (valueSpan) {
-                valueSpan.textContent = ` ${quality.currentValue} / ${target}`;
-            }
-
-            const progressBarSpan = getSingletonByClassName(qualityDisplay, "progress-bar__stripe") as HTMLElement;
-            if (progressBarSpan) {
-                let percentage = (quality.currentValue / target) * 100;
-                if (percentage > 100) {
-                    percentage = 100;
-                }
-                progressBarSpan.style.cssText = `width: ${percentage}%;`;
-            }
-            qualityDisplay.style.cssText = "text-align: left";
-
-            if (quality.image !== "question") {
-                const icon = qualityDisplay.getElementsByTagName("img")[0];
-                icon?.setAttribute("src", `//images.fallenlondon.com/icons/${quality.image}.png`);
-            }
-        }
-    }
-
     checkEligibility(node: HTMLElement): boolean {
         if (!this.displayQualityTracker) {
             return false;
@@ -465,7 +557,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 document.body.appendChild(editModal);
                 this.hideUpAndDownButtons();
             }
-            sidebar.appendChild(wrapperDiv);
+            sidebar.insertBefore(wrapperDiv, sidebar.firstChild);
         }
 
         if (!travelColumn.contains(sidebar)) {
@@ -529,7 +621,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         closeModalButton.style.padding = "2px 5px";
         editModal.appendChild(closeModalButton);
         editModal.addEventListener("click", (event) => {
-            if (event.target === (document.getElementById("edit-modal") as HTMLDialogElement)) { //todo check this
+            if (event.target === (document.getElementById("edit-modal") as HTMLDialogElement)) {
                 const qualitySelect = document.getElementById("track-target-name") as HTMLInputElement;
                 if (qualitySelect) {
                     qualitySelect.value = "";
@@ -548,7 +640,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         ;
     }
 
-    private createDropDownSelect() {
+    createDropDownSelect() {
         const qualityPicker = document.createElement("div");
         qualityPicker.setAttribute("id", "quality-picker");
         const qualitySelect = document.createElement("input");
@@ -581,10 +673,10 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             const targetInputEnclosed = document.getElementById("track-target-number") as HTMLInputElement;
             const trackName = qualitySelectEnclosed.value;
             const trackNumber = Number(targetInputEnclosed.value);
-            const trackCategory = this.qualityNameAndCategory.get(trackName) || "";//todo this
+            const trackCategory = this.qualityNameAndCategory.get(trackName) || "";
             const trackCurrent = this.currentState?.getQuality(trackCategory, trackName)?.level || 0;
             const trackImage = this.currentState?.getQuality(trackCategory, trackName)?.image || "question";
-            const newQuality = { name: trackName, category: trackCategory, currentValue: trackCurrent, targetValue: trackNumber, image: trackImage };
+            const newQuality = { name: trackName, category: trackCategory, currentValue: trackCurrent, targetValues: [trackNumber], image: trackImage };
             this.trackedQualities.set(trackName, newQuality);
 
             this.currentSettings.trackedQualities = JSON.stringify(Object.fromEntries(this.trackedQualities));
@@ -624,7 +716,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         }
     }
 
-    private hideUpAndDownButtons() {
+    hideUpAndDownButtons() {
         const qualityTrackerEditPanel = document.getElementById("quality-tracker-edit");
         if (!qualityTrackerEditPanel) {
             return; //no buttons to hide if you're can't get the edit panel
@@ -632,7 +724,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         const collectionItems = qualityTrackerEditPanel.getElementsByTagName("li");
         if (collectionItems) {
             const arrayItems = Array.from(collectionItems);
-            if (arrayItems && arrayItems.length && arrayItems.length > 0) {
+            if (arrayItems && arrayItems.length > 0) {
                 //hide up on the first, down on the last
                 const firstElementUpButton = arrayItems[0].getElementsByClassName("up-button").item(0) as HTMLButtonElement;
                 if (firstElementUpButton) {
@@ -664,12 +756,16 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                         //making sure everything else has its up and down visible
                         const up = element.getElementsByClassName("up-button").item(0) as HTMLButtonElement;
                         const down = element.getElementsByClassName("down-button").item(0) as HTMLButtonElement;
-                        up.removeAttribute("hidden");
-                        up.style.opacity = "1.0";
-                        up.disabled = false;
-                        down.removeAttribute("hidden");
-                        down.style.opacity = "1.0";
-                        down.disabled = false;
+                        if (up) {
+                            up.removeAttribute("hidden");
+                            up.style.opacity = "1.0";
+                            up.disabled = false;
+                        }
+                        if (down) {
+                            down.removeAttribute("hidden");
+                            down.style.opacity = "1.0";
+                            down.disabled = false;
+                        }
                     });
                 }
             }
@@ -681,6 +777,7 @@ export interface TrackedQuality {
     name: string;
     category: string;
     currentValue: number;
-    targetValue: number;
+    targetValue?: number;
+    targetValues?: number[];
     image: string;
 };

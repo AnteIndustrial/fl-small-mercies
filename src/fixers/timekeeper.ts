@@ -656,6 +656,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 starvedItem.textContent = "You can visit the Starved Embassy.";
             }
         }
+        //todo you can have multiple boons, so this needs to add them up
         if (this.currentSettings.ecdysis && this.characterQualities.ECDYSIS.value) {
             const sharpened = this.currentState.getQuality("Boon", "Sharpened");
             if (!(this.characterQualities.WIDE_EYED.value ||
@@ -907,6 +908,15 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 }
             }
             livingStoryPanel.appendChild(chimesBoons);
+        }
+        //todo need a setting to turn this feature on/off
+        for (const [title, livingStory] of Object.entries(MISC_LIVING_STORIES)) {
+            if (this.currentSettings[title]) {
+                const livingStoryDiv = document.createElement("div");
+                const remaining = this.calculateRemainingTimeFromIsoOrNumberString(this.currentSettings[title]);
+                livingStoryDiv.textContent = `${livingStory.story} will complete ${remaining}`;
+                livingStoryPanel.appendChild(livingStoryDiv);
+            }
         }
 
         return livingStoryPanel;
