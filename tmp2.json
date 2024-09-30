@@ -1,0 +1,1399 @@
+{
+  "(A Book Scrawled in Blood)": {
+    "name": "(A Book Scrawled in Blood)",
+    "ids": [
+      263646
+    ],
+    "story": "Another Volume for the Library"
+  },
+  "(A Book Signed With a Flourish)": {
+    "name": "(A Book Signed With a Flourish)",
+    "ids": [
+      263647
+    ],
+    "story": "Another Volume for the Library"
+  },
+  "(A Book Writ in Darkness)": {
+    "name": "(A Book Writ in Darkness)",
+    "ids": [
+      263648
+    ],
+    "story": "Another Volume for the Library"
+  },
+  "(A Book in a Secret Alphabet)": {
+    "name": "(A Book in a Secret Alphabet)",
+    "ids": [
+      263645
+    ],
+    "story": "Another Volume for the Library"
+  },
+  "A notable success – a good deal": {
+    "name": "A notable success – a good deal",
+    "ids": [
+      9650
+    ],
+    "story": "The Enterprising Astronomer's Gift"
+  },
+  "A notable success – he's pleased to see you!": {
+    "name": "A notable success – he's pleased to see you!",
+    "ids": [
+      9448
+    ],
+    "story": "The Disgruntled Naval Officer's Gift"
+  },
+  "A notable success – something extra for your troubles": {
+    "name": "A notable success – something extra for your troubles",
+    "ids": [
+      9647
+    ],
+    "story": "The Masked Clay Man's Gift"
+  },
+  "Accept Mr Cups' bargain; spare its life": {
+    "name": "Accept Mr Cups' bargain; spare its life",
+    "ids": [
+      235721
+    ],
+    "story": "An Invitation from Mr Cups"
+  },
+  "Accept a gift from Balmoral's Castellan": {
+    "name": "Accept a gift from Balmoral's Castellan",
+    "ids": [
+      243583,
+      243592,
+      243600
+    ],
+    "story": "A Gift from Balmoral (Living Story)"
+  },
+  "Accept the Monkey's Chance": {
+    "name": "Accept the Monkey's Chance",
+    "ids": [
+      240193
+    ],
+    "story": "Mr Hearts' Congratulations"
+  },
+  "Advise her to stick with her original plan": {
+    "name": "Advise her to stick with her original plan",
+    "ids": [
+      244394
+    ],
+    "story": "A Missive from Marigold"
+  },
+  "Advise her to take the Chandler's other option": {
+    "name": "Advise her to take the Chandler's other option",
+    "ids": [
+      244395
+    ],
+    "story": "A Missive from Marigold"
+  },
+  "Alert the Constables": {
+    "name": "Alert the Constables",
+    "ids": [
+      247112
+    ],
+    "story": "The Fate of the Clay Highwayman (Living Story)"
+  },
+  "Alter your Destiny": {
+    "name": "Alter your Destiny",
+    "ids": [
+      259965
+    ],
+    "story": "The Gaze of the Seven-Serpent"
+  },
+  "An Anonymous White Mask, Zee-Stained and Mildewy (The Waswood 2)": {
+    "name": "An Anonymous White Mask, Zee-Stained and Mildewy (The Waswood 2)",
+    "ids": [
+      254499
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "An Anonymous White Mask, Zee-Stained and Mildewy (The Waswood 3)": {
+    "name": "An Anonymous White Mask, Zee-Stained and Mildewy (The Waswood 3)",
+    "ids": [
+      254982
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Ask His Amused Lordship to sponsor you": {
+    "name": "Ask His Amused Lordship to sponsor you",
+    "ids": [
+      9756
+    ],
+    "story": "A meeting of the Dilmun Club"
+  },
+  "Ask the Bishop of St Fiacre's to sponsor you": {
+    "name": "Ask the Bishop of St Fiacre's to sponsor you",
+    "ids": [
+      9757
+    ],
+    "story": "A meeting of the Dilmun Club"
+  },
+  "Ask the Implacable Detective to sponsor you": {
+    "name": "Ask the Implacable Detective to sponsor you",
+    "ids": [
+      9758
+    ],
+    "story": "A meeting of the Dilmun Club"
+  },
+  "Attempt to dissuade the Clay Highwayman": {
+    "name": "Attempt to dissuade the Clay Highwayman",
+    "ids": [
+      247109
+    ],
+    "story": "The Fate of the Clay Highwayman (Living Story)"
+  },
+  "Bathe in the waters": {
+    "name": "Bathe in the waters",
+    "ids": [
+      244785
+    ],
+    "story": "Viric Fades"
+  },
+  "Bathe in the waters (with Boon)": {
+    "name": "Bathe in the waters (with Boon)",
+    "ids": [
+      264889
+    ],
+    "story": "Viric Fades"
+  },
+  "Browse tales of pirates": {
+    "name": "Browse tales of pirates",
+    "ids": [
+      5636
+    ],
+    "story": "You're calmer now."
+  },
+  "Browse the military history": {
+    "name": "Browse the military history",
+    "ids": [
+      5639
+    ],
+    "story": "You're calmer now."
+  },
+  "Browse the natural philosophy section": {
+    "name": "Browse the natural philosophy section",
+    "ids": [
+      5637
+    ],
+    "story": "You're calmer now."
+  },
+  "Browse the society romances": {
+    "name": "Browse the society romances",
+    "ids": [
+      5638
+    ],
+    "story": "You're calmer now."
+  },
+  "Charm your way into someone's home": {
+    "name": "Charm your way into someone's home",
+    "ids": [
+      4401,
+      258747
+    ],
+    "story": "Tutorial: Social Engagements"
+  },
+  "Choose Campaigner as your Profession": {
+    "name": "Choose Campaigner as your Profession",
+    "ids": [
+      38325
+    ],
+    "story": "Time, the Healer"
+  },
+  "Choose Campaigner as your Profession 2": {
+    "name": "Choose Campaigner as your Profession 2",
+    "ids": [
+      38323
+    ],
+    "story": "Time, the Healer"
+  },
+  "Choose Enforcer as your Profession (The Criminals)": {
+    "name": "Choose Enforcer as your Profession (The Criminals)",
+    "ids": [
+      38309
+    ],
+    "story": "Time, the Healer"
+  },
+  "Choose Enforcer as your Profession (The Revolutionaries)": {
+    "name": "Choose Enforcer as your Profession (The Revolutionaries)",
+    "ids": [
+      38322
+    ],
+    "story": "Time, the Healer"
+  },
+  "Choose Journalist as your Profession": {
+    "name": "Choose Journalist as your Profession",
+    "ids": [
+      38311
+    ],
+    "story": "Time, the Healer"
+  },
+  "Choose Rat-Catcher as your profession": {
+    "name": "Choose Rat-Catcher as your profession",
+    "ids": [
+      38310
+    ],
+    "story": "Time, the Healer"
+  },
+  "Choose Trickster as your Profession 1": {
+    "name": "Choose Trickster as your Profession 1",
+    "ids": [
+      38312
+    ],
+    "story": "Time, the Healer"
+  },
+  "Choose Trickster as your Profession 2": {
+    "name": "Choose Trickster as your Profession 2",
+    "ids": [
+      38324
+    ],
+    "story": "Time, the Healer"
+  },
+  "Choose Watcher as your Profession 1": {
+    "name": "Choose Watcher as your Profession 1",
+    "ids": [
+      38326
+    ],
+    "story": "Time, the Healer"
+  },
+  "Choose Watcher as your Profession 2": {
+    "name": "Choose Watcher as your Profession 2",
+    "ids": [
+      38327
+    ],
+    "story": "Time, the Healer"
+  },
+  "Choose the amber card": {
+    "name": "Choose the amber card",
+    "ids": [
+      5634
+    ],
+    "story": "You're calmer now."
+  },
+  "Choose the black card": {
+    "name": "Choose the black card",
+    "ids": [
+      5635
+    ],
+    "story": "You're calmer now."
+  },
+  "Choose the crimson card": {
+    "name": "Choose the crimson card",
+    "ids": [
+      5632
+    ],
+    "story": "You're calmer now."
+  },
+  "Choose the turquoise card": {
+    "name": "Choose the turquoise card",
+    "ids": [
+      5633
+    ],
+    "story": "You're calmer now."
+  },
+  "Contemplate your incredible good fortune": {
+    "name": "Contemplate your incredible good fortune",
+    "ids": [
+      258741
+    ],
+    "story": "Your Messages"
+  },
+  "Dig": {
+    "name": "Dig",
+    "ids": [
+      260400
+    ],
+    "story": "The Rose in Burrow"
+  },
+  "Dip your Cross in the Waters": {
+    "name": "Dip your Cross in the Waters",
+    "ids": [
+      244786
+    ],
+    "story": "Viric Fades"
+  },
+  "Enter the Rat Market": {
+    "name": "Enter the Rat Market",
+    "ids": [
+      252245
+    ],
+    "story": "A Rat no Longer"
+  },
+  "Escape to Ladybones Road (Escaping from New Newgate Prison!)": {
+    "name": "Escape to Ladybones Road (Escaping from New Newgate Prison!)",
+    "ids": [
+      252161
+    ],
+    "story": "Time, the Healer"
+  },
+  "Escape to Spite (Escaping from New Newgate Prison!)": {
+    "name": "Escape to Spite (Escaping from New Newgate Prison!)",
+    "ids": [
+      252159
+    ],
+    "story": "Time, the Healer"
+  },
+  "Escape to Veilgarden (Escaping from New Newgate Prison!)": {
+    "name": "Escape to Veilgarden (Escaping from New Newgate Prison!)",
+    "ids": [
+      252160
+    ],
+    "story": "Time, the Healer"
+  },
+  "Escape to Watchmaker's Hill (Escaping from New Newgate Prison!)": {
+    "name": "Escape to Watchmaker's Hill (Escaping from New Newgate Prison!)",
+    "ids": [
+      252158
+    ],
+    "story": "Time, the Healer"
+  },
+  "Feed a hybrid to the Hybrid": {
+    "name": "Feed a hybrid to the Hybrid",
+    "ids": [
+      238909
+    ],
+    "story": "Weeks have passed since you last saw Clara"
+  },
+  "Feed the Hybrid the dreams of a dead god": {
+    "name": "Feed the Hybrid the dreams of a dead god",
+    "ids": [
+      238944
+    ],
+    "story": "Weeks have passed since you last saw Clara"
+  },
+  "Feed your Philosophical Raven Advisor further": {
+    "name": "Feed your Philosophical Raven Advisor further",
+    "ids": [
+      41166
+    ],
+    "story": "Your Pristine Raven's Egg is hatching!"
+  },
+  "Give him the wink": {
+    "name": "Give him the wink",
+    "ids": [
+      239468
+    ],
+    "story": "Waiting for the Next Bout"
+  },
+  "Give the order for your airship to be built": {
+    "name": "Give the order for your airship to be built",
+    "ids": [
+      265642
+    ],
+    "story": "Your Airship, under construction"
+  },
+  "Go for the kill": {
+    "name": "Go for the kill",
+    "ids": [
+      128567
+    ],
+    "story": "A Legend Among Ratkind (Living Story)"
+  },
+  "Have a word with F.F. Gebrandt (The Waswood)": {
+    "name": "Have a word with F.F. Gebrandt (The Waswood)",
+    "ids": [
+      254769
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Have a word with Madame Shoshana (The Waswood)": {
+    "name": "Have a word with Madame Shoshana (The Waswood)",
+    "ids": [
+      254764
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Have a word with Mr Slowcake (The Waswood)": {
+    "name": "Have a word with Mr Slowcake (The Waswood)",
+    "ids": [
+      254597
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Have a word with Mrs Plenty (The Waswood)": {
+    "name": "Have a word with Mrs Plenty (The Waswood)",
+    "ids": [
+      254763
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Have a word with Virginia (The Waswood)": {
+    "name": "Have a word with Virginia (The Waswood)",
+    "ids": [
+      254765
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Have a word with the Captivating Princess (The Waswood)": {
+    "name": "Have a word with the Captivating Princess (The Waswood)",
+    "ids": [
+      254599
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Have a word with the Jovial Contrarian (The Waswood)": {
+    "name": "Have a word with the Jovial Contrarian (The Waswood)",
+    "ids": [
+      254598
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Have a word with the Tentacled Entrepreneur (The Waswood)": {
+    "name": "Have a word with the Tentacled Entrepreneur (The Waswood)",
+    "ids": [
+      254767
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Have a word with the Viscountess of the Viric Jungle (The Waswood)": {
+    "name": "Have a word with the Viscountess of the Viric Jungle (The Waswood)",
+    "ids": [
+      254768
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "He has something for you": {
+    "name": "He has something for you",
+    "ids": [
+      9648
+    ],
+    "story": "The Masked Clay Man's Gift"
+  },
+  "Hit the cobbles": {
+    "name": "Hit the cobbles",
+    "ids": [
+      258741,
+      258745
+    ],
+    "story": "A Mysterious Benefactor! (Living Story)"
+  },
+  "How long until maturity?": {
+    "name": "How long until maturity?",
+    "ids": [
+      238122
+    ],
+    "story": "Weeks have passed since you last saw Clara"
+  },
+  "Incubate a Pristine Raven's Egg among books": {
+    "name": "Incubate a Pristine Raven's Egg among books",
+    "ids": [
+      119377
+    ],
+    "story": "Your Pristine Raven's Egg is hatching!"
+  },
+  "Introduce your friend": {
+    "name": "Introduce your friend",
+    "ids": [],
+    "story": "Attending to a Matter at Home"
+  },
+  "Introduce your friend of the Third City": {
+    "name": "Introduce your friend of the Third City",
+    "ids": [
+      237941
+    ],
+    "story": "Attending to a Matter at Home"
+  },
+  "Introduce your friend the Curator": {
+    "name": "Introduce your friend the Curator",
+    "ids": [
+      237940
+    ],
+    "story": "Attending to a Matter at Home"
+  },
+  "Mr Fires (Station VIII)": {
+    "name": "Mr Fires (Station VIII)",
+    "ids": [
+      245936
+    ],
+    "story": "The Master's Departure"
+  },
+  "Mr Spices (Station VIII)": {
+    "name": "Mr Spices (Station VIII)",
+    "ids": [
+      245568
+    ],
+    "story": "The Master's Departure"
+  },
+  "Mr Wines (Station VIII)": {
+    "name": "Mr Wines (Station VIII)",
+    "ids": [
+      245563
+    ],
+    "story": "The Master's Departure"
+  },
+  "Obtain a curious promissory note (Destined 2)": {
+    "name": "Obtain a curious promissory note (Destined 2)",
+    "ids": [
+      259970
+    ],
+    "story": "The Gaze of the Seven-Serpent"
+  },
+  "Offer a pail of Hellworm Milk": {
+    "name": "Offer a pail of Hellworm Milk",
+    "ids": [
+      255408
+    ],
+    "story": "Time the Ripener, will bring its rewards"
+  },
+  "Offer to join the Clay Highwayman": {
+    "name": "Offer to join the Clay Highwayman",
+    "ids": [
+      247111
+    ],
+    "story": "The Fate of the Clay Highwayman (Living Story)"
+  },
+  "Operations at midnight": {
+    "name": "Operations at midnight",
+    "ids": [
+      40919
+    ],
+    "story": "A Raven's triumphant return!"
+  },
+  "Plant the infernal rose": {
+    "name": "Plant the infernal rose",
+    "ids": [
+      260679
+    ],
+    "story": "The Rose in Burrow"
+  },
+  "Provide a Portfolio of Souls": {
+    "name": "Provide a Portfolio of Souls",
+    "ids": [
+      238073
+    ],
+    "story": "Weeks have passed since you last saw Clara"
+  },
+  "Provide a few swift nips of something strong": {
+    "name": "Provide a few swift nips of something strong",
+    "ids": [
+      238077
+    ],
+    "story": "Weeks have passed since you last saw Clara"
+  },
+  "Provide a sack of crunchy treats": {
+    "name": "Provide a sack of crunchy treats",
+    "ids": [
+      238078
+    ],
+    "story": "Weeks have passed since you last saw Clara"
+  },
+  "Provide a smorgasbord of deceased rats": {
+    "name": "Provide a smorgasbord of deceased rats",
+    "ids": [
+      238072
+    ],
+    "story": "Weeks have passed since you last saw Clara"
+  },
+  "Provide an Ambiguous Eolith": {
+    "name": "Provide an Ambiguous Eolith",
+    "ids": [
+      238076
+    ],
+    "story": "Weeks have passed since you last saw Clara"
+  },
+  "Provide something viciously sweet": {
+    "name": "Provide something viciously sweet",
+    "ids": [
+      238075
+    ],
+    "story": "Weeks have passed since you last saw Clara"
+  },
+  "Provide something writhing and alive": {
+    "name": "Provide something writhing and alive",
+    "ids": [],
+    "story": "Weeks have passed since you last saw Clara"
+  },
+  "Provide the flavour of sorrow": {
+    "name": "Provide the flavour of sorrow",
+    "ids": [
+      238079
+    ],
+    "story": "Weeks have passed since you last saw Clara"
+  },
+  "Put your trophy on the clerk's desk": {
+    "name": "Put your trophy on the clerk's desk",
+    "ids": [],
+    "story": "An Invitation from the Efficient Commissioner"
+  },
+  "Receive the latest 'reports' from your 'agent'": {
+    "name": "Receive the latest 'reports' from your 'agent'",
+    "ids": [
+      250681
+    ],
+    "story": "A Report from the Khagan's Palace (Living Story)"
+  },
+  "Reconstruct the Museum of Prelapsarian History": {
+    "name": "Reconstruct the Museum of Prelapsarian History",
+    "ids": [
+      258987
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Refuse the Chance": {
+    "name": "Refuse the Chance",
+    "ids": [
+      240200
+    ],
+    "story": "Mr Hearts' Congratulations"
+  },
+  "Relive the Great Sink of 1899": {
+    "name": "Relive the Great Sink of 1899",
+    "ids": [
+      256439
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Relive the construction of the Museum of Prelapsarian History": {
+    "name": "Relive the construction of the Museum of Prelapsarian History",
+    "ids": [
+      258986
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Rent a room (Hints)": {
+    "name": "Rent a room (Hints)",
+    "ids": [
+      4402
+    ],
+    "story": "Tutorial: Social Engagements"
+  },
+  "Rent a room (Rostygold)": {
+    "name": "Rent a room (Rostygold)",
+    "ids": [
+      119565
+    ],
+    "story": "Tutorial: Social Engagements"
+  },
+  "Request identification from London's military service": {
+    "name": "Request identification from London's military service",
+    "ids": [
+      260678
+    ],
+    "story": "A Regimental Rose"
+  },
+  "Return to a reverie of the Great Sink": {
+    "name": "Return to a reverie of the Great Sink",
+    "ids": [
+      256921
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Return to the Viscountess (The Waswood)": {
+    "name": "Return to the Viscountess (The Waswood)",
+    "ids": [
+      254510
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Return to the Viscountess (The Waswood) 2": {
+    "name": "Return to the Viscountess (The Waswood) 2",
+    "ids": [
+      254511
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Send to Hell for gardening advice": {
+    "name": "Send to Hell for gardening advice",
+    "ids": [
+      260398
+    ],
+    "story": "A Missive, on a Rose"
+  },
+  "Sinning Jenny's Wimple. Again. (Waswood)": {
+    "name": "Sinning Jenny's Wimple. Again. (Waswood)",
+    "ids": [
+      254492
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Speak with the Roseate Queen": {
+    "name": "Speak with the Roseate Queen",
+    "ids": [
+      224801
+    ],
+    "story": "The Waswood's Influence Fades"
+  },
+  "Take your leave (Ambition: Your Defeat)": {
+    "name": "Take your leave (Ambition: Your Defeat)",
+    "ids": [
+      240114
+    ],
+    "story": "An Invitation From Mister Hearts"
+  },
+  "The 1762 Zitternfränkisch": {
+    "name": "The 1762 Zitternfränkisch",
+    "ids": [
+      266863
+    ],
+    "story": "Oenophilic Ardour"
+  },
+  "The 1805 Lambs' Slaughter": {
+    "name": "The 1805 Lambs' Slaughter",
+    "ids": [
+      266862
+    ],
+    "story": "Oenophilic Ardour"
+  },
+  "The 1854 Château Tyran": {
+    "name": "The 1854 Château Tyran",
+    "ids": [
+      266860
+    ],
+    "story": "Oenophilic Ardour"
+  },
+  "The 335 Opimian": {
+    "name": "The 335 Opimian",
+    "ids": [
+      266864
+    ],
+    "story": "Oenophilic Ardour"
+  },
+  "The 6000 BC Grunting Vintner": {
+    "name": "The 6000 BC Grunting Vintner",
+    "ids": [
+      266865
+    ],
+    "story": "Oenophilic Ardour"
+  },
+  "The Winking Weasel (undated)": {
+    "name": "The Winking Weasel (undated)",
+    "ids": [
+      266866
+    ],
+    "story": "Oenophilic Ardour"
+  },
+  "There he is! 2": {
+    "name": "There he is! 2",
+    "ids": [
+      9651
+    ],
+    "story": "The Enterprising Astronomer's Gift"
+  },
+  "Try to take him alive": {
+    "name": "Try to take him alive",
+    "ids": [
+      128568
+    ],
+    "story": "A Legend Among Ratkind (Living Story)"
+  },
+  "Use your leverage": {
+    "name": "Use your leverage",
+    "ids": [
+      239462
+    ],
+    "story": "Waiting for the Next Bout"
+  },
+  "Visit the mint": {
+    "name": "Visit the mint",
+    "ids": [
+      250116
+    ],
+    "story": "A Minting, Completed"
+  },
+  "Wait (Smoke and Ash, Kindled)": {
+    "name": "Wait (Smoke and Ash, Kindled)",
+    "ids": [
+      260401
+    ],
+    "story": "The Rose in Burrow"
+  },
+  "Walk away (The Clay Highwayman)": {
+    "name": "Walk away (The Clay Highwayman)",
+    "ids": [
+      247511
+    ],
+    "story": "The Fate of the Clay Highwayman (Living Story)"
+  },
+  "Wish the Clay Highwayman luck": {
+    "name": "Wish the Clay Highwayman luck",
+    "ids": [
+      247110
+    ],
+    "story": "The Fate of the Clay Highwayman (Living Story)"
+  },
+  "You understand": {
+    "name": "You understand",
+    "ids": [
+      8098
+    ],
+    "story": "Time, the Healer"
+  },
+  "You've found him!": {
+    "name": "You've found him!",
+    "ids": [
+      9449
+    ],
+    "story": "The Disgruntled Naval Officer's Gift"
+  },
+  "Parabola tattoo": {
+    "name": "Parabola tattoo",
+    "ids": [
+      123865,
+      150231
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Purchase a 'Coilheart Indulgence'": {
+    "name": "Purchase a 'Coilheart Indulgence'",
+    "ids": [
+      266582,
+      267786
+    ],
+    "story": "Crumbling Tickets"
+  },
+  "New Newgate Prison tattoo": {
+    "name": "New Newgate Prison tattoo",
+    "ids": [
+      123866,
+      150232
+    ],
+    "story": "Remembering Millicent"
+  },
+  "A View from the Chambers of the Heart tattoo": {
+    "name": "A View from the Chambers of the Heart tattoo",
+    "ids": [
+      123316,
+      150213
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Clean out your fireplace": {
+    "name": "Clean out your fireplace",
+    "ids": [
+      262519
+    ],
+    "story": "A Wound Heals"
+  },
+  "Sunless tattoo": {
+    "name": "Sunless tattoo",
+    "ids": [
+      150199,
+      150246
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Rogue Translator (The End of a Search)": {
+    "name": "The Rogue Translator (The End of a Search)",
+    "ids": [
+      267043
+    ],
+    "story": "A Moment Has Passed"
+  },
+  "The Shadow tattoo": {
+    "name": "The Shadow tattoo",
+    "ids": [
+      123877,
+      150241
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Mr Hearts' Devilled Hearts": {
+    "name": "Mr Hearts' Devilled Hearts",
+    "ids": [
+      5498
+    ],
+    "story": "You're calmer now."
+  },
+  "The Gift tattoo": {
+    "name": "The Gift tattoo",
+    "ids": [
+      150202,
+      150248
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Heiress tattoo": {
+    "name": "The Heiress tattoo",
+    "ids": [
+      123868,
+      150234
+    ],
+    "story": "Remembering Millicent"
+  },
+  "A Zee-Monster tattoo": {
+    "name": "A Zee-Monster tattoo",
+    "ids": [
+      123313,
+      150210
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Show a modicum of caution": {
+    "name": "Show a modicum of caution",
+    "ids": [
+      266853
+    ],
+    "story": "Dissipating Vibration"
+  },
+  "No tattoo at all": {
+    "name": "No tattoo at all",
+    "ids": [
+      150257
+    ],
+    "story": "Remembering Millicent"
+  },
+  "An Incident: Watch Millicent tattoo a pale visitor": {
+    "name": "An Incident: Watch Millicent tattoo a pale visitor",
+    "ids": [
+      178386
+    ],
+    "story": "Remembering Millicent"
+  },
+  "A Blemmigan tattoo": {
+    "name": "A Blemmigan tattoo",
+    "ids": [
+      123899,
+      150244
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Übergoat tattoo": {
+    "name": "Übergoat tattoo",
+    "ids": [
+      123307,
+      150204
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Approach the Banded Prince's dais": {
+    "name": "Approach the Banded Prince's dais",
+    "ids": [
+      267368
+    ],
+    "story": "Dissipating Radiance"
+  },
+  "Hellfire tattoo": {
+    "name": "Hellfire tattoo",
+    "ids": [
+      123894,
+      150242
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Accept an invitation from the Drownies: Reprise": {
+    "name": "Accept an invitation from the Drownies: Reprise",
+    "ids": [
+      259523
+    ],
+    "story": "The Gaze of the Seven-Serpent"
+  },
+  "A Face for the Evening tattoo": {
+    "name": "A Face for the Evening tattoo",
+    "ids": [
+      150201,
+      150247
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Manufacture xanthous bulbs": {
+    "name": "Manufacture xanthous bulbs",
+    "ids": [
+      267044
+    ],
+    "story": "A Moment Has Passed"
+  },
+  "London from above tattoo": {
+    "name": "London from above tattoo",
+    "ids": [
+      123872,
+      150237
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Dance with a mysterious stranger": {
+    "name": "Dance with a mysterious stranger",
+    "ids": [
+      5485
+    ],
+    "story": "You're calmer now."
+  },
+  "Penstock's Wicket tattoo": {
+    "name": "Penstock's Wicket tattoo",
+    "ids": [
+      123314,
+      150211
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Sun tattoo": {
+    "name": "The Sun tattoo",
+    "ids": [
+      123310,
+      150207
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Cheesemonger tattoo": {
+    "name": "The Cheesemonger tattoo",
+    "ids": [
+      123308,
+      150205
+    ],
+    "story": "Remembering Millicent"
+  },
+  "An Invisible City tattoo": {
+    "name": "An Invisible City tattoo",
+    "ids": [
+      123309,
+      150206,
+      150222
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Hunt tattoo": {
+    "name": "The Hunt tattoo",
+    "ids": [
+      123321,
+      150218
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Cards tattoo": {
+    "name": "The Cards tattoo",
+    "ids": [
+      123322,
+      150219
+    ],
+    "story": "Remembering Millicent"
+  },
+  "A Velocipede tattoo": {
+    "name": "A Velocipede tattoo",
+    "ids": [
+      123319,
+      150216
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Extract concentrated sentiment from the Whispering Duellist": {
+    "name": "Extract concentrated sentiment from the Whispering Duellist",
+    "ids": [
+      267311
+    ],
+    "story": "A Moment Has Passed"
+  },
+  "The Fist tattoo": {
+    "name": "The Fist tattoo",
+    "ids": [
+      123874,
+      150238
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Face in the Snow tattoo": {
+    "name": "The Face in the Snow tattoo",
+    "ids": [
+      123315,
+      150212
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Your Own Name tattoo": {
+    "name": "Your Own Name tattoo",
+    "ids": [
+      123869,
+      150235
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Overgoat tattoo": {
+    "name": "The Overgoat tattoo",
+    "ids": [
+      123306,
+      150203
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Someone you once loved tattoo": {
+    "name": "Someone you once loved tattoo",
+    "ids": [
+      123324,
+      150221
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Jewel tattoo": {
+    "name": "The Jewel tattoo",
+    "ids": [
+      123323,
+      150220
+    ],
+    "story": "Remembering Millicent"
+  },
+  "A Chess-Piece tattoo": {
+    "name": "A Chess-Piece tattoo",
+    "ids": [
+      123327,
+      150224
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Extract a quantity of viric fixative": {
+    "name": "Extract a quantity of viric fixative",
+    "ids": [
+      267309
+    ],
+    "story": "A Moment Has Passed"
+  },
+  "The Eye tattoo": {
+    "name": "The Eye tattoo",
+    "ids": [
+      123875,
+      150239
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Indefatigable tattoo": {
+    "name": "The Indefatigable tattoo",
+    "ids": [
+      123317,
+      150214
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Devilbone Dice tattoo": {
+    "name": "Devilbone Dice tattoo",
+    "ids": [
+      123309,
+      150206
+    ],
+    "story": "Remembering Millicent"
+  },
+  "An Incident: Get a private tattoo of your noman": {
+    "name": "An Incident: Get a private tattoo of your noman",
+    "ids": [
+      178385
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Oracle of the Lintel: Reprise": {
+    "name": "The Oracle of the Lintel: Reprise",
+    "ids": [
+      120243
+    ],
+    "story": "The Gaze of the Seven-Serpent"
+  },
+  "The Bazaar tattoo": {
+    "name": "The Bazaar tattoo",
+    "ids": [
+      123312,
+      150209
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Stag's Head tattoo": {
+    "name": "The Stag's Head tattoo",
+    "ids": [
+      123326,
+      150223
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Flute Street tattoo": {
+    "name": "Flute Street tattoo",
+    "ids": [
+      123330,
+      150227
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The Scar in the Sky tattoo": {
+    "name": "The Scar in the Sky tattoo",
+    "ids": [
+      123331,
+      150228
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Savour the goodwill of the season": {
+    "name": "Savour the goodwill of the season",
+    "ids": [
+      262517
+    ],
+    "story": "Dissipating Goodwill"
+  },
+  "Just a Knife tattoo": {
+    "name": "Just a Knife tattoo",
+    "ids": [
+      123329,
+      150226
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Note down as complete a record as you can": {
+    "name": "Note down as complete a record as you can",
+    "ids": [
+      267310
+    ],
+    "story": "A Moment Has Passed"
+  },
+  "The Pen tattoo": {
+    "name": "The Pen tattoo",
+    "ids": [
+      123876,
+      150240
+    ],
+    "story": "Remembering Millicent"
+  },
+  "The House of Chimes tattoo": {
+    "name": "The House of Chimes tattoo",
+    "ids": [
+      123318,
+      150215
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Wrap it up warm and wait": {
+    "name": "Wrap it up warm and wait",
+    "ids": [
+      238693
+    ],
+    "story": "Your Whitsun Egg is Hatching!"
+  },
+  "The Fallen Rat tattoo": {
+    "name": "The Fallen Rat tattoo",
+    "ids": [
+      123867,
+      150233
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Embrace a different destiny": {
+    "name": "Embrace a different destiny",
+    "ids": [
+      117122
+    ],
+    "story": "The Gaze of the Seven-Serpent"
+  },
+  "A Knife which Burns tattoo": {
+    "name": "A Knife which Burns tattoo",
+    "ids": [
+      123328,
+      150225
+    ],
+    "story": "Remembering Millicent"
+  },
+  "Collect poisonous water flowing out of the Sere Palace (With Gonfaloniere 0-1)": {
+    "name": "Collect poisonous water flowing out of the Sere Palace (With Gonfaloniere 0-1)",
+    "ids": [
+      256279
+    ],
+    "story": "Volatiles Evaporate"
+  },
+  "Escape to Watchmaker's Hill": {
+    "name": "Escape to Watchmaker's Hill",
+    "ids": [
+      38085
+    ],
+    "story": "Time, the Healer"
+  },
+  "Pose as a servant (An Empress' Grief)": {
+    "name": "Pose as a servant (An Empress' Grief)",
+    "ids": [
+      256276
+    ],
+    "story": "Volatiles Evaporate"
+  },
+  "Sneak in through the Palace cellars": {
+    "name": "Sneak in through the Palace cellars",
+    "ids": [
+      256278
+    ],
+    "story": "Volatiles Evaporate"
+  },
+  "Fill your hold with sphinxstone": {
+    "name": "Fill your hold with sphinxstone",
+    "ids": [
+      255838
+    ],
+    "story": "A Message from the Unmakers"
+  },
+  "Muck in with the crowd": {
+    "name": "Muck in with the crowd",
+    "ids": [
+      260355
+    ],
+    "story": "Camaraderie concluding"
+  },
+  "Explore Fallen London": {
+    "name": "Explore Fallen London",
+    "ids": [
+      178921
+    ],
+    "story": "A Mysterious Benefactor! (Living Story)"
+  },
+  "Obtain a box full of honeyed cosmogone": {
+    "name": "Obtain a box full of honeyed cosmogone",
+    "ids": [
+      256282
+    ],
+    "story": "Volatiles Evaporate"
+  },
+  "Breathe a sigh of contentment": {
+    "name": "Breathe a sigh of contentment",
+    "ids": [
+      256153
+    ],
+    "story": "Dissipating joy"
+  },
+  "Accept a ribbon for 'Best in Show'": {
+    "name": "Accept a ribbon for 'Best in Show'",
+    "ids": [
+      260380
+    ],
+    "story": "Dissipating Radiance"
+  },
+  "Recover the plaque of your former craft": {
+    "name": "Recover the plaque of your former craft",
+    "ids": [
+      265643
+    ],
+    "story": "Your Airship, under construction"
+  },
+  "Finish off the crocodile, and collect its gall": {
+    "name": "Finish off the crocodile, and collect its gall",
+    "ids": [
+      256264
+    ],
+    "story": "Volatiles Evaporate"
+  },
+  "Escape to Spite": {
+    "name": "Escape to Spite",
+    "ids": [
+      38086
+    ],
+    "story": "Time, the Healer"
+  },
+  "Have some of that coffee": {
+    "name": "Have some of that coffee",
+    "ids": [
+      256387
+    ],
+    "story": "Dissipating Vibration"
+  },
+  "Collect poisonous water flowing out of the Sere Palace (With Gonfaloniere 2-3)": {
+    "name": "Collect poisonous water flowing out of the Sere Palace (With Gonfaloniere 2-3)",
+    "ids": [
+      256280
+    ],
+    "story": "Volatiles Evaporate"
+  },
+  "Escape to Veilgarden": {
+    "name": "Escape to Veilgarden",
+    "ids": [
+      38087
+    ],
+    "story": "Time, the Healer"
+  },
+  "Manufacture a quantum of transposed time": {
+    "name": "Manufacture a quantum of transposed time",
+    "ids": [
+      256281
+    ],
+    "story": "Volatiles Evaporate"
+  },
+  "Escape to Ladybones Road": {
+    "name": "Escape to Ladybones Road",
+    "ids": [
+      38088
+    ],
+    "story": "Time, the Healer"
+  }
+}
