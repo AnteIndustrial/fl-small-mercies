@@ -7,9 +7,9 @@ import {sendToServiceWorker} from "./comms";
 import { MiscTrackerFixer, TrackedQuality } from "./fixers/misc_tracker";
 import { BoneMarketFixer, blockBranches, SMALL_MERCIES_LOCKED_QUALITY } from "./fixers/bone_market";
 import { BoneDetails, BoneName, recipeMap } from "./fixers/recipes";
-import { html } from './temp';
+import { html } from './test/sample_storylet_html';
 import { GameState } from "./game_state";
-import sampleResponse from "./fixers/test.json";
+import sampleResponse from "./test/sample_response.json";
 
 jest.mock("./comms");
 const MILLISECONDS_IN_MINUTE = 60 * 1000;
