@@ -39,7 +39,7 @@ const LIVING_STORY_NAMES = ["livingStoryBookBoon", "livingStoryAstronomerMap", "
     "livingStoryMarigold", "livingStoryHighwayman", "livingStoryDilmun", "livingStoryCalmer", "livingStoryTutorial", "livingStoryRoseInBurrow", "livingStoryClara",
     "livingStoryPristineEgg", "livingStoryNextBout",  "livingStoryAirship", "livingStoryRatkind", "livingStoryMatterAtHome", "livingStoryDeparture", "livingStoryRaven", "livingStoryEfficient", "livingStoryRegimental",
     "livingStoryMissive", "livingStoryInvitation", "livingStoryArdour", "livingStoryMinting", "livingStoryWhitsun", "livingStoryEscape", "livingStoryChristmas"] as const
-type LivingStoryName = typeof LIVING_STORY_NAMES[number];
+type LivingStoryName = typeof LIVING_STORY_NAMES[number];//todo station 8 master airship
 const MISC_LIVING_STORIES: Record<LivingStoryName, LivingStory> = {
     livingStoryBookBoon: { ids: [263646, 263647, 263648, 263645], story: "Another Volume for the Library", timer: SEVEN_DAYS_IN_MILLISECONDS },
     livingStoryAstronomerMap: {  ids: [9650, 9651], story: "The Enterprising Astronomer's Gift", timer: 2 * MILLISECONDS_IN_DAY },
@@ -81,16 +81,18 @@ const MESSAGE_STRINGS = {
 const DAYS = { SUNDAY: 0, MONDAY: 1, TUESDAY: 2, WEDNESDAY: 3, THURSDAY: 4, FRIDAY: 5, SATURDAY: 6 } as const;
 
 
-const RattyDemands = ["ALWAYS", "SAINTLY_DEMAND", "SOFT_DEMAND", "TEMPESTUOUS_DEMAND", "INSCRUTABLE_DEMAND", "INTRICATE_DEMAND", "MAUDLIN_DEMAND"] as const;
+const RattyDemands = ["ALWAYS", "SAINTLY_DEMAND", "SOFT_DEMAND", "TEMPESTUOUS_DEMAND", "INSCRUTABLE_DEMAND", "INTRICATE_DEMAND", "MAUDLIN_DEMAND", "CALCULATING_DEMAND", "RUINOUS_DEMAND"] as const;
 type RattyDemand = typeof RattyDemands[number];
 const RAT_MARKET_BUYING: Record<RattyDemand, readonly RatItem[]> = {
     ALWAYS: [{ id: 142797, name: "Fourth-City Echo", price: 125 }],
     SAINTLY_DEMAND: [{ id: 123214, name: "Ratty Reliquary", price: 125 }, { id: 142249, name: "False Hagiotoponym", price: 625 }],
     SOFT_DEMAND: [{ id: 924, name: "Parabola-Linen Scrap", price: 625 }, { id: 925, name: "Scrap of Ivory Organza", price: 3125 }],
     TEMPESTUOUS_DEMAND: [{ id: 849, name: "Storm-Threnody", price: 125 }, { id: 933, name: "Night-Whisper", price: 625 }],
-    INSCRUTABLE_DEMAND: [{ id: 812, name: "Uncanny Incunabulum", price: 125 }, { id: 141189, name: "Cartographer's Hoard", price: 3125 }],
-    INTRICATE_DEMAND: [{ id: 141946, name: "Unlawful Device", price: 125 }, { id: 142793, name: "Corresponding Sounder", price: 3125 }],
-    MAUDLIN_DEMAND: [{ id: 142386, name: "Captivating Ballad", price: 625 }, { id: 142463, name: "Parabolan Parable", price: 3125 }]
+    INSCRUTABLE_DEMAND: [{ id: 812, name: "Uncanny Incunabulum", price: 125 }, { id: 142448, name: "Chimerical Archive", price: 625 }, { id: 141189, name: "Cartographer's Hoard", price: 3125 }],
+    INTRICATE_DEMAND: [{ id: 141946, name: "Unlawful Device", price: 125 }, { id: 142840, name: "Crackling Device", price: 625}],
+    MAUDLIN_DEMAND: [{ id: 142386, name: "Captivating Ballad", price: 625 }, { id: 142463, name: "Parabolan Parable", price: 3125 }],
+    CALCULATING_DEMAND: [{ id: 122489, name: "Vital Intelligence", price: 125 }, { id: 140970 /* and 140971*/, name: "Queen Mate and Epaulette Mate Pairs", price: 500 }, { id: 142793, name: "Corresponding Sounder", price: 3125 }],
+    RUINOUS_DEMAND: [{ id: 141882, name: "Mortification of a Great Power", price: 625 }, { id: 814, name: "Dreadful Surmise", price: 3125 }, { id: 141764, name: "Distillation of Retribution", price: 3125}]
 } as const;
 
 
@@ -191,28 +193,33 @@ const HEARTS_GAME_SEASON_TO_DISTINCTION: Record<HeartsGameSeason, HeartsGameDist
     Duplicities: "DUPLICITY",
 } as const;
 
-const worldQualityNames = ["SAINTLY_DEMAND", "SOFT_DEMAND", "TEMPESTUOUS_DEMAND", "INSCRUTABLE_DEMAND", "INTRICATE_DEMAND", "MAUDLIN_DEMAND", "THE_RAT_SEASON",
-    "DIRECTION_OF_THE_RAT_WIND", "PHASE_OF_THE_RAT_MOON", "THE_FALSE_SEASON", "THE_SEASON_IN_SOUP", "BONE_MARKET_FLUCTUATIONS", "ZOOLOGICAL_MANIA",
+const worldQualityNames = ["SAINTLY_DEMAND", "SOFT_DEMAND", "TEMPESTUOUS_DEMAND", "INSCRUTABLE_DEMAND", "INTRICATE_DEMAND", "MAUDLIN_DEMAND", "CALCULATING_DEMAND", "RUINOUS_DEMAND",
+    "THE_RAT_SEASON", "DIRECTION_OF_THE_RAT_WIND", "PHASE_OF_THE_RAT_MOON", "THE_FALSE_SEASON", "THE_SEASON_IN_SOUP", "BONE_MARKET_FLUCTUATIONS", "ZOOLOGICAL_MANIA",
     "HEARTS_GAME_SEASON", "SEASON_OF_THE_SACROBOSCAN_CALENDAR"] as const;
 type WorldQualityName = typeof worldQualityNames[number];
 
 type CharacterQualityName = "MAKING_WAVES" | "NOTABILITY" | "BENEFICENCE" | "FREE_EVENING" | "MIRED_IN_MAIL" | "WHISPERS" | "A_KNOCK" | "A_SUSURRUS" | "UNEARTHLY_WHISPER" |
-    "BACKSTAGE" | "ACQUAINTANCE_MRS_CHAPMAN" | "FAVOURABLE_CIRCUMSTANCE" | "PAYMENT" | "PROFESSIONAL_PERK" | "ROUTE_NADIR" | "IRRIGO" | "FLEETING_RECOLLECTIONS" | "PARABOLAN_COMPANY" |
+    "BACKSTAGE" | "ACQUAINTANCE_MRS_CHAPMAN" | "FAVOURABLE_CIRCUMSTANCE" | "PAYMENT" | "PROFESSIONAL_PERK" | "ROUTE_NADIR" | "IRRIGO" | "FLEETING_RECOLLECTIONS" | "VIOLANT_SIGHTS" |
+    "ANTICANDLE" | "MEMORY_OF_LIGHT" | "KHAGANIAN_LIGHTBULB" | "FIRMAMENT" | "DREADED_BOON" | "PARABOLAN_COMPANY" |
     "PARABOLAN_RAVAGES" | "PARABOLAN_CAMPAIGN" | "PARABOLAN_WAR_STAGE" | "PARABOLAN_WAR_ADVANCE" | "TRUE_DENIZEN" | "CONSEQUENCE" | "ROUTE_BONE_MARKET" | "BONE_MARKET_EXHAUSTION" |
     "DELAY_NEXT_MEETING" | "RAILWAY_VENTURE" | "BUREAUCRATIC_ADVANTAGE" | "APPROACHING_HELL" | "VISITOR_TO_HELL" | "FLOWER_FROM_HELL" | "STARVED_EXCHANGE" | "ECDYSIS" | "WIDE_EYED" |
     "PARTIALLY_BONELESS" | "RADIANT_BEARING" | "HALLOW_VESSEL" | "VOTES_CAST" | "VOTES_ALLOWED" | "JENNYS_WIMPLE" | "ANON_WHITE_MASK" | "VISCOUNT_COLLAR" | "VISCOUNTESS_COLLAR" | "STURDY_PICK" |
     "SPEAKING_TUBE" | "M_D_A_FOR_F" | "DRINKING_VESSEL" | "POISONED_PEN" | "WAX_BOOTS" | "WORK_GLOVES" | "MINIATURE_MUSEUM" | "PERFUMERS_ARTS" | "GEBRANDTS_ADDRESS_BOOK" | "NASCENCY" |
     "EXCESS" | "DARES" | "DEVOTION" | "IRREVERENCE" | "DUPLICITY" | "BALMORAL" | "NULL_AND_VOID" | "KHAGANS_PALACE_REPORT" | "AGENT" | "JAUNT_WASWOOD" | "DISCOVERED_WELLSPRING" |
-    "GLOWING_VIRIC" | "BALMORAL_CASTELLAN" | "BALMORAL_GIFT"
+    "GLOWING_VIRIC" | "BALMORAL_CASTELLAN" | "BALMORAL_GIFT" | "RAT_MARKET_SATURATION"
 
 interface RatItem { id: number, name: string, price: number; };
 interface WorldQuality { name: string, result?: WikiResult, resetDay: number; blindspot?: boolean}
 interface CharacterQuality { id: number, value: number, name?: string; }
 
-const timekeeperSettings = ["KHANATE_MESSAGE", "BALMORAL_MESSAGE", "TTH_MESSAGE", "highestBDR", "nextTthISOString",
-    "nextKhanateISOString", "nextBalmoralISOString", "nextWaswoodISOString", "nextWellspringISOString", "nextChimesISOString"];
+const timekeeperSettings = ["nextTthISOString", "nextKhanateISOString", "nextBalmoralISOString", "nextWaswoodISOString", "nextWellspringISOString", "nextChimesISOString",
+    "KHANATE_MESSAGE", "BALMORAL_MESSAGE", "TTH_MESSAGE", "highestBDR"];
 //todo update stuff. When the wiki gives a new world quality, update everything that uses it. Refresh all 'hours remaining' text. Update item quantities.
 //add panels when you get a boon. Remove panels when they expire. etc.
+//fill out the settings modal with add time, delete world quality, etc (put in add/delete misc tracker json too just for development purposes)
+//add a countdown to the last thursday of the month for new exceptional stories
+//when TtH comes, add 7 days to the old one. Update the value any time you see api/tth. Only use messages if there's nothing else.
+//when waswood items are available, say how long until they're gone
 export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAware {
 
     currentSettings!: SettingsObject;
@@ -228,6 +235,8 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: undefined, resetDay: DAYS.MONDAY },
         INTRICATE_DEMAND: { name: "Intricate Demand", result: undefined, resetDay: DAYS.MONDAY },
         MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY },
+        CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY },
+        RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY },
         THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY },
         DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY },
         PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY },
@@ -235,7 +244,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY },
         BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: DAYS.TUESDAY },
         ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY },
-        HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: undefined, resetDay: DAYS.TUESDAY }, //Only the first time each month
+        HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: undefined, resetDay: DAYS.TUESDAY },
         SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: undefined, resetDay: DAYS.THURSDAY },
     };//todo I'm saving the whole thing, maybe just save the results?
 
@@ -257,11 +266,16 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         ROUTE_NADIR: { id: 23569, value: 0 },
         IRRIGO: { id: 23879, value: 0 },
         FLEETING_RECOLLECTIONS: { id: 107562, value: 0 },
+        VIOLANT_SIGHTS: { id: 145614, value: 0 },
+        ANTICANDLE: { id: 142750, value: 0 },
+        MEMORY_OF_LIGHT: { id: 589, value: 0 },
+        KHAGANIAN_LIGHTBULB: { id: 142728, value: 0 },
+        FIRMAMENT: { id: 144986, value: 0 },
         PARABOLAN_COMPANY: { id: 142527, value: 0 },
         PARABOLAN_RAVAGES: { id: 141647, value: 0 },
         PARABOLAN_CAMPAIGN: { id: 142468, value: 0 },
-        PARABOLAN_WAR_STAGE: {id: 142455, value: 0},
-        PARABOLAN_WAR_ADVANCE: {id: 142452, value: 0},
+        PARABOLAN_WAR_STAGE: { id: 142455, value: 0 },
+        PARABOLAN_WAR_ADVANCE: { id: 142452, value: 0 },
         TRUE_DENIZEN: { id: 140753, value: 0 },
         CONSEQUENCE: { id: 140799, value: 0 },
         ROUTE_BONE_MARKET: { id: 140958, value: 0 },
@@ -280,7 +294,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         RADIANT_BEARING: { id: 145010, value: 0 },
         HALLOW_VESSEL: { id: 145013, value: 0 },
         VOTES_CAST: { id: 144587, value: 0 },
-        VOTES_ALLOWED: {id: 144584, value: 0},
+        VOTES_ALLOWED: { id: 144584, value: 0 },
         JENNYS_WIMPLE: { id: 128206, value: 0, name: "Sinning Jenny's Forsaken Wimple" },
         ANON_WHITE_MASK: { id: 140461, value: 0, name: "Anonymous White Mask, Zee-Stained and Mildewy" },
         VISCOUNT_COLLAR: { id: 141787, value: 0, name: "Viscount's Bejewelled Collar" },
@@ -303,13 +317,15 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         DUPLICITY: { id: 144841, value: 0 },
         BALMORAL: { id: 141783, value: 0 },
         NULL_AND_VOID: { id: 141948, value: 0 },
-        KHAGANS_PALACE_REPORT: { id: 142863, value: 0 }, //0 is available, 1 is not
+        KHAGANS_PALACE_REPORT: { id: 142863, value: 0 },
         AGENT: { id: 142862, value: 0 },
         JAUNT_WASWOOD: { id: 143416, value: 0 },
         DISCOVERED_WELLSPRING: { id: 141973, value: 0 },
         GLOWING_VIRIC: { id: 141974, value: 0 },
         BALMORAL_CASTELLAN: { id: 141780, value: 0 },
         BALMORAL_GIFT: { id: 141783, value: 0 },
+        RAT_MARKET_SATURATION: { id: 145145, value: 0 },
+        DREADED_BOON: { id: 142225, value: 0}
     };
 
     characterEffectiveQualities: Record<string, CharacterQuality> = {
@@ -346,8 +362,8 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     }
 
     linkState(state: GameStateController): void {
+        this.currentState = state.getState();
         state.onCharacterDataLoaded((g) => {
-            this.currentState = g;
             Object.values(this.characterQualities).forEach((characterQuality) => {
                 characterQuality.value = g.getQualityById(characterQuality.id)?.level || 0;
             });
@@ -453,14 +469,16 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     calculateTimeDifference(moment: number, now: number) {
         const minutesLeft = Math.round((moment - now) / (MILLISECONDS_IN_MINUTE));
         const hoursLeft = Math.floor(minutesLeft / 60) + (minutesLeft % 60 >= 30 ? 1 : 0);
-        const daysLeft = hoursLeft >= 24 ? Math.ceil(hoursLeft / 24) : 0;
+        const daysLeft = minutesLeft >= 1440 ? Math.floor(minutesLeft / 1440) : 0;
+        const daysAndHours = daysLeft >= 1 ? hoursLeft - 24 * daysLeft : hoursLeft;
 
         let remainingText;
 
         if (daysLeft > 0) {
             const unit = daysLeft === 1 ? "day" : "days";
+            const hoursUnit = daysAndHours === 1 ? "hour" : "hours";
 
-            remainingText = `in ${daysLeft} ${unit}.`;
+            remainingText = `in ${daysLeft} ${unit} ${daysAndHours} ${hoursUnit}.`;
         } else if (hoursLeft > 0) {
             const unit = hoursLeft === 1 ? "hour" : "hours";
 
@@ -517,6 +535,9 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         const perkItem = document.createElement("li");
         perkItem.id = 'professional-perk-item';
         tthPanel.appendChild(perkItem);
+        const zenithItem = document.createElement("li");
+        zenithItem.id = 'zenith-item';
+        tthPanel.appendChild(zenithItem);
         const nadirItem = document.createElement("li");
         nadirItem.id = 'cave-of-nadir-item';
         tthPanel.appendChild(nadirItem);
@@ -544,6 +565,9 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         const heartsGameItem = document.createElement("li");
         heartsGameItem.id = "hearts-game-item";
         tthPanel.appendChild(heartsGameItem);
+        const exceptionalStoryItem = document.createElement("li");
+        exceptionalStoryItem.id = "exceptional-story-item";
+        tthPanel.appendChild(exceptionalStoryItem);
 
         if (this.currentSettings.notability) {
             this.populateNotabilityItems(losingNotability, currentBdrItem, bdrRequiredItem);
@@ -585,9 +609,32 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 perkItem.textContent = "You have 4 Professional Perks, use them before TtH arrives";
             }
         }
+        if (this.currentSettings.zenith && this.characterQualities.FIRMAMENT.value >= 300) {
+            if (this.characterQualities.VIOLANT_SIGHTS.value === 0) {
+                zenithItem.textContent = "You may enter Zenith.";
+                if (this.characterQualities.ANTICANDLE.value >= 12) {
+                    zenithItem.textContent += " You have enough Anticandles to use them in Zenith.";
+                } else {
+                    zenithItem.textContent += ` You need ${12 - this.characterQualities.ANTICANDLE.value} more Anticandles to use them in Zenith.`
+                }
+                if (this.characterQualities.MEMORY_OF_LIGHT.value >= 60) {
+                    zenithItem.textContent += " You have enough Memories of Light to use them in Zenith.";
+                } else {
+                    zenithItem.textContent += ` You need ${60 - this.characterQualities.MEMORY_OF_LIGHT.value} more Memories of Light to use them in Zenith.`;
+                }
+                if (this.characterQualities.KHAGANIAN_LIGHTBULB.value >= 300) {
+                    zenithItem.textContent += " You have enough Khaganian Lightbulbs to use them in Zenith.";
+                } else {
+                    zenithItem.textContent += ` You need ${300 - this.characterQualities.KHAGANIAN_LIGHTBULB.value} more Khaganian Lightbulbs to use them in Zenith.`;
+                }
+            }
+        }
         if (this.currentSettings.irrigo && this.characterQualities.ROUTE_NADIR.value > 2) {
             if (!this.characterQualities.IRRIGO.value || this.characterQualities.FLEETING_RECOLLECTIONS.value) {
-                nadirItem.textContent = "You can visit the Cave of the Nadir";
+                nadirItem.textContent = "You can visit the Cave of the Nadir.";
+                if (this.characterQualities.VIOLANT_SIGHTS.value === 0) {
+                    nadirItem.textContent += " Consider going to Zenith first.";
+                }
             }
         }
         if (this.currentSettings.parabolan_ravages && this.characterQualities.PARABOLAN_COMPANY.value) {
@@ -638,12 +685,14 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             }
             if (this.characterQualities.PARABOLAN_COMPANY.value && (bureaucraticAdvantageAvailable || meetingAvailable)) {
                 if (this.characterQualities.PARABOLAN_WAR_ADVANCE.value === 0 &&
-                        this.characterQualities.PARABOLAN_CAMPAIGN.value > 0 &&
-                        this.characterQualities.PARABOLAN_CAMPAIGN.value < 7 &&
-                        this.characterQualities.PARABOLAN_RAVAGES.value < 3) {
+                    this.characterQualities.PARABOLAN_CAMPAIGN.value > 0 &&
+                    this.characterQualities.PARABOLAN_CAMPAIGN.value < 7 &&
+                    this.characterQualities.PARABOLAN_RAVAGES.value < 3) {
 
-                    boardMeetingItem.textContent += " Now would be a good time to send your train to fight in Parabola."
-                    }
+                    boardMeetingItem.textContent += " Now would be a good time to send your train to fight in Parabola.";
+                } else {
+                    boardMeetingItem.textContent += " You cannot currently send a train to Parabola, you may need to set up the campaign first.";
+                }
             }
         }
         if (this.currentSettings.visit_hell && this.characterQualities.APPROACHING_HELL.value === 777) {
@@ -672,6 +721,12 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         }
         if (this.currentSettings.hearts_game) {
             this.buildHeartsGameItem(heartsGameItem);
+        }
+        if (this.currentSettings.exceptional_story) {
+            const now = new Date();
+            const changeDate = this.getNextExceptionalStoryDate(now);
+            const remainingTime = this.calculateRemainingTime(changeDate.getTime());
+            exceptionalStoryItem.textContent = `The next Exceptional Story will be available ${remainingTime}`;
         }
         return tthPanel;
     }
@@ -729,7 +784,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             }
         }
         if (this.worldQualities.HEARTS_GAME_SEASON.blindspot) {
-            heartsGameItem.textContent = `The Hearts' Game Season World Quality is changing now, which can lead to inaccuracies. Try again in around 30 minutes.`;
+            heartsGameItem.textContent = `The Hearts' Game Season World Quality is changing now, which can lead to inaccuracies. This can take a long time to update on the Wiki. Check in-game manually, or wait about 1 day.`;
             return;
         }
         const season = this.worldQualities.HEARTS_GAME_SEASON.result?.value as HeartsGameSeason;
@@ -785,6 +840,20 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         return changeDate;
     }
 
+    getNextExceptionalStoryDate(start: Date): Date {
+        const changeDate = new Date(this.getNextDay(start, DAYS.THURSDAY));
+        while (changeDate.getUTCDate() > 7) {
+            changeDate.setUTCDate(changeDate.getUTCDate() + 7);
+        }
+        changeDate.setUTCDate(changeDate.getUTCDate() - 7);
+        if (changeDate.getTime() < start.getTime()) {
+            changeDate.setUTCDate(changeDate.getUTCDate() + 7);
+            return this.getNextExceptionalStoryDate(changeDate);
+        } else {
+            return changeDate;
+        }
+    }
+
     private populateNotabilityItems(losingNotability?: HTMLLIElement, currentBdrItem?: HTMLLIElement, bdrRequiredItem?: HTMLLIElement) {
         if (!losingNotability) {
             losingNotability = (document.getElementById("losing-notability-item") as HTMLLIElement);
@@ -805,19 +874,34 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         }
         const highestBDR = this.getHighestBDR();
         currentBdrItem.textContent = `Your highest BDR is ${highestBDR}.`;
-        const requiredMakingWaves = 20 - highestBDR + 4 * this.characterQualities.NOTABILITY.value;
-        if (currentMakingWaves >= requiredMakingWaves) {
-            bdrRequiredItem.textContent = "You can increase your Notability now.";
+        if (this.characterQualities.DREADED_BOON.value === 0 && Number(this.currentSettings.highestBDRRequiresBoon) === 1) {
+            currentBdrItem.textContent += " You will need to regain the Not To Be Trifled With boon to reach this again.";
+            const requiredMakingWaves = 20 - highestBDR + 1 + 4 * this.characterQualities.NOTABILITY.value;
+            if (currentMakingWaves >= requiredMakingWaves) {
+                bdrRequiredItem.textContent = "You can increase your Notability now.";
+            } else {
+                if (currentMakingWaves + 1 === requiredMakingWaves) {
+                    bdrRequiredItem.textContent = `You need to regain your Dreaded boon or gain 1 more Making Waves to increase your Notability.`;
+                } else {
+                    bdrRequiredItem.textContent = `You need ${requiredMakingWaves - currentMakingWaves} more Making Waves to increase your Notability.`;
+                }
+            }
         } else {
-            bdrRequiredItem.textContent = `You need ${requiredMakingWaves - currentMakingWaves} more Making Waves to increase your Notability.`;
+            const requiredMakingWaves = 20 - highestBDR + 4 * this.characterQualities.NOTABILITY.value;
+            if (currentMakingWaves >= requiredMakingWaves) {
+                bdrRequiredItem.textContent = "You can increase your Notability now.";
+            } else {
+                bdrRequiredItem.textContent = `You need ${requiredMakingWaves - currentMakingWaves} more Making Waves to increase your Notability.`;
+            }
         }
     }
 
     getHighestBDR(): number {
         const currentBDR = this.getBDR();
         const highestBDR = Number(this.currentSettings.highestBDR);
-        if (!highestBDR || currentBDR > highestBDR) {
+        if (!highestBDR || currentBDR >= highestBDR) {
             this.currentSettings.highestBDR = currentBDR.toString();
+            this.currentSettings.highestBDRRequiresBoon = this.characterQualities.DREADED_BOON.value.toString();
             sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
         }
         return Number(this.currentSettings.highestBDR);
@@ -845,6 +929,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             } else {
                 wellspringItem.textContent = "You can visit the Wellspring of Moulin now.";
             }
+            livingStoryPanel.appendChild(wellspringItem);
         }
         if (this.currentSettings.waswood) {
             const waswoodPanel = this.buildWaswoodPanel();
@@ -1062,62 +1147,28 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         const modalForm = document.createElement("form");
         modalForm.setAttribute("method", "dialog");
 
-        const khanateLabel = document.createElement("label");
-        khanateLabel.textContent = "Enter an estimate of the next time a 'report' will be available. It should be in UTC time.";
-        khanateLabel.htmlFor = "khanate-date-picker";
+        //const khanateLabel = document.createElement("label");
+        //khanateLabel.textContent = "Enter an estimate of the next time a 'report' will be available. It should be in UTC time.";
+        //khanateLabel.htmlFor = "khanate-date-picker";
 
-        const khanateDatePicker = document.createElement("input");
-        const now = new Date();
-        now.setMinutes(0);
-        now.setSeconds(0);
-        now.setMilliseconds(0);
+        //const khanateDatePicker = this.generateDatePicker();
 
-        khanateDatePicker.id = "khanate-date-picker";
-        khanateDatePicker.type = "datetime-local";
-        khanateDatePicker.value = now.toISOString().slice(0, -1);
-        khanateDatePicker.max = new Date(now.getTime() + SEVEN_DAYS_IN_MILLISECONDS).toISOString().slice(0, -1);
-        khanateDatePicker.min = now.toISOString().slice(0, -1);
-        khanateDatePicker.step = "900";
+        //const khanateConfirm = this.generateDatePickerConfirmButton();
 
-        const timekeeperModalCancel = document.createElement("button");
-        timekeeperModalCancel.textContent = "Cancel";
-        timekeeperModalCancel.addEventListener("click", () => {
-            (document.getElementById("timekeeper-modal") as HTMLDialogElement).close();
-        });
-        timekeeperModalCancel.classList.add("js-tt", "button", "button--primary", "button--go");
-        timekeeperModalCancel.style.padding = "2px 5px";
-
-        const khanateConfirm = document.createElement("button");
-        khanateConfirm.textContent = "Confirm";
-        khanateConfirm.addEventListener("click", () => {
-            const nextKhanateISOString = (document.getElementById("khanate-date-picker") as HTMLInputElement).value + "Z";
-            this.currentSettings.nextKhanateISOString = new Date(nextKhanateISOString).toISOString();
-            sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
-            const nextKhanateReport = "A 'report' from Khagan's Palace is due " + this.calculateRemainingTimeFromIsoOrNumberString(nextKhanateISOString);
-            const nextKhanateReportSpan = document.getElementById("next-khanate-report-message");
-            if (nextKhanateReportSpan) {
-                nextKhanateReportSpan.textContent = nextKhanateReport;
-            }
-            (document.getElementById("timekeeper-modal") as HTMLDialogElement).close();
-        });
-        khanateConfirm.classList.add("js-tt", "button", "button--primary", "button--go");
-        khanateConfirm.style.padding = "2px 5px";
-
-        const tthButton = document.createElement("button");
-        tthButton.textContent = "Clear TTH timer";
-        tthButton.classList.add("js-tt", "button", "button--primary", "button--go");
-        tthButton.style.padding = "2px 5px";
-        tthButton.addEventListener("click", () => {
-            sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextTthISOString: null } });
-        });
+        //const tthButton = document.createElement("button");
+        //tthButton.textContent = "Clear TTH timer";
+        //tthButton.classList.add("js-tt", "button", "button--primary", "button--go");
+        //tthButton.style.padding = "2px 5px";
+        //tthButton.addEventListener("click", () => {
+        //    sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextTthISOString: null } });
+        //});
 
         timekeeperModal.appendChild(modalWrapperDiv);
         modalWrapperDiv.appendChild(modalForm);
-        modalForm.appendChild(khanateLabel);
-        khanateLabel.appendChild(khanateDatePicker);
-        modalForm.appendChild(timekeeperModalCancel);
-        modalForm.appendChild(khanateConfirm);
-        modalForm.appendChild(tthButton);
+        //modalForm.appendChild(khanateLabel);
+        //khanateLabel.appendChild(khanateDatePicker);
+        //modalForm.appendChild(khanateConfirm);
+        //modalForm.appendChild(tthButton);
         timekeeperModal.addEventListener("click", (event) => {
             if (event.target === (document.getElementById("timekeeper-modal") as HTMLDialogElement)) {
                 (document.getElementById("timekeeper-modal") as HTMLDialogElement).close();
@@ -1129,15 +1180,19 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         for (const key of timekeeperSettings) {
             const settingsItem = document.createElement("li");
             settingsItem.textContent = `[${key}]: ${this.currentSettings[key]}`;
+            settingsList.appendChild(settingsItem);
+            if (key.endsWith("ISOString")) {
+                settingsList.appendChild(this.generateDatePicker(key));
+                settingsList.appendChild(this.generateDatePickerConfirmButton(key));
+            }
             const clearButton = document.createElement("button");
             clearButton.textContent = `Clear ${key}`;
             clearButton.addEventListener("click", () => {
                 sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { [key]: "" } });
             });
-            settingsList.appendChild(settingsItem);
-            settingsList.appendChild(clearButton);
             clearButton.classList.add("js-tt", "button", "button--primary", "button--go");
             clearButton.style.padding = "2px 5px";
+            settingsList.appendChild(clearButton);
         }
         const worldQualities: Record<WorldQualityName, WorldQuality> = JSON.parse(this.currentSettings.worldQualities as string);
         for (const [key, val] of Object.entries(worldQualities)) {
@@ -1162,12 +1217,59 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         for (const [name, qual] of Object.entries(this.characterEffectiveQualities)) {
             charQuals.textContent += `{${name}: ${qual.value}}, `;
         }
-
         settingsList.appendChild(charQuals);
 
         timekeeperModal.style.padding = "0";
         modalWrapperDiv.style.margin = "0";
         modalWrapperDiv.style.padding = "1rem";
+
+        const timekeeperModalCancel = document.createElement("button");
+        timekeeperModalCancel.textContent = "Cancel";
+        timekeeperModalCancel.addEventListener("click", () => {
+            (document.getElementById("timekeeper-modal") as HTMLDialogElement).close();
+        });
+        timekeeperModalCancel.classList.add("js-tt", "button", "button--primary", "button--go");
+        timekeeperModalCancel.style.padding = "2px 5px";
+        modalForm.appendChild(timekeeperModalCancel);
+    }
+
+    private generateDatePickerConfirmButton(name: string) {
+        const confirmButton = document.createElement("button");
+        confirmButton.textContent = "Confirm";
+        confirmButton.addEventListener("click", () => {
+            const nextISOString = (document.getElementById(`${name}-date-picker`) as HTMLInputElement).value + "Z";
+            //this.currentSettings[name] = new Date(nextISOString).toISOString();
+            sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { [name]: nextISOString } });
+            //const nextKhanateReport = "A 'report' from Khagan's Palace is due " + this.calculateRemainingTimeFromIsoOrNumberString(nextISOString);
+            //const nextKhanateReportSpan = document.getElementById("next-khanate-report-message");
+            //if (nextKhanateReportSpan) {
+            //    nextKhanateReportSpan.textContent = nextKhanateReport;
+            //}
+            (document.getElementById("timekeeper-modal") as HTMLDialogElement).close();
+        });
+        confirmButton.classList.add("js-tt", "button", "button--primary", "button--go");
+        confirmButton.style.padding = "2px 5px";
+        return confirmButton;
+    }
+
+    private generateDatePicker(name: string) {
+        const datePicker = document.createElement("input");
+        const now = new Date();
+        now.setMinutes(0);
+        now.setSeconds(0);
+        now.setMilliseconds(0);
+
+        datePicker.id = `${name}-date-picker`;
+        datePicker.type = "datetime-local";
+        datePicker.value = now.toISOString().slice(0, -1);
+        if (name.includes("Chimes")) {
+            datePicker.max = new Date(now.getTime() + 4 * SEVEN_DAYS_IN_MILLISECONDS).toISOString().slice(0, -1);
+        } else {
+            datePicker.max = new Date(now.getTime() + SEVEN_DAYS_IN_MILLISECONDS).toISOString().slice(0, -1);
+        }
+        datePicker.min = now.toISOString().slice(0, -1);
+        datePicker.step = "900";
+        return datePicker;
     }
 
     getNextDay(startDate: Date, day: number) {
@@ -1266,7 +1368,19 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         ratMarketOpenItem.textContent = open ? "The Rat Market is Open." : "The Rat Market is Closed.";
         ratMarketList.appendChild(ratMarketOpenItem);
         const tillNextRefresh = this.calculateRemainingTime(this.getNextDay(new Date(), DAYS.MONDAY));
+        
         if (open) {
+            const saturationItem = document.createElement("li");
+            const currentSaturation = this.characterQualities.RAT_MARKET_SATURATION.value;
+            saturationItem.textContent = `Current Rat Market Saturation: ${currentSaturation}.`;
+            if (currentSaturation < 65000) {
+                saturationItem.textContent += ` ${65000 - currentSaturation} saturation remaining at maximum markup.`;
+            } else if (currentSaturation < 180000) {
+                saturationItem.textContent += ` ${180000 - currentSaturation} saturation remaining at small markup.`;
+            } else {
+                saturationItem.textContent += ` No markup remaining.`
+            }
+            ratMarketList.appendChild(saturationItem);
             const closingItem = document.createElement("li");
             closingItem.textContent = `Closing ${tillNextRefresh}`;
             ratMarketList.appendChild(closingItem);
@@ -1284,9 +1398,14 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             const available = this.worldQualities[demand as WorldQualityName]?.result?.value;
             if (available === "1" || available === "2") {
                 for (const item of items) {
-                    const owned = this.currentState.getQualityById(item.id)?.level || 0;
+                    let owned;
+                    if (item.id == 140970) { //special case for pairs of epaulette and queen mates
+                        owned = Math.min(this.currentState.getQualityById(140970)?.level || 0, this.currentState.getQualityById(140971)?.level || 0)
+                    } else {
+                        owned = this.currentState.getQualityById(item.id)?.level || 0;
+                    }
                     const ratMarketBuyingItem = document.createElement("li");
-                    ratMarketBuyingItem.textContent = `Buying ${item.name} for ${item.price}-${item.price * 1.32} Rat-Shillings.`;
+                    ratMarketBuyingItem.textContent = `Buying ${item.name} for ${item.price}-${item.price * 1.32} Rat-Shillings. You have ${owned}.`;
                     ratMarketBuyingItem.textContent += available === "1" ? ` Also buying next week.` : ` Last week.`;
                     totalSellPrice += item.price * owned;
                     ratMarketList.appendChild(ratMarketBuyingItem);
@@ -1322,7 +1441,9 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         if (this.worldQualities.TEMPESTUOUS_DEMAND.result?.value === "1" || this.worldQualities.TEMPESTUOUS_DEMAND.result?.value === "2") {
             const sellingItem = document.createElement("li");
             const item = RAT_MARKET_ITEMS.GANT;
-            sellingItem.textContent = `Selling ${item.name} for ${item.price} Rat-shillings.`;
+            const current = this.currentState.getQualityById(item.id)?.level || 0;
+            sellingItem.textContent = `Selling ${item.name} for ${item.price} Rat-shillings. You currently have ${current}.`;
+            ratMarketList.appendChild(sellingItem);
         }
 
         const nextRefreshItem = document.createElement("li");
@@ -1358,11 +1479,17 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     applySettings(settings: SettingsObject): void {
         this.currentSettings = settings;
         this.displayTimekeeping = this.currentSettings.display_timekeeping as boolean;
-        //todo if tth in the past, add 7 days
         if (this.displayTimekeeping && this.currentSettings.nextTthISOString) {
             const tthListItem = document.getElementById("tth-remaining-item");
             if (tthListItem) {
-                const remainingText = this.calculateRemainingTimeFromIsoOrNumberString(this.currentSettings.nextTthISOString);
+                const tthDate = new Date(this.currentSettings.nextTthISOString as string);
+                //if tth in the past, add 7 days
+                if (tthDate.getTime() < new Date().getTime() + MILLISECONDS_IN_MINUTE * 10) {
+                    tthDate.setTime(tthDate.getTime() + SEVEN_DAYS_IN_MILLISECONDS);
+                    sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextTthISOString: tthDate.toISOString() } });
+                }
+                
+                const remainingText = this.calculateRemainingTime(tthDate.getTime());
                 tthListItem.textContent = `Time the Healer cometh ${remainingText}`;
             }
         }
@@ -1394,16 +1521,24 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             }
         }
     }
-
+    
     removeOutdatedWorldQualities(now: Date): boolean {
         let dirty = false;
         for (const [name, quality] of Object.entries(this.worldQualities)) {
             if (quality.result) {
                 const retrievedTime = new Date(quality.result.timestamp);
-                if (retrievedTime.getUTCDay() === quality.resetDay && retrievedTime.getUTCHours() === 11 && retrievedTime.getUTCMinutes() < 30) {
-                    //result was retrieved during blindspot, may be up to date, or not, best delete it.
-                    quality.result = undefined;
-                    dirty = true;
+                if (name === "SEASON_OF_THE_SACROBOSCAN_CALENDAR") {
+                    if (retrievedTime.getUTCDay() === quality.resetDay && retrievedTime.getUTCHours() === 14 && retrievedTime.getUTCMinutes() < 50) {
+                        //result was retrieved during blindspot, may be up to date, or not, best delete it.
+                        quality.result = undefined;
+                        dirty = true;
+                    }
+                } else {
+                    if (retrievedTime.getUTCDay() === quality.resetDay && retrievedTime.getUTCHours() === 11 && retrievedTime.getUTCMinutes() < 50) {
+                        //result was retrieved during blindspot, may be up to date, or not, best delete it.
+                        quality.result = undefined;
+                        dirty = true;
+                    }
                 }
                 let changeTime;
                 if (name === "HEARTS_GAME_SEASON") {
@@ -1411,29 +1546,58 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 } else {
                     changeTime = this.getNextDay(retrievedTime, quality.resetDay);
                 }
-                //wiki takes about 15 minutes to update - todo add a notification when this happens
-                if (now.getTime() > changeTime + 30 * MILLISECONDS_IN_MINUTE) {
-                    if (quality.result) {
-                        dirty = true;
-                    }
-                    quality.result = undefined;
-                    quality.blindspot = false;
+                if (name === "SEASON_OF_THE_SACROBOSCAN_CALENDAR") {
+                    const temp = new Date(changeTime);
+                    temp.setUTCHours(14);
+                    changeTime = temp.getTime();
                 }
+                if (name === "HEARTS_GAME_SEASON") {
+                    //wiki takes a long time to update this, let's say 1 day
+                    if (now.getTime() > changeTime + MILLISECONDS_IN_DAY) {
+                        if (quality.result) {
+                            dirty = true;
+                        }
+                        quality.result = undefined;
+                        quality.blindspot = false;
+                    }
 
-                if (now.getTime() > changeTime && now.getTime() < changeTime + 30 * MILLISECONDS_IN_MINUTE) {
-                    if (quality.result || !quality.blindspot) {
-                        dirty = true;
+                    if (now.getTime() > changeTime && now.getTime() < changeTime + MILLISECONDS_IN_DAY) {
+                        if (quality.result || !quality.blindspot) {
+                            dirty = true;
+                        }
+                        quality.blindspot = true;
+                        quality.result = undefined;
+                    } else {
+                        if (quality.blindspot) {
+                            dirty = true;
+                        }
+                        quality.blindspot = false;
                     }
-                    quality.blindspot = true;
-                    quality.result = undefined;
                 } else {
-                    if (quality.blindspot) {
-                        dirty = true;
+                    //wiki takes about 15 minutes to update - todo add a notification when this happens
+                    if (now.getTime() > changeTime + 50 * MILLISECONDS_IN_MINUTE) {
+                        if (quality.result) {
+                            dirty = true;
+                        }
+                        quality.result = undefined;
+                        quality.blindspot = false;
                     }
-                    quality.blindspot = false;
+
+                    if (now.getTime() > changeTime && now.getTime() < changeTime + 50 * MILLISECONDS_IN_MINUTE) {
+                        if (quality.result || !quality.blindspot) {
+                            dirty = true;
+                        }
+                        quality.blindspot = true;
+                        quality.result = undefined;
+                    } else {
+                        if (quality.blindspot) {
+                            dirty = true;
+                        }
+                        quality.blindspot = false;
+                    }
                 }
             } else {
-                if (now.getUTCDay() === quality.resetDay && now.getUTCHours() === 11 && now.getUTCMinutes() < 30) {
+                if (now.getUTCDay() === quality.resetDay && now.getUTCHours() === 11 && now.getUTCMinutes() < 50) {
                     if (!quality.blindspot) {
                         dirty = true;
                     }
@@ -1492,7 +1656,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                     let nextChimesVote = new Date(message.date).getTime();
                     const now = new Date().getTime();
                     let iter = 0;
-                    while (nextChimesVote < now && iter < 5) {
+                    while (nextChimesVote < now && iter < 5) { //iter < 5 is just about stopping a huge loop if message.date = 0 or something
                         nextChimesVote += 4 * SEVEN_DAYS_IN_MILLISECONDS;
                         iter++;
                     }

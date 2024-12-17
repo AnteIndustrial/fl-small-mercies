@@ -83,9 +83,9 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
     }
 
     linkState(state: GameStateController): void {
+        this.currentState = state.getState();
         const stringSorter = (s1: string, s2: string) => (s1 > s2 ? 1 : -1);
         state.onCharacterDataLoaded((g) => {
-            this.currentState = g;
             const unsortedQualityNames: string[] = [];
             for (const quality of g.enumerateQualities()) {
                 this.qualityNameAndCategory.set(quality.name, quality.category);
@@ -261,7 +261,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
             nameDiv.style.gridArea = "1 / 2";
             nameDiv.style.textAlign = "left";
             editDiv.style.gridArea = "1 / 3";
-            editDiv.style.textAlign = "right";
+            editDiv.style.textAlign = "left";
             const newTargetSpan = document.createElement("span");
             const targetInput = document.createElement("input");
             targetInput.id = `${title}-new-target-number`;
@@ -350,6 +350,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
                 for (const [idx, target] of targetValues.entries()) {
                     const editTargetDiv = document.createElement("div");
                     editTargetDiv.style.gridArea = `${2 * idx + 2} / 3`;
+                    editTargetDiv.style.textAlign = "left";
                     qualityListItem.appendChild(editTargetDiv);
                     const editTargetInput = document.createElement("input");
                     editTargetInput.id = `${title}-edit-target-number-${idx}`;
@@ -606,6 +607,31 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         const wrapperDiv = document.createElement("div");
         const editTrackerPanel = this.createTrackerPanel(true);
         editTrackerPanel.appendChild(this.createDropDownSelect());
+        const jsonDiv = document.createElement("div");
+        jsonDiv.textContent = "Current Tracked Qualities: " + this.currentSettings.trackedQualities as string;
+        jsonDiv.style.maxWidth = "1000px";
+        editTrackerPanel.appendChild(jsonDiv);
+        const jsonOverride = document.createElement("input");
+        jsonOverride.placeholder = "Enter a JSON string to overwrite your Tracked Qualities";
+        jsonOverride.id = "json-override-input";
+        editTrackerPanel.appendChild(jsonOverride);
+        const submitJson = document.createElement("button");
+        submitJson.textContent = "Overwrite";
+        submitJson.textContent = "Close";
+        submitJson.addEventListener("click", () => {
+            const jsonOverrideEnclosed = document.getElementById("json-override-input") as HTMLInputElement;
+            if (jsonOverrideEnclosed) {
+                try {
+                    const newTrackedQualities = new Map(Object.entries(JSON.parse(jsonOverrideEnclosed.value)));
+                    sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { trackedQualities: JSON.stringify(Object.fromEntries(newTrackedQualities)) } })
+                } catch (e) {
+                    return;
+                }
+            }
+        });
+        submitJson.classList.add("js-tt", "button", "button--primary", "button--go");
+        submitJson.style.padding = "2px 5px";
+        editTrackerPanel.appendChild(submitJson);
         wrapperDiv.appendChild(editTrackerPanel);
         editModal.appendChild(wrapperDiv);
         const closeModalButton = document.createElement("button");
@@ -634,7 +660,7 @@ export class MiscTrackerFixer implements IMutationAware, IStateAware {
         wrapperDiv.style.padding = "1rem";
         return editModal;
     }
-
+    
 
     onNodeRemoved(_node: HTMLElement): void {
         ;

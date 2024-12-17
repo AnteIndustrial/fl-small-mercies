@@ -357,7 +357,7 @@ class FLSettingsBackend {
     }
 
     isMessageRelevant(message: { [key: string]: boolean | string }) {
-        return message.action == MSG_TYPE_CURRENT_SETTINGS || message.action == MSG_TYPE_SAVE_SETTINGS || MSG_TYPE_UPDATE_SETTINGS;
+        return message.action == MSG_TYPE_CURRENT_SETTINGS || message.action == MSG_TYPE_SAVE_SETTINGS || message.action == MSG_TYPE_UPDATE_SETTINGS;
     }
 
     handleMessage(message: SettingsMessage) {

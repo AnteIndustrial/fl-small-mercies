@@ -5,9 +5,19 @@
 import { TimeKeeperFixer, DAYS, WorldQualityName, WorldQuality } from "./fixers/timekeeper";
 import {sendToServiceWorker} from "./comms";
 import { MiscTrackerFixer, TrackedQuality } from "./fixers/misc_tracker";
+import { BoneMarketFixer, blockBranches, SMALL_MERCIES_LOCKED_QUALITY } from "./fixers/bone_market";
+import { BoneDetails, BoneName, recipeMap } from "./fixers/recipes";
+import { html } from './temp';
+import { GameState } from "./game_state";
+import sampleResponse from "./fixers/test.json";
 
 jest.mock("./comms");
-
+const MILLISECONDS_IN_MINUTE = 60 * 1000;
+const MILLISECONDS_IN_HOUR = 60 * MILLISECONDS_IN_MINUTE;
+const MILLISECONDS_IN_DAY = 24 * MILLISECONDS_IN_HOUR;
+//unrelated, useful regex:
+//find: (".*?"), ([0-9]+)
+//replace: $1, {id: $2, name: $1, type: ""}
 
 describe('testAsuite', () => {
 
@@ -63,6 +73,29 @@ describe('testAsuite', () => {
         expect(timekeeper.getNextHeartsGameReset(date5)).toStrictEqual(nextReset3);
     })
 
+    it('testNextExceptionalStory', () => {
+        const timekeeper = new TimeKeeperFixer();
+        const date1 = new Date('2024-09-01T09:28:35.017Z');
+        const nextReset1 = new Date('2024-09-26T11:00:00.00Z');
+        expect(timekeeper.getNextExceptionalStoryDate(date1)).toStrictEqual(nextReset1);
+
+        const date2 = new Date('2024-09-26T09:28:35.017Z');
+        const nextReset2 = new Date('2024-09-26T11:00:00.00Z');
+        expect(timekeeper.getNextExceptionalStoryDate(date2)).toStrictEqual(nextReset2);
+
+        const date3 = new Date('2024-09-26T11:28:35.017Z');
+        const nextReset3 = new Date('2024-10-31T11:00:00.00Z');
+        expect(timekeeper.getNextExceptionalStoryDate(date3)).toStrictEqual(nextReset3);
+
+        const date4 = new Date('2024-09-28T09:28:35.017Z');
+        const nextReset4 = new Date('2024-10-31T11:00:00.00Z');
+        expect(timekeeper.getNextExceptionalStoryDate(date4)).toStrictEqual(nextReset4);
+
+        const date5 = new Date('2024-10-15T09:28:35.017Z');
+        const nextReset5 = new Date('2024-10-31T11:00:00.00Z');
+        expect(timekeeper.getNextExceptionalStoryDate(date5)).toStrictEqual(nextReset5);
+    })
+
     it('testApplySettings', () => {
         ;// const timekeeper = new TimeKeeperFixer();
     })
@@ -73,6 +106,7 @@ describe('testAsuite', () => {
             // @ts-ignore
             events[event] = handle;
         });
+        jest.useFakeTimers().setSystemTime(new Date('2024-09-26T11:10:35.017Z'))
         const timekeeper = new TimeKeeperFixer();
 
         timekeeper.currentSettings = {};
@@ -92,6 +126,8 @@ describe('testAsuite', () => {
             INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: { name: "Inscrutable Demand", value: "4", timestamp: 1727409904666 }, resetDay: DAYS.MONDAY, blindspot: false },
             INTRICATE_DEMAND: { name: "Intricate Demand", result: { name: "Intricate Demand", value: "2", timestamp: 1727409904666 }, resetDay: DAYS.MONDAY, blindspot: false },
             MAUDLIN_DEMAND: { name: "Maudlin Demand", result: { name: "Maudlin Demand", value: "0", timestamp: 1727409904666 }, resetDay: DAYS.MONDAY, blindspot: false },
+            CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             THE_RAT_SEASON: { name: "The Rat-Season:", result: { name: "The Rat-Season:", value: "Kifer-Caitiff", timestamp: 1727409904666 }, resetDay: DAYS.MONDAY, blindspot: false },
             DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: { name: "Direction of the Rat-Wind:", value: "North", timestamp: 1727409904666 }, resetDay: DAYS.MONDAY, blindspot: false },
             PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: { name: "Phase of the Rat-Moon:", value: "Blue", timestamp: 1727409904666 }, resetDay: DAYS.MONDAY, blindspot: false },
@@ -105,7 +141,6 @@ describe('testAsuite', () => {
         const worldString = JSON.stringify(worldQualities);
 
         expect(calls[0][1]).toStrictEqual({ settings: { worldQualities: worldString } });
-
     })
 
     it('testTimekeeperRemoveOutdatedSetBlindspot', () => {
@@ -117,26 +152,28 @@ describe('testAsuite', () => {
         const timekeeper = new TimeKeeperFixer();
 
         const worldQualities: Record<WorldQualityName, WorldQuality> = {
-            SAINTLY_DEMAND: { name: "Saintly Demand", result: { name: "a", value: "0", timestamp: 0 }, resetDay: DAYS.MONDAY }, //should be removed as outdated
-            SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: DAYS.MONDAY }, //should be unchanged
-            TEMPESTUOUS_DEMAND: { name: "Tempestuous Demand", result: { name: "b", value: "0", timestamp: 1727003435017 }, resetDay: DAYS.MONDAY }, //outdated
-            INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: { name: "c", value: "0", timestamp: 1727176235017 }, resetDay: DAYS.MONDAY }, //unchanged
-            INTRICATE_DEMAND: { name: "Intricate Demand", result: { name: "d", value: "0", timestamp: 1725621035017 }, resetDay: DAYS.MONDAY }, //outdated
+            SAINTLY_DEMAND: { name: "Saintly Demand", result: { name: "a", value: "0", timestamp: 0 }, resetDay: DAYS.MONDAY },
+            SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: DAYS.MONDAY },
+            TEMPESTUOUS_DEMAND: { name: "Tempestuous Demand", result: { name: "b", value: "0", timestamp: 1727003435017 }, resetDay: DAYS.MONDAY }, //2024-09-22T11:10:35.017Z sunday
+            INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: { name: "c", value: "0", timestamp: 1727176235017 }, resetDay: DAYS.MONDAY }, //2024-09-24T11:10:35.017Z tues
+            INTRICATE_DEMAND: { name: "Intricate Demand", result: { name: "d", value: "0", timestamp: 1725621035017 }, resetDay: DAYS.MONDAY }, //2024-09-06T11:10:35.017Z friday
             MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY },
             THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY },
             DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY },
             PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY },
             THE_FALSE_SEASON: { name: "The False-Season:", result: undefined, resetDay: DAYS.MONDAY },
             THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY },
-            BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: { name: "e", value: "", timestamp: 1727176235017 }, resetDay: DAYS.TUESDAY }, //timestamp is in blindspot
-            ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY }, 
-            HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: { name: "f", value: "", timestamp: 1725880235017 }, resetDay: DAYS.TUESDAY }, //unchanged
-            SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: { name: "g", value: "0", timestamp: 1727176235017 }, resetDay: DAYS.THURSDAY }, //now is in blindspot
+            BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: { name: "e", value: "", timestamp: 1727176235017 }, resetDay: DAYS.TUESDAY }, //2024-09-24T11:10:35.017Z tues
+            ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY },
+            HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: { name: "f", value: "", timestamp: 1725880235017 }, resetDay: DAYS.TUESDAY }, //2024-09-09T11:10:35.017Z mon
+            SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: { name: "g", value: "0", timestamp: 1726848635017 }, resetDay: DAYS.THURSDAY }, //Fri, 20 Sep 2024 16:10:35 GMT
+            CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY },
+            RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY },
         };
 
         timekeeper.worldQualities = worldQualities;
 
-        const fakeNow = new Date('2024-09-26T11:10:35.017Z') //thursday
+        const fakeNow = new Date('2024-09-24T05:10:35.017Z') //tuesday
         const dirty = timekeeper.removeOutdatedWorldQualities(fakeNow)
 
         const expected: Record<WorldQualityName, WorldQuality> = {
@@ -146,6 +183,65 @@ describe('testAsuite', () => {
             INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: { name: "c", value: "0", timestamp: 1727176235017 }, resetDay: DAYS.MONDAY, blindspot: false },
             INTRICATE_DEMAND: { name: "Intricate Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            THE_FALSE_SEASON: { name: "The False-Season:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: { name: "f", value: "", timestamp: 1725880235017 }, resetDay: DAYS.TUESDAY, blindspot: false },
+            SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: { name: "g", value: "0", timestamp: 1726848635017 }, resetDay: DAYS.THURSDAY, blindspot: false }
+        };
+        expect(timekeeper.worldQualities).toStrictEqual(expected);
+        expect(dirty).toBe(true);
+    })
+
+
+    it('testTimekeeperRemoveOutdatedWaswood', () => {
+        const events: any = {};
+        jest.spyOn(window, 'addEventListener').mockImplementation((event, handle, _options?) => {
+            // @ts-ignore
+            events[event] = handle;
+        });
+        const timekeeper = new TimeKeeperFixer();
+
+        const worldQualities: Record<WorldQualityName, WorldQuality> = {
+            SAINTLY_DEMAND: { name: "Saintly Demand", result: { name: "a", value: "0", timestamp: 0 }, resetDay: DAYS.MONDAY },
+            SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: DAYS.MONDAY },
+            TEMPESTUOUS_DEMAND: { name: "Tempestuous Demand", result: { name: "b", value: "0", timestamp: 1727003435017 }, resetDay: DAYS.MONDAY },
+            INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: { name: "c", value: "0", timestamp: 1727176235017 }, resetDay: DAYS.MONDAY },
+            INTRICATE_DEMAND: { name: "Intricate Demand", result: { name: "d", value: "0", timestamp: 1725621035017 }, resetDay: DAYS.MONDAY },
+            MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY },
+            THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY },
+            DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY },
+            PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY },
+            THE_FALSE_SEASON: { name: "The False-Season:", result: undefined, resetDay: DAYS.MONDAY },
+            THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY },
+            BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: { name: "e", value: "", timestamp: 1727176235017 }, resetDay: DAYS.TUESDAY },
+            ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY },
+            HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: { name: "f", value: "", timestamp: 1725880235017 }, resetDay: DAYS.TUESDAY },
+            SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: { name: "g", value: "0", timestamp: 1726848635017 }, resetDay: DAYS.THURSDAY },//Fri, 20 Sep 2024 16:10:35 GMT
+            CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY },
+            RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY },
+        };
+
+        timekeeper.worldQualities = worldQualities;
+
+        const fakeNow = new Date('2024-09-26T14:10:35.017Z'); //thursday
+        const dirty = timekeeper.removeOutdatedWorldQualities(fakeNow);
+
+        const expected: Record<WorldQualityName, WorldQuality> = {
+            SAINTLY_DEMAND: { name: "Saintly Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            TEMPESTUOUS_DEMAND: { name: "Tempestuous Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: { name: "c", value: "0", timestamp: 1727176235017 }, resetDay: DAYS.MONDAY, blindspot: false },
+            INTRICATE_DEMAND: { name: "Intricate Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
@@ -158,7 +254,62 @@ describe('testAsuite', () => {
         };
         expect(timekeeper.worldQualities).toStrictEqual(expected);
         expect(dirty).toBe(true);
-        //assert stuff
+    })
+
+    it('testTimekeeperRemoveOutdatedLongHeartsGameBlindspot', () => {
+        const events: any = {};
+        jest.spyOn(window, 'addEventListener').mockImplementation((event, handle, _options?) => {
+            // @ts-ignore
+            events[event] = handle;
+        });
+        const timekeeper = new TimeKeeperFixer();
+
+        const worldQualities: Record<WorldQualityName, WorldQuality> = {
+            SAINTLY_DEMAND: { name: "Saintly Demand", result: undefined, resetDay: DAYS.MONDAY },
+            SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: DAYS.MONDAY },
+            TEMPESTUOUS_DEMAND: { name: "Tempestuous Demand", result: undefined, resetDay: DAYS.MONDAY },
+            INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: undefined, resetDay: DAYS.MONDAY },
+            INTRICATE_DEMAND: { name: "Intricate Demand", result: undefined, resetDay: DAYS.MONDAY },
+            MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY },
+            THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY },
+            DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY },
+            PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY },
+            THE_FALSE_SEASON: { name: "The False-Season:", result: undefined, resetDay: DAYS.MONDAY },
+            THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY },
+            BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: DAYS.TUESDAY },
+            ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY },
+            HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: { name: "f", value: "", timestamp: 1725880235017 }, resetDay: DAYS.TUESDAY }, //2024-09-09T11:10:35.017Z mon
+            SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: undefined, resetDay: DAYS.THURSDAY },
+            CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY },
+            RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY },
+        };
+
+        timekeeper.worldQualities = worldQualities;
+
+        const fakeNow = new Date('2024-10-01T18:04:23.123Z'); //tuesday
+        const dirty = timekeeper.removeOutdatedWorldQualities(fakeNow);
+
+        const expected: Record<WorldQualityName, WorldQuality> = {
+            SAINTLY_DEMAND: { name: "Saintly Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            TEMPESTUOUS_DEMAND: { name: "Tempestuous Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            INTRICATE_DEMAND: { name: "Intricate Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            THE_FALSE_SEASON: { name: "The False-Season:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: undefined, resetDay: DAYS.TUESDAY, blindspot: true },
+            SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: undefined, resetDay: DAYS.THURSDAY, blindspot: false }
+        };
+        expect(timekeeper.worldQualities).toStrictEqual(expected);
+        expect(dirty).toBe(true);
     })
 
     it('testTrackerParseJSON', () => {
@@ -269,4 +420,78 @@ describe('testAsuite', () => {
         expect(buttons[4].style.opacity).toStrictEqual("1");
         expect(buttons[5].style.opacity).toStrictEqual("0");
     })
+
+    it('testCalculateTimeDifference', () => {
+        const timekeeper = new TimeKeeperFixer();
+        const time = new Date('2024-09-26T11:10:35.017Z').getTime();
+
+        expect(timekeeper.calculateTimeDifference(time + MILLISECONDS_IN_DAY, time)).toContain("1 day");
+
+        expect(timekeeper.calculateTimeDifference(time + MILLISECONDS_IN_HOUR, time)).toContain("1 hour");
+
+        expect(timekeeper.calculateTimeDifference(time + 3 * MILLISECONDS_IN_DAY + 2 * MILLISECONDS_IN_HOUR, time)).toContain("3 days 2 hours");
+
+        expect(timekeeper.calculateTimeDifference(time + 2 * MILLISECONDS_IN_MINUTE, time)).toContain("2 minutes");
+
+        expect(timekeeper.calculateTimeDifference(time + 10 * MILLISECONDS_IN_DAY, time)).toContain("10 days");
+
+        expect(timekeeper.calculateTimeDifference(time + MILLISECONDS_IN_DAY + 2 * MILLISECONDS_IN_HOUR, time)).toContain("1 day 2 hours");
+    })
+
+    it('testRecipeMapIsFilledOut', () => {
+        expect(recipeMap.get("Antique Primate 1 Exhaustion")?.bones[0].bone).toStrictEqual("Human Ribcage");
+        expect(BoneDetails.get(recipeMap.get("Menacing Bird 1 Exhaustion")?.bones[4].bone as BoneName)?.id).toStrictEqual(140883);
+        expect(recipeMap.get("Amalgamy Bomb")?.steps[1]).toStrictEqual("Affix a Skull in Coral to your (Skeleton Type)")
+    })
+
+    it('testBoneMarketPlaceOrRemoveDivs', () => {
+        document.body.innerHTML = html;
+        const boneMarketFixer = new BoneMarketFixer();
+        boneMarketFixer.currentState = new GameState();
+        boneMarketFixer.currentState.location.area.areaId = 1
+        boneMarketFixer.enableBoneMarketHelper = true;
+        const recipeDiv = document.createElement("div");
+        recipeDiv.id = "bone-market-recipe-container";
+        const ingredientDiv = document.createElement("div");
+        ingredientDiv.id = "bone-market-ingredient-container";
+
+        expect(document.getElementById("bone-market-recipe-container")).toBeNull();
+        expect(document.getElementById("bone-market-ingredient-container")).toBeNull();
+
+        boneMarketFixer.placeDivsInRightPosition(recipeDiv, ingredientDiv);
+        expect(document.getElementById("bone-market-recipe-container")).toBeNull();
+        expect(document.getElementById("bone-market-ingredient-container")).toBeNull();
+
+        boneMarketFixer.currentState.location.area.areaId = 111138
+        boneMarketFixer.placeDivsInRightPosition(recipeDiv, ingredientDiv);
+        expect(document.getElementById("bone-market-recipe-container")).toStrictEqual(recipeDiv);
+        expect(document.getElementById("bone-market-ingredient-container")).toStrictEqual(ingredientDiv);
+
+        boneMarketFixer.currentState.location.area.areaId = 5
+        boneMarketFixer.placeDivsInRightPosition(recipeDiv, ingredientDiv);
+        expect(document.getElementById("bone-market-recipe-container")).toBeNull();
+        expect(document.getElementById("bone-market-ingredient-container")).toBeNull();
+    })
+
+    it('testBoneMarketBlocksBranches', () => {
+        const response = sampleResponse;
+        for (const branch of response.storylet.childBranches) {
+            expect(branch.qualityLocked).toBeFalsy();
+            for (const req of branch.qualityRequirements) {
+                expect(req.status).toStrictEqual("Unlocked");
+            }
+        }
+        blockBranches(response.storylet.childBranches, "Build on a Segmented Ribcage");
+        for (const branch of response.storylet.childBranches) {
+            if (branch.id === 255215) {
+                expect(branch.qualityLocked).toBeFalsy();
+                for (const req of branch.qualityRequirements) {
+                    expect(req.status).toStrictEqual("Unlocked");
+                }
+            } else {
+                expect(branch.qualityLocked).toBeTruthy();
+                expect(branch.qualityRequirements).toContain(SMALL_MERCIES_LOCKED_QUALITY)
+            }
+        }
+    });
 });

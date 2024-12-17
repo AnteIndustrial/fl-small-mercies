@@ -145,6 +145,10 @@ const SETTINGS_SCHEMA: SettingsSchema = [
                 description: "Remove text about challenge being simple from check results.",
                 default: true,
             },
+            bone_market_helper: {
+                description: "UI changes to help profit in the Bone Market.",
+                default: true,
+            }
         },
     },
     {
@@ -256,8 +260,12 @@ const SETTINGS_SCHEMA: SettingsSchema = [
                 description: "Warn if Professional Perks is 4.",
                 default: true,
             },
+            zenith: {
+                description: "Notify if Zenith is available.",
+                default: true,
+            },
             irrigo: {
-                description: "Notify if Irrigo is 0.",
+                description: "Notify if the Cave of the Nadir is available.",
                 default: true,
             },
             parabolan_ravages: {
@@ -324,6 +332,10 @@ const SETTINGS_SCHEMA: SettingsSchema = [
                 description: "Notify when boons from the House of Chimes will expire.",
                 default: true,
             },
+            exceptional_story: {
+                description: "Notify when next Exceptional Story will be available.",
+                default: true,
+            }
         }
     }
 ];

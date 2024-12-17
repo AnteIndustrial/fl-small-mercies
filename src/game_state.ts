@@ -539,4 +539,8 @@ export class GameStateController {
         interceptor.onResponseReceived("/api/exchange/sell", (_, response) => this.parseShopResponse(response));
         interceptor.onResponseReceived("/api/exchange/buy", (_, response) => this.parseShopResponse(response));
     }
+
+    public getState() {
+        return this.state;
+    }
 }

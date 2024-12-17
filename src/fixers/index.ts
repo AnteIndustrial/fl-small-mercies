@@ -30,6 +30,7 @@ import {EchoPenniesFixer} from "./echo_pennies";
 import {BranchResultsFixer} from "./branch_results";
 import {AdvancedArtFixer} from "./advanced_art";
 import {AirshipNameFixer} from "./airship_name";
+import { BoneMarketFixer } from "./bone_market";
 
 export default [
     AutoScrollFixer,
@@ -45,6 +46,7 @@ export default [
     AsceticModeFixer,
     MiscTrackerFixer,
     TimeKeeperFixer,
+    BoneMarketFixer,
     SocialEmptyReqsFixer,
     AfterFallYearFixer,
     KhanateOracleFixer,
