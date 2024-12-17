@@ -1,5 +1,5 @@
 import {IChooseBranchRequest, IUserResponse} from "./interfaces";
-import { debug } from "./logging";
+import {debug} from "./logging";
 
 type AjaxMethod = (method: string, url: string, async: boolean) => any;
 

@@ -79,7 +79,7 @@ const centralMutationObserver = new MutationObserver((mutations, _observer) => {
                         fixer.onNodeRemoved(node);
                     }
                 } catch (error) {
-                    console.error("Error occured while processing removed node:", error);
+                    console.error("Error occurred while processing removed node:", error);
                 }
             });
         }
