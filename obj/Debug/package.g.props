@@ -3,13 +3,13 @@
   <PropertyGroup>
     <PackageJsonName Condition="$(PackageJsonName) == ''">fl-small-mercies</PackageJsonName>
     <PackageJsonVersion Condition="$(PackageJsonVersion) == ''">3.2.0</PackageJsonVersion>
-    <PackageJsonDescription Condition="$(PackageJsonDescription) == ''">[![License](https://img.shields.io/github/license/lensvol/fl-small-mercies)](https://github.com/lensvol/fl-small-mercies/blob/master/LICENSE) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/lensvol/fl-small-mercies) [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/efcjeepmkepahpaodagjlioagpganblf)](https://chrome.google.com/webstore/detail/fl-small-mercies/efcjeepmkepahpaodagjlioagpganblf) [![Mozilla Add-on](https://img.shields.io/amo/v/fl-small-mercies)](https://addons.mozilla.org/en-US/firefox/addon/fl-small-mercies/) ![User count](https://raw.githubusercontent.com/lensvol/fl-extensions-graylist/main/static/badges/counts/fl_small_mercies.svg?bogus-cache-buster=yes) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)</PackageJsonDescription>
+    <PackageJsonDescription Condition="$(PackageJsonDescription) == ''"></PackageJsonDescription>
     <PackageJsonMain Condition="$(PackageJsonMain) == ''">index.js</PackageJsonMain>
     <PackageJsonScriptsLint Condition="$(PackageJsonScriptsLint) == ''">prettier --plugin-search-dir . --check ./src &amp;&amp; eslint ./src</PackageJsonScriptsLint>
     <PackageJsonScriptsFormat Condition="$(PackageJsonScriptsFormat) == ''">prettier --plugin-search-dir . --write ./src</PackageJsonScriptsFormat>
     <PackageJsonScriptsBuild Condition="$(PackageJsonScriptsBuild) == ''">webpack</PackageJsonScriptsBuild>
     <PackageJsonScriptsAutocompile Condition="$(PackageJsonScriptsAutocompile) == ''">webpack -w</PackageJsonScriptsAutocompile>
-    <PackageJsonScriptsTest Condition="$(PackageJsonScriptsTest) == ''">jest</PackageJsonScriptsTest>
+    <PackageJsonScriptsTest Condition="$(PackageJsonScriptsTest) == ''">jest --verbose --silent=false</PackageJsonScriptsTest>
     <PackageJsonScriptsTestDebug Condition="$(PackageJsonScriptsTestDebug) == ''">jest --runInBand --inspect-brk --env=jsdom</PackageJsonScriptsTestDebug>
     <PackageJsonKeywords Condition="$(PackageJsonKeywords) == ''">[]</PackageJsonKeywords>
     <PackageJsonAuthor Condition="$(PackageJsonAuthor) == ''"></PackageJsonAuthor>
@@ -17,6 +17,7 @@
     <PackageJsonDevdependenciesTypesChrome Condition="$(PackageJsonDevdependenciesTypesChrome) == ''">^0.0.190</PackageJsonDevdependenciesTypesChrome>
     <PackageJsonDevdependenciesTypescriptEslintEslintPlugin Condition="$(PackageJsonDevdependenciesTypescriptEslintEslintPlugin) == ''">^5.42.1</PackageJsonDevdependenciesTypescriptEslintEslintPlugin>
     <PackageJsonDevdependenciesTypescriptEslintParser Condition="$(PackageJsonDevdependenciesTypescriptEslintParser) == ''">^5.42.1</PackageJsonDevdependenciesTypescriptEslintParser>
+    <PackageJsonDevdependenciesCssLoader Condition="$(PackageJsonDevdependenciesCssLoader) == ''">^7.1.2</PackageJsonDevdependenciesCssLoader>
     <PackageJsonDevdependenciesEslint Condition="$(PackageJsonDevdependenciesEslint) == ''">^8.27.0</PackageJsonDevdependenciesEslint>
     <PackageJsonDevdependenciesEslintConfigPrettier Condition="$(PackageJsonDevdependenciesEslintConfigPrettier) == ''">^8.8.0</PackageJsonDevdependenciesEslintConfigPrettier>
     <PackageJsonDevdependenciesEsquery Condition="$(PackageJsonDevdependenciesEsquery) == ''">^1.4.0</PackageJsonDevdependenciesEsquery>
