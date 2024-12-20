@@ -1,13 +1,22 @@
-export interface Recipe {
-    name: string;
-    bones: { bone: BoneName; quantity: number; }[];
-    type: string;
-    quality: string;
-    steps: AssemblyStep[];
+export class Recipe {
+    name!: string;
+    bones!: Ingredient[];
+    type!: string;
+    quality!: string;
+    steps!: AssemblyStep[];
+    //alternateSteps?: { [key: number]: AssemblyStep; }
     buyer?: string;
     payout?: string;
     exhaustion?: number;
     epa?: number;
+}
+
+export type AssemblyStep = AssemblyOption[];
+
+export interface Ingredient {
+    bone: BoneName;
+    quantity: number;
+    optional?: boolean;
 }
 
 export type SkeletonType = "Chimera" | "Primate" | "Bird" | "Amphibian" | "Reptile" | "Fish" | "Insect" | "Spider" | "Curator";
@@ -39,60 +48,60 @@ export interface Details {
 }
 
 
-export const BoneDetails = new Map<BoneName, Details>([
-    ["Thorned Ribcage", { id: 140833, name: "Thorned Ribcage", type: "Torso" }],
-    ["Ribcage with a Bouquet of Eight Spines", { id: 140844, name: "Ribcage with a Bouquet of Eight Spines", type: "Torso" }],
-    ["Human Ribcage", { id: 140839, name: "Human Ribcage", type: "Torso" }],
-    ["Bright Brass Skull", { id: 749, name: "Bright Brass Skull", type: "Skull", additionalCost: [{ bone: "Nevercold Brass Sliver", quantity: 200 }] }],
-    ["Skull in Coral", { id: 141774, name: "Skull in Coral", type: "Skull", additionalCost: [{ bone: "Knob of Scintillack", quantity: 1 }] }],
-    ["Nevercold Brass Sliver", { id: 387, name: "Nevercold Brass Sliver", type: "Resource" }],
-    ["Helical Thighbone", { id: 141480, name: "Helical Thighbone", type: "Leg" }],
-    ["Albatross Wing", { id: 140850, name: "Albatross Wing", type: "Wing" }],
-    ["Knob of Scintillack", { id: 122495, name: "Knob of Scintillack", type: "Resource" }],
-    ["Obsidian Chitin Tail", { id: 142727, name: "Obsidian Chitin Tail", type: "Tail" }],
-    ["A Custom-Engraved Skull", { id: 136048, name: "A Custom-Engraved Skull", type: "Skull" }],
-    ["Amber-Crusted Fin", { id: 141380, name: "Amber-Crusted Fin", type: "Fin" }],
-    ["Bat Wing", { id: 140879, name: "Bat Wing", type: "Wing" }],
-    ["Carved Ball of Stygian Ivory", { id: 122483, name: "Carved Ball of Stygian Ivory", type: "Skull" }],
-    ["Counterfeit Head of John the Baptist", { id: 413, name: "Counterfeit Head of John the Baptist", type: "Skull" }],
-    ["Crustacean Pincer", { id: 140880, name: "Crustacean Pincer", type: "Arm" }],
-    ["Doubled Skull", { id: 141479, name: "Doubled Skull", type: "Skull" }],
-    ["Eyeless Skull", { id: 23504, name: "Eyeless Skull", type: "Skull" }],
-    ["Femur of a Jurassic Beast", { id: 140773, name: "Femur of a Jurassic Beast", type: "Leg" }],
-    ["Femur of a Surface Deer", { id: 140771, name: "Femur of a Surface Deer", type: "Leg" }],
-    ["Fin Bones, Collected", { id: 140852, name: "Fin Bones, Collected", type: "Fin" }],
-    ["Five Pointed Ribcage", { id: 141640, name: "Five Pointed Ribcage", type: "Torso" }],
-    ["Flourishing Ribcage", { id: 140840, name: "Flourishing Ribcage", type: "Torso" }],
-    ["Fossilised Forelimb", { id: 141540, name: "Fossilised Forelimb", type: "Arm" }],
-    ["Glim-Encrusted Carapace", { id: 145008, name: "Glim-Encrusted Carapace", type: "Torso" }],
-    ["Headless Skeleton", { id: 140814, name: "Headless Skeleton", type: "Torso" }],
-    ["Holy Relic of the Thigh of Saint Fiacre", { id: 140774, name: "Holy Relic of the Thigh of Saint Fiacre", type: "Leg" }],
-    ["Horned Skull", { id: 141371, name: "Horned Skull", type: "Skull" }],
-    ["Human Arm", { id: 140813, name: "Human Arm", type: "Arm" }],
-    ["Ivory Femur", { id: 142351, name: "Ivory Femur", type: "Leg" }],
-    ["Ivory Humerus", { id: 140849, name: "Ivory Humerus", type: "Arm" }],
-    ["Jet Black Stinger", { id: 140883, name: "Jet Black Stinger", type: "Tail" }],
-    ["Knotted Humerus", { id: 140772, name: "Knotted Humerus", type: "Arm" }],
-    ["Leviathan Frame", { id: 140845, name: "Leviathan Frame", type: "Torso" }],
-    ["Mammoth Ribcage", { id: 140843, name: "Mammoth Ribcage", type: "Torso" }],
-    ["Panoptical Skull", { id: 145642, name: "Panoptical Skull", type: "Skull" }],
-    ["Pentagrammic Skull", { id: 142298, name: "Pentagrammic Skull", type: "Skull" }],
-    ["Plaster Tail Bones", { id: 140851, name: "Plaster Tail Bones", type: "Tail" }],
-    ["Plated Skull", { id: 140882, name: "Plated Skull", type: "Skull" }],
-    ["Prismatic Frame", { id: 140857, name: "Prismatic Frame", type: "Torso" }],
-    ["Rubbery Skull", { id: 811, name: "Rubbery Skull", type: "Skull" }],
-    ["Sabre-toothed Skull", { id: 140847, name: "Sabre-toothed Skull", type: "Skull" }],
-    ["Segmented Ribcage", { id: 143548, name: "Segmented Ribcage", type: "Torso" }],
-    ["Severed Chimaerical Head of the Vake", { id: 140721, name: "Severed Chimaerical Head of the Vake", type: "Skull" }],
-    ["Skeleton with Seven Necks", { id: 140838, name: "Skeleton with Seven Necks", type: "Torso" }],
-    ["Tomb-Lion's Tail", { id: 140881, name: "Tomb-Lion's Tail", type: "Tail" }],
-    ["Unidentified Thigh Bone", { id: 140756, name: "Unidentified Thigh Bone", type: "Leg" }],
-    ["Wing of a Young Terror Bird", { id: 141372, name: "Wing of a Young Terror Bird", type: "Wing" }],
-    ["Withered Tentacle", { id: 140853, name: "Withered Tentacle", type: "Tentacle" }],
-    ["Your Own Severed Head", { id: 127097, name: "Your Own Severed Head", type: "Skull" }],
-]);
+export const BoneDetails: Record<BoneName, Details> = {
+    "Thorned Ribcage": { id: 140833, name: "Thorned Ribcage", type: "Torso" },
+    "Ribcage with a Bouquet of Eight Spines": { id: 140844, name: "Ribcage with a Bouquet of Eight Spines", type: "Torso" },
+    "Human Ribcage": { id: 140839, name: "Human Ribcage", type: "Torso" },
+    "Bright Brass Skull": { id: 749, name: "Bright Brass Skull", type: "Skull", additionalCost: [{ bone: "Nevercold Brass Sliver", quantity: 200 }] },
+    "Skull in Coral": { id: 141774, name: "Skull in Coral", type: "Skull", additionalCost: [{ bone: "Knob of Scintillack", quantity: 1 }] },
+    "Nevercold Brass Sliver": { id: 387, name: "Nevercold Brass Sliver", type: "Resource" },
+    "Helical Thighbone": { id: 141480, name: "Helical Thighbone", type: "Leg" },
+    "Albatross Wing": { id: 140850, name: "Albatross Wing", type: "Wing" },
+    "Knob of Scintillack": { id: 122495, name: "Knob of Scintillack", type: "Resource" },
+    "Obsidian Chitin Tail": { id: 142727, name: "Obsidian Chitin Tail", type: "Tail" },
+    "A Custom-Engraved Skull": { id: 136048, name: "A Custom-Engraved Skull", type: "Skull" },
+    "Amber-Crusted Fin": { id: 141380, name: "Amber-Crusted Fin", type: "Fin" },
+    "Bat Wing": { id: 140879, name: "Bat Wing", type: "Wing" },
+    "Carved Ball of Stygian Ivory": { id: 122483, name: "Carved Ball of Stygian Ivory", type: "Skull" },
+    "Counterfeit Head of John the Baptist": { id: 413, name: "Counterfeit Head of John the Baptist", type: "Skull" },
+    "Crustacean Pincer": { id: 140880, name: "Crustacean Pincer", type: "Arm" },
+    "Doubled Skull": { id: 141479, name: "Doubled Skull", type: "Skull" },
+    "Eyeless Skull": { id: 23504, name: "Eyeless Skull", type: "Skull" },
+    "Femur of a Jurassic Beast": { id: 140773, name: "Femur of a Jurassic Beast", type: "Leg" },
+    "Femur of a Surface Deer": { id: 140771, name: "Femur of a Surface Deer", type: "Leg" },
+    "Fin Bones, Collected": { id: 140852, name: "Fin Bones, Collected", type: "Fin" },
+    "Five Pointed Ribcage": { id: 141640, name: "Five Pointed Ribcage", type: "Torso" },
+    "Flourishing Ribcage": { id: 140840, name: "Flourishing Ribcage", type: "Torso" },
+    "Fossilised Forelimb": { id: 141540, name: "Fossilised Forelimb", type: "Arm" },
+    "Glim-Encrusted Carapace": { id: 145008, name: "Glim-Encrusted Carapace", type: "Torso" },
+    "Headless Skeleton": { id: 140814, name: "Headless Skeleton", type: "Torso" },
+    "Holy Relic of the Thigh of Saint Fiacre": { id: 140774, name: "Holy Relic of the Thigh of Saint Fiacre", type: "Leg" },
+    "Horned Skull": { id: 141371, name: "Horned Skull", type: "Skull" },
+    "Human Arm": { id: 140813, name: "Human Arm", type: "Arm" },
+    "Ivory Femur": { id: 142351, name: "Ivory Femur", type: "Leg" },
+    "Ivory Humerus": { id: 140849, name: "Ivory Humerus", type: "Arm" },
+    "Jet Black Stinger": { id: 140883, name: "Jet Black Stinger", type: "Tail" },
+    "Knotted Humerus": { id: 140772, name: "Knotted Humerus", type: "Arm" },
+    "Leviathan Frame": { id: 140845, name: "Leviathan Frame", type: "Torso" },
+    "Mammoth Ribcage": { id: 140843, name: "Mammoth Ribcage", type: "Torso" },
+    "Panoptical Skull": { id: 145642, name: "Panoptical Skull", type: "Skull" },
+    "Pentagrammic Skull": { id: 142298, name: "Pentagrammic Skull", type: "Skull" },
+    "Plaster Tail Bones": { id: 140851, name: "Plaster Tail Bones", type: "Tail" },
+    "Plated Skull": { id: 140882, name: "Plated Skull", type: "Skull" },
+    "Prismatic Frame": { id: 140857, name: "Prismatic Frame", type: "Torso" },
+    "Rubbery Skull": { id: 811, name: "Rubbery Skull", type: "Skull" },
+    "Sabre-toothed Skull": { id: 140847, name: "Sabre-toothed Skull", type: "Skull" },
+    "Segmented Ribcage": { id: 143548, name: "Segmented Ribcage", type: "Torso" },
+    "Severed Chimaerical Head of the Vake": { id: 140721, name: "Severed Chimaerical Head of the Vake", type: "Skull" },
+    "Skeleton with Seven Necks": { id: 140838, name: "Skeleton with Seven Necks", type: "Torso" },
+    "Tomb-Lion's Tail": { id: 140881, name: "Tomb-Lion's Tail", type: "Tail" },
+    "Unidentified Thigh Bone": { id: 140756, name: "Unidentified Thigh Bone", type: "Leg" },
+    "Wing of a Young Terror Bird": { id: 141372, name: "Wing of a Young Terror Bird", type: "Wing" },
+    "Withered Tentacle": { id: 140853, name: "Withered Tentacle", type: "Tentacle" },
+    "Your Own Severed Head": { id: 127097, name: "Your Own Severed Head", type: "Skull" },
+};
 
-export const ASSEMBLY_STEPS = ["Add a Bat Wing to your (Skeleton Type)",
+export const ASSEMBLY_OPTIONS = ["Add a Bat Wing to your (Skeleton Type)",
     "Add four more joints to your skeleton",
     "Add the Wing of a Young Terror Bird to your (Skeleton Type)",
     "Affix Saint Fiacre's Thigh Relic to your (Skeleton Type)",
@@ -175,9 +184,9 @@ export const ASSEMBLY_STEPS = ["Add a Bat Wing to your (Skeleton Type)",
     "Supply a skeleton of your own",
     "Use a Carved Ball of Stygian Ivory to cap off your (Skeleton Type)"] as const;
 
-export type AssemblyStep = typeof ASSEMBLY_STEPS[number];
+export type AssemblyOption = typeof ASSEMBLY_OPTIONS[number];
 
-export const AssemblyMap: Record<AssemblyStep, number> = {
+export const AssemblyOptionIDMap: Record<AssemblyOption, number> = {
     "Add a Bat Wing to your (Skeleton Type)": 242511,
     "Add four more joints to your skeleton": 242528,
     "Add the Wing of a Young Terror Bird to your (Skeleton Type)": 242541,
@@ -270,7 +279,7 @@ export const recipeMap = new Map<string, Recipe>([
             { "bone": "Bright Brass Skull", "quantity": 1 },
             { "bone": "Helical Thighbone", "quantity": 2 },
             { "bone": "Albatross Wing", "quantity": 2 },
-            { "bone": "Withered Tentacle", "quantity": 1 }
+            { "bone": "Withered Tentacle", "quantity": 1, optional: true }
         ],
         "buyer": "A Tentacled Entrepreneur",
         "type": "Bird",
@@ -279,21 +288,22 @@ export const recipeMap = new Map<string, Recipe>([
         "exhaustion": 1,
         "epa": 7.48,
         "steps": [
-            "Make something of your Thorned Ribcage",
-            "Affix a Bright Brass Skull to your (Skeleton Type)",
-            "Affix the Helical Thighbone to your (Skeleton Type)",
-            "Affix the Helical Thighbone to your (Skeleton Type)",
-            "Put an Albatross Wing on your (Skeleton Type)",
-            "Put an Albatross Wing on your (Skeleton Type)",
-            "Apply a Withered Tentacle as a tail on your (Skeleton Type)",
-            "Declare your (Skeleton Type) a completed Bird"
+            ["Make something of your Thorned Ribcage"],
+            ["Affix a Bright Brass Skull to your (Skeleton Type)"],
+            ["Affix the Helical Thighbone to your (Skeleton Type)"],
+            ["Affix the Helical Thighbone to your (Skeleton Type)"],
+            ["Put an Albatross Wing on your (Skeleton Type)"],
+            ["Put an Albatross Wing on your (Skeleton Type)"],
+            ["Apply a Withered Tentacle as a tail on your (Skeleton Type)", "Decide your (Skeleton Type) needs no tail"],
+            ["Declare your (Skeleton Type) a completed Bird"]
         ]
+        //alternateSteps: { 6: "Decide your (Skeleton Type) needs no tail" }
     }],
     ["Amalgamy Bomb", {
         "name": "Amalgamy Bomb",
         "bones": [
             { "bone": "Ribcage with a Bouquet of Eight Spines", "quantity": 1 },
-            {  "bone": "Skull in Coral", "quantity": 8 },
+            { "bone": "Skull in Coral", "quantity": 8 },
             { "bone": "Helical Thighbone", "quantity": 2 },
             { "bone": "Albatross Wing", "quantity": 2 },
             { "bone": "Obsidian Chitin Tail", "quantity": 1 }
@@ -305,21 +315,21 @@ export const recipeMap = new Map<string, Recipe>([
         "exhaustion": 23,
         "epa": 13.47,
         "steps": [
-            "Build on the Ribcage with the Eight Spines",
-            "Affix a Skull in Coral to your (Skeleton Type)",
-            "Affix a Skull in Coral to your (Skeleton Type)",
-            "Affix a Skull in Coral to your (Skeleton Type)",
-            "Affix a Skull in Coral to your (Skeleton Type)",
-            "Affix a Skull in Coral to your (Skeleton Type)",
-            "Affix a Skull in Coral to your (Skeleton Type)",
-            "Affix a Skull in Coral to your (Skeleton Type)",
-            "Affix a Skull in Coral to your (Skeleton Type)",
-            "Affix the Helical Thighbone to your (Skeleton Type)",
-            "Affix the Helical Thighbone to your (Skeleton Type)",
-            "Put an Albatross Wing on your (Skeleton Type)",
-            "Put an Albatross Wing on your (Skeleton Type)",
-            "Apply an Obsidian Chitin Tail to your (Skeleton Type)",
-            "Declare your (Skeleton Type) a completed Bird"
+            ["Build on the Ribcage with the Eight Spines"],
+            ["Affix a Skull in Coral to your (Skeleton Type)"],
+            ["Affix a Skull in Coral to your (Skeleton Type)"],
+            ["Affix a Skull in Coral to your (Skeleton Type)"],
+            ["Affix a Skull in Coral to your (Skeleton Type)"],
+            ["Affix a Skull in Coral to your (Skeleton Type)"],
+            ["Affix a Skull in Coral to your (Skeleton Type)"],
+            ["Affix a Skull in Coral to your (Skeleton Type)"],
+            ["Affix a Skull in Coral to your (Skeleton Type)"],
+            ["Affix the Helical Thighbone to your (Skeleton Type)"],
+            ["Affix the Helical Thighbone to your (Skeleton Type)"],
+            ["Put an Albatross Wing on your (Skeleton Type)"],
+            ["Put an Albatross Wing on your (Skeleton Type)"],
+            ["Apply an Obsidian Chitin Tail to your (Skeleton Type)"],
+            ["Declare your (Skeleton Type) a completed Bird"]
         ]
     }],
     ["Amalgamy Reptile 1 Exhaustion", {
@@ -329,7 +339,7 @@ export const recipeMap = new Map<string, Recipe>([
             { "bone": "Bright Brass Skull", "quantity": 1 },
             { "bone": "Knotted Humerus", "quantity": 2 },
             { "bone": "Helical Thighbone",  "quantity": 2 },
-            { "bone": "Withered Tentacle", "quantity": 1 }
+            { "bone": "Withered Tentacle", "quantity": 1, optional: true }
         ],
         "buyer": "A Tentacled Entrepreneur",
         "type": "Reptile",
@@ -338,15 +348,16 @@ export const recipeMap = new Map<string, Recipe>([
         "exhaustion": 1,
         "epa": 8.02,
         "steps": [
-            "Make something of your Thorned Ribcage",
-            "Affix a Bright Brass Skull to your (Skeleton Type)",
-            "Affix the Helical Thighbone to your (Skeleton Type)",
-            "Affix the Helical Thighbone to your (Skeleton Type)",
-            "Apply a Knotted Humerus to your (Skeleton Type)",
-            "Apply a Knotted Humerus to your (Skeleton Type)",
-            "Apply a Withered Tentacle as a tail on your (Skeleton Type)",
-            "Declare your (Skeleton Type) a completed Reptile"
+            ["Make something of your Thorned Ribcage"],
+            ["Affix a Bright Brass Skull to your (Skeleton Type)"],
+            ["Affix the Helical Thighbone to your (Skeleton Type)"],
+            ["Affix the Helical Thighbone to your (Skeleton Type)"],
+            ["Apply a Knotted Humerus to your (Skeleton Type)"],
+            ["Apply a Knotted Humerus to your (Skeleton Type)"],
+            ["Apply a Withered Tentacle as a tail on your (Skeleton Type)", "Decide your (Skeleton Type) needs no tail"],
+            ["Declare your (Skeleton Type) a completed Reptile"]
         ]
+        //alternateSteps: { 6: "Decide your (Skeleton Type) needs no tail" }
     }],
     ["Amalgamy Primate 1 Exhaustion", {
         "name": "Amalgamy Primate 1 Exhaustion",
@@ -363,14 +374,14 @@ export const recipeMap = new Map<string, Recipe>([
         "exhaustion": 1,
         "epa": 7.93,
         "steps": [
-            "Make something of your Thorned Ribcage",
-            "Affix a Bright Brass Skull to your (Skeleton Type)",
-            "Affix the Helical Thighbone to your (Skeleton Type)",
-            "Affix the Helical Thighbone to your (Skeleton Type)",
-            "Apply a Knotted Humerus to your (Skeleton Type)",
-            "Apply a Knotted Humerus to your (Skeleton Type)",
-            "Decide your (Skeleton Type) needs no tail",
-            "Declare your (Skeleton Type) a completed Humanoid"
+            ["Make something of your Thorned Ribcage"],
+            ["Affix a Bright Brass Skull to your (Skeleton Type)"],
+            ["Affix the Helical Thighbone to your (Skeleton Type)"],
+            ["Affix the Helical Thighbone to your (Skeleton Type)"],
+            ["Apply a Knotted Humerus to your (Skeleton Type)"],
+            ["Apply a Knotted Humerus to your (Skeleton Type)"],
+            ["Decide your (Skeleton Type) needs no tail"],
+            ["Declare your (Skeleton Type) a completed Humanoid"]
         ]
     }],
     ["Amalgamy Amphibian 1 Exhaustion", {
@@ -388,14 +399,14 @@ export const recipeMap = new Map<string, Recipe>([
         "exhaustion": 1,
         "epa": 7.81,
         "steps": [
-            "Make something of your Thorned Ribcage",
-            "Affix a Bright Brass Skull to your (Skeleton Type)",
-            "Affix the Helical Thighbone to your (Skeleton Type)",
-            "Affix the Helical Thighbone to your (Skeleton Type)",
-            "Affix the Helical Thighbone to your (Skeleton Type)",
-            "Apply an Unidentified Thigh Bone to your (Skeleton Type)",
-            "Decide your (Skeleton Type) needs no tail",
-            "Declare your (Skeleton Type) a completed Amphibian"
+            ["Make something of your Thorned Ribcage"],
+            ["Affix a Bright Brass Skull to your (Skeleton Type)"],
+            ["Affix the Helical Thighbone to your (Skeleton Type)"],
+            ["Affix the Helical Thighbone to your (Skeleton Type)"],
+            ["Affix the Helical Thighbone to your (Skeleton Type)"],
+            ["Apply an Unidentified Thigh Bone to your (Skeleton Type)"],
+            ["Decide your (Skeleton Type) needs no tail"],
+            ["Declare your (Skeleton Type) a completed Amphibian"]
         ]
     }],
     ["Menacing Bird 1 Exhaustion", {
@@ -414,14 +425,14 @@ export const recipeMap = new Map<string, Recipe>([
         "exhaustion": 1,
         "epa": 8.65,
         "steps": [
-            "Make something of your Thorned Ribcage",
-            "Affix a Horned Skull to your (Skeleton Type)",
-            "Add the Wing of a Young Terror Bird to your (Skeleton Type)",
-            "Add the Wing of a Young Terror Bird to your (Skeleton Type)",
-            "Apply an Unidentified Thigh Bone to your (Skeleton Type)",
-            "Apply an Unidentified Thigh Bone to your (Skeleton Type)",
-            "Apply a Jet Black Stinger to your (Skeleton Type)",
-            "Declare your (Skeleton Type) a completed Bird"
+            ["Make something of your Thorned Ribcage"],
+            ["Affix a Horned Skull to your (Skeleton Type)"],
+            ["Add the Wing of a Young Terror Bird to your (Skeleton Type)"],
+            ["Add the Wing of a Young Terror Bird to your (Skeleton Type)"],
+            ["Apply an Unidentified Thigh Bone to your (Skeleton Type)"],
+            ["Apply an Unidentified Thigh Bone to your (Skeleton Type)"],
+            ["Apply a Jet Black Stinger to your (Skeleton Type)"],
+            ["Declare your (Skeleton Type) a completed Bird"]
         ]
     }],
     ["Menacing Fish 1 Exhaustion", {
@@ -430,7 +441,7 @@ export const recipeMap = new Map<string, Recipe>([
             { "bone": "Thorned Ribcage", "quantity": 1 },
             { "bone": "Horned Skull", "quantity": 1 },
             { "bone": "Amber-Crusted Fin", "quantity": 4 },
-            { "bone": "Withered Tentacle", "quantity": 1 }
+            { "bone": "Withered Tentacle", "quantity": 1, optional: true }
         ],
         "buyer": "A Teller of Terrors",
         "type": "Fish",
@@ -439,15 +450,16 @@ export const recipeMap = new Map<string, Recipe>([
         "exhaustion": 1,
         "epa": 8.08,
         "steps": [
-            "Make something of your Thorned Ribcage",
-            "Affix a Horned Skull to your (Skeleton Type)",
-            "Attach the Amber-Crusted Fin to your (Skeleton Type)",
-            "Attach the Amber-Crusted Fin to your (Skeleton Type)",
-            "Attach the Amber-Crusted Fin to your (Skeleton Type)",
-            "Attach the Amber-Crusted Fin to your (Skeleton Type)",
-            "Apply a Withered Tentacle as a tail on your (Skeleton Type)",
-            "Declare your (Skeleton Type) a completed Fish"
+            ["Make something of your Thorned Ribcage"],
+            ["Affix a Horned Skull to your (Skeleton Type)"],
+            ["Attach the Amber-Crusted Fin to your (Skeleton Type)"],
+            ["Attach the Amber-Crusted Fin to your (Skeleton Type)"],
+            ["Attach the Amber-Crusted Fin to your (Skeleton Type)"],
+            ["Attach the Amber-Crusted Fin to your (Skeleton Type)"],
+            ["Apply a Withered Tentacle as a tail on your (Skeleton Type)", "Decide your (Skeleton Type) needs no tail"],
+            ["Declare your (Skeleton Type) a completed Fish"]
         ]
+        //alternateSteps: { 6: "Decide your (Skeleton Type) needs no tail" }
     }],
     ["Menacing Fish 1 Exhaustion", {
         "name": "Antique Reptile 1 Exhaustion",
@@ -464,14 +476,14 @@ export const recipeMap = new Map<string, Recipe>([
         "exhaustion": 1,
         "epa": 7.24,
         "steps": [
-            "Build on the Mammoth Ribcage",
-            "Affix a Bright Brass Skull to your (Skeleton Type)",
-            "Apply a Jurassic Thigh Bone to your (Skeleton Type)",
-            "Apply a Jurassic Thigh Bone to your (Skeleton Type)",
-            "Apply a Jurassic Thigh Bone to your (Skeleton Type)",
-            "Apply a Jurassic Thigh Bone to your (Skeleton Type)",
-            "Apply a Tomb-Lion's Tail to your (Skeleton Type)",
-            "Declare your (Skeleton Type) a completed Reptile"
+            ["Build on the Mammoth Ribcage"],
+            ["Affix a Bright Brass Skull to your (Skeleton Type)"],
+            ["Apply a Jurassic Thigh Bone to your (Skeleton Type)"],
+            ["Apply a Jurassic Thigh Bone to your (Skeleton Type)"],
+            ["Apply a Jurassic Thigh Bone to your (Skeleton Type)"],
+            ["Apply a Jurassic Thigh Bone to your (Skeleton Type)"],
+            ["Apply a Tomb-Lion's Tail to your (Skeleton Type)"],
+            ["Declare your (Skeleton Type) a completed Reptile"]
         ]
     }],
     ["Antique Amphibian 1 Exhaustion", {
@@ -488,14 +500,14 @@ export const recipeMap = new Map<string, Recipe>([
         "exhaustion": 1,
         "epa": 6.97,
         "steps": [
-            "Build on the Mammoth Ribcage",
-            "Affix a Sabre-toothed Skull to your (Skeleton Type)",
-            "Apply a Jurassic Thigh Bone to your (Skeleton Type)",
-            "Apply a Jurassic Thigh Bone to your (Skeleton Type)",
-            "Apply a Jurassic Thigh Bone to your (Skeleton Type)",
-            "Apply a Jurassic Thigh Bone to your (Skeleton Type)",
-            "Decide your (Skeleton Type) needs no tail",
-            "Declare your (Skeleton Type) a completed Amphibian"
+            ["Build on the Mammoth Ribcage"],
+            ["Affix a Sabre-toothed Skull to your (Skeleton Type)"],
+            ["Apply a Jurassic Thigh Bone to your (Skeleton Type)"],
+            ["Apply a Jurassic Thigh Bone to your (Skeleton Type)"],
+            ["Apply a Jurassic Thigh Bone to your (Skeleton Type)"],
+            ["Apply a Jurassic Thigh Bone to your (Skeleton Type)"],
+            ["Decide your (Skeleton Type) needs no tail"],
+            ["Declare your (Skeleton Type) a completed Amphibian"]
         ]
     }],
     ["Antique Bird 1 Exhaustion", {
@@ -505,7 +517,7 @@ export const recipeMap = new Map<string, Recipe>([
             { "bone": "Sabre-toothed Skull", "quantity": 1 },
             { "bone": "Femur of a Jurassic Beast", "quantity": 2 },
             { "bone": "Wing of a Young Terror Bird", "quantity": 2 },
-            { "bone": "Plaster Tail Bones", "quantity": 1 }
+            { "bone": "Plaster Tail Bones", "quantity": 1, optional: true }
         ],
         "buyer": "An Investment-Minded Ambassador",
         "type": "Bird",
@@ -514,15 +526,16 @@ export const recipeMap = new Map<string, Recipe>([
         "exhaustion": 1,
         "epa": 6.78,
         "steps": [
-            "Build on the Mammoth Ribcage",
-            "Affix a Sabre-toothed Skull to your (Skeleton Type)",
-            "Add the Wing of a Young Terror Bird to your (Skeleton Type)",
-            "Add the Wing of a Young Terror Bird to your (Skeleton Type)",
-            "Apply a Jurassic Thigh Bone to your (Skeleton Type)",
-            "Apply a Jurassic Thigh Bone to your (Skeleton Type)",
-            "Apply Plaster Tail Bones to your (Skeleton Type)",
-            "Declare your (Skeleton Type) a completed Bird"
+            ["Build on the Mammoth Ribcage"],
+            ["Affix a Sabre-toothed Skull to your (Skeleton Type)"],
+            ["Add the Wing of a Young Terror Bird to your (Skeleton Type)"],
+            ["Add the Wing of a Young Terror Bird to your (Skeleton Type)"],
+            ["Apply a Jurassic Thigh Bone to your (Skeleton Type)"],
+            ["Apply a Jurassic Thigh Bone to your (Skeleton Type)"],
+            ["Apply Plaster Tail Bones to your (Skeleton Type)", "Decide your (Skeleton Type) needs no tail"],
+            ["Declare your (Skeleton Type) a completed Bird"]
         ]
+        //alternateSteps: { 6: "Decide your (Skeleton Type) needs no tail" }
     }],
     ["Antique Primate 1 Exhaustion", {
         "name": "Antique Primate 1 Exhaustion",
@@ -539,16 +552,15 @@ export const recipeMap = new Map<string, Recipe>([
         "exhaustion": 1,
         "epa": 6.45,
         "steps": [
-            "Build on the Human Ribcage",
-            "Affix a Sabre-toothed Skull to your (Skeleton Type)",
-            "Apply a Jurassic Thigh Bone to your (Skeleton Type)",
-            "Apply a Jurassic Thigh Bone to your (Skeleton Type)",
-            "Apply a Fossilised Forelimb to your (Skeleton Type)",
-            "Apply a Fossilised Forelimb to your (Skeleton Type)",
-            "Decide your (Skeleton Type) needs no tail",
-            "Declare your (Skeleton Type) a completed Humanoid"
+            ["Build on the Human Ribcage"],
+            ["Affix a Sabre-toothed Skull to your (Skeleton Type)"],
+            ["Apply a Jurassic Thigh Bone to your (Skeleton Type)"],
+            ["Apply a Jurassic Thigh Bone to your (Skeleton Type)"],
+            ["Apply a Fossilised Forelimb to your (Skeleton Type)"],
+            ["Apply a Fossilised Forelimb to your (Skeleton Type)"],
+            ["Decide your (Skeleton Type) needs no tail"],
+            ["Declare your (Skeleton Type) a completed Humanoid"]
         ]
     }]
 ]);
-
 

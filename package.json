@@ -8,7 +8,7 @@
     "format": "prettier --plugin-search-dir . --write ./src",
     "build": "webpack",
     "autocompile": "webpack -w",
-    "test": "jest",
+    "test": "jest --verbose --silent=false",
     "test:debug": "jest --runInBand --inspect-brk --env=jsdom"
   },
   "keywords": [],

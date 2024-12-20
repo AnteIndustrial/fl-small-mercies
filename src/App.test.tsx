@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { TimeKeeperFixer, DAYS, WorldQualityName, WorldQuality } from "./fixers/timekeeper";
 import {sendToServiceWorker} from "./comms";
 import { MiscTrackerFixer, TrackedQuality } from "./fixers/misc_tracker";
-import { BoneMarketFixer, blockBranches, SMALL_MERCIES_LOCKED_QUALITY } from "./fixers/bone_market";
+import { BoneMarketFixer } from "./fixers/bone_market";
 import { BoneDetails, BoneName, recipeMap } from "./fixers/recipes";
 import { html } from './test/sample_storylet_html';
 import { GameState } from "./game_state";
-import sampleResponse from "./test/sample_response.json";
+import { lockedButtons } from "./test/sample_buttons_locked_html";
+import { unlockedButtons } from "./test/sample_buttons_unlocked_html";
+import { sampleBranchContainer } from "./test/sample_many_branches";
 
 jest.mock("./comms");
 const MILLISECONDS_IN_MINUTE = 60 * 1000;
@@ -440,8 +441,10 @@ describe('testAsuite', () => {
 
     it('testRecipeMapIsFilledOut', () => {
         expect(recipeMap.get("Antique Primate 1 Exhaustion")?.bones[0].bone).toStrictEqual("Human Ribcage");
-        expect(BoneDetails.get(recipeMap.get("Menacing Bird 1 Exhaustion")?.bones[4].bone as BoneName)?.id).toStrictEqual(140883);
-        expect(recipeMap.get("Amalgamy Bomb")?.steps[1]).toStrictEqual("Affix a Skull in Coral to your (Skeleton Type)")
+        expect(BoneDetails[recipeMap.get("Menacing Bird 1 Exhaustion")?.bones[4].bone as BoneName].id).toStrictEqual(140883);
+        expect(recipeMap.get("Amalgamy Bomb")?.steps[1]).toStrictEqual(["Affix a Skull in Coral to your (Skeleton Type)"]);
+        expect(recipeMap.get("Amalgamy Bird 1 Exhaustion")?.steps[6][1]).toStrictEqual("Decide your (Skeleton Type) needs no tail")
+        expect(typeof recipeMap.get("Menacing Bird 1 Exhaustion")?.bones[4].bone).toEqual("string");
     })
 
     it('testBoneMarketPlaceOrRemoveDivs', () => {
@@ -473,25 +476,81 @@ describe('testAsuite', () => {
         expect(document.getElementById("bone-market-ingredient-container")).toBeNull();
     })
 
-    it('testBoneMarketBlocksBranches', () => {
-        const response = sampleResponse;
-        for (const branch of response.storylet.childBranches) {
-            expect(branch.qualityLocked).toBeFalsy();
-            for (const req of branch.qualityRequirements) {
-                expect(req.status).toStrictEqual("Unlocked");
-            }
-        }
-        blockBranches(response.storylet.childBranches, "Build on a Segmented Ribcage");
-        for (const branch of response.storylet.childBranches) {
-            if (branch.id === 255215) {
-                expect(branch.qualityLocked).toBeFalsy();
-                for (const req of branch.qualityRequirements) {
-                    expect(req.status).toStrictEqual("Unlocked");
-                }
-            } else {
-                expect(branch.qualityLocked).toBeTruthy();
-                expect(branch.qualityRequirements).toContain(SMALL_MERCIES_LOCKED_QUALITY)
-            }
-        }
+    it('testLockButtons', () => {
+        document.body.innerHTML = unlockedButtons;
+        expect((document.getElementsByClassName("button--primary")[0] as HTMLButtonElement).disabled).toBeFalsy()
+
+        const boneMarketFixer = new BoneMarketFixer();
+        boneMarketFixer.currentState = new GameState();
+        boneMarketFixer.currentState.location.area.areaId = 111138;
+        boneMarketFixer.enableBoneMarketHelper = true;
+
+        boneMarketFixer.lockBranch(document.getElementsByClassName("media branch media--branch")[0] as HTMLDivElement);
+
+        const updatedBranch = document.getElementsByClassName("media branch media--branch")[0] as HTMLDivElement;
+
+        expect(updatedBranch.classList.contains("media--locked")).toBeTruthy();
+        expect(updatedBranch.getElementsByClassName("button--go")[0].getAttribute("disabled")).not.toBeNull();
+        expect(updatedBranch.getElementsByClassName("quality-requirement").length).toStrictEqual(3);
+    })
+
+    it('testUnlockButtons', () => {
+        document.body.innerHTML = lockedButtons;
+        expect((document.getElementsByClassName("button--primary")[0] as HTMLButtonElement).disabled).toBeTruthy();
+
+        const boneMarketFixer = new BoneMarketFixer();
+        boneMarketFixer.currentState = new GameState();
+        boneMarketFixer.currentState.location.area.areaId = 111138;
+        boneMarketFixer.enableBoneMarketHelper = true;
+
+        boneMarketFixer.unlockBranch(document.getElementsByClassName("media branch media--branch")[0] as HTMLDivElement);
+
+        const updatedBranch = document.getElementsByClassName("media branch media--branch")[0] as HTMLDivElement;
+
+        expect(updatedBranch.classList.contains("media--locked")).toBeFalsy();
+        expect(updatedBranch.getElementsByClassName("button--go")[0].getAttribute("disabled")).toBeNull();
+        expect(updatedBranch.getElementsByClassName("quality-requirement").length).toStrictEqual(2);
     });
+
+    it('testLockOrUnlockManyBranches', () => {
+        document.body.innerHTML = sampleBranchContainer;
+        const branchesAtStart = document.getElementsByClassName("media branch media--branch") as HTMLCollectionOf<HTMLDivElement>;
+        expect(branchesAtStart.length).toStrictEqual(4);
+        expect(branchesAtStart[0].dataset.branchId).toStrictEqual("242491");
+        expect(branchesAtStart[0].classList.contains("media--locked")).toBeFalsy();
+        expect(branchesAtStart[1].dataset.branchId).toStrictEqual("242469");
+        expect(branchesAtStart[1].classList.contains("media--locked")).toBeTruthy();
+        expect(branchesAtStart[2].dataset.branchId).toStrictEqual("255215");
+        expect(branchesAtStart[2].classList.contains("media--locked")).toBeTruthy();
+        expect(branchesAtStart[3].dataset.branchId).toStrictEqual("242468");
+        expect(branchesAtStart[3].classList.contains("media--locked")).toBeTruthy();
+
+        const boneMarketFixer = new BoneMarketFixer();
+        boneMarketFixer.currentState = new GameState();
+        boneMarketFixer.currentState.location.area.areaId = 111138;
+        boneMarketFixer.enableBoneMarketHelper = true;
+        boneMarketFixer.currentRecipeName = "Amalgamy Bird 1 Exhaustion";
+        boneMarketFixer.currentRecipeStep = 0;
+
+        boneMarketFixer.lockOrUnlockButtons();
+
+        const branchesAfter = document.getElementsByClassName("media branch media--branch") as HTMLCollectionOf<HTMLDivElement>;
+        console.log(branchesAfter[0].outerHTML);
+        console.log(branchesAfter[1].outerHTML);
+        console.log(branchesAfter[2].outerHTML);
+        console.log(branchesAfter[3].outerHTML);
+        expect(branchesAfter.length).toStrictEqual(4);
+        expect(branchesAfter[0].dataset.branchId).toStrictEqual("242491");
+        expect(branchesAfter[0].classList.contains("media--locked")).toBeTruthy();
+        expect(branchesAfter[0].getElementsByClassName("icon--locked quality-requirement").length).toStrictEqual(1)
+        expect(branchesAfter[1].dataset.branchId).toStrictEqual("242469");
+        expect(branchesAfter[1].classList.contains("media--locked")).toBeFalsy();
+        expect(branchesAfter[1].getElementsByClassName("icon--locked quality-requirement").length).toStrictEqual(0)
+        expect(branchesAfter[2].dataset.branchId).toStrictEqual("255215");
+        expect(branchesAfter[2].classList.contains("media--locked")).toBeTruthy();
+        expect(branchesAfter[2].getElementsByClassName("icon--locked quality-requirement").length).toStrictEqual(2)
+        expect(branchesAfter[3].dataset.branchId).toStrictEqual("242468");
+        expect(branchesAfter[3].classList.contains("media--locked")).toBeTruthy();
+        expect(branchesAfter[3].getElementsByClassName("icon--locked quality-requirement").length).toStrictEqual(1)
+    })
 });

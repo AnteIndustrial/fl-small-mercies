@@ -336,10 +336,6 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     //gamestate.onEquipmentChange returns their values before the change, which isn't super helpful
 
     constructor() {
-        /*const oldSettings = {
-            "nextTthIsoString": null, "nextKhanateIsoString": null, "nextBalmoralIsoString": null, "nextWaswoodIsoString": null, "CHIMES_MESSAGE": null,
-            "nextWellspringIsoString": null, "nextChimesIsoString": null, "nextKhanateMoment": null, "nextBalmoralMoment": null, "boons_and_burdens": null};
-        sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: oldSettings})*/
         window.addEventListener("message", (event) => {
             if (event.data.action === MSG_TYPE_WIKI_API_RESPONSE) {
                 const results: Map<string, WikiResult> = new Map(Object.entries(JSON.parse(event.data.results)));
@@ -840,15 +836,18 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         return changeDate;
     }
 
-    getNextExceptionalStoryDate(start: Date): Date {
+    getNextExceptionalStoryDate(start: Date, iteration = 0): Date {
         const changeDate = new Date(this.getNextDay(start, DAYS.THURSDAY));
         while (changeDate.getUTCDate() > 7) {
             changeDate.setUTCDate(changeDate.getUTCDate() + 7);
         }
         changeDate.setUTCDate(changeDate.getUTCDate() - 7);
         if (changeDate.getTime() < start.getTime()) {
+            if (iteration > 5) {
+                return changeDate;//just trying to stop an infinite loop
+            }
             changeDate.setUTCDate(changeDate.getUTCDate() + 7);
-            return this.getNextExceptionalStoryDate(changeDate);
+            return this.getNextExceptionalStoryDate(changeDate, iteration++);
         } else {
             return changeDate;
         }
@@ -1108,7 +1107,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 const backupString = this.backupMoments.get(MESSAGE_STRINGS.KHANATE_MESSAGE);
                 if (backupString) {
                     const nextBackupDate = new Date(this.backupMoments.get(MESSAGE_STRINGS.KHANATE_MESSAGE) as string);
-                    nextBackupDate.setDate(nextBackupDate.getDate() + 7);
+                    nextBackupDate.setUTCDate(nextBackupDate.getUTCDate() + 7);
                     const nextBackupMoment = nextBackupDate.getTime();
                     if (nextBackupDate.getTime() > now) {
                         //Backup moment looks good, save it and use it
