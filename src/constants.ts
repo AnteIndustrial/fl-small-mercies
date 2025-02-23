@@ -268,6 +268,10 @@ const SETTINGS_SCHEMA: SettingsSchema = [
                 description: "Notify if the Cave of the Nadir is available.",
                 default: true,
             },
+            disco_law: {
+                description: "Notify if no Discordance Law is active.",
+                default: true,
+            },
             parabolan_ravages: {
                 description: "Notify if Parabolan Ravages is 0.",
                 default: true,
@@ -334,6 +338,10 @@ const SETTINGS_SCHEMA: SettingsSchema = [
             },
             exceptional_story: {
                 description: "Notify when next Exceptional Story will be available.",
+                default: true,
+            },
+            enhanced_exceptional: {
+                description: "Notify when EEF stories can be selected, and when new options will rotate in.",
                 default: true,
             }
         }

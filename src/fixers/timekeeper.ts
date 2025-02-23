@@ -19,9 +19,9 @@ const EVENT_TRIGGER_LEEWAY = 10 * MILLISECONDS_IN_MINUTE;
 const BALMORAL_GIFT_BRANCH_IDS = [243583, 243592, 243600] as const;
 const KHANATE_REPORT_BRANCH_IDS = [250681] as const;
 const WELLSPRING_BRANCH_IDS = [244785, 244786] as const;
-const WASWOOD_CALENDAR_BRANCH_IDS = [254769, 254764, 254597, 254763, 254765, 254599, 254598, 254767, 254768, 234347, 254844, 254842, 234348, 254510, 254511, 224801, 254843] as const;
-const CHIMES_BOONS_BRANCH_IDS = [261036, 261037, 261025, 261029, 261030, 261031, 261032, 261033, 261034, 261035] as const;
-const CHIMES_BOONS_BRANCHES: Record<number, string> = {
+const WASWOOD_CALENDAR_BRANCH_IDS = [254769, 254764, 254597, 254763, 254765, 254599, 254598, 254767, 254768, 234347, 254844, 254842, 234348, 254510, 254511, 224801, 254843, 270298] as const;
+//const CHIMES_BOONS_BRANCH_IDS = [261036, 261037, 261025, 261029, 261030, 261031, 261032, 261033, 261034, 261035] as const;
+/*const CHIMES_BOONS_BRANCHES: Record<number, string> = {
     261036: "A Remarkable Tolerance for Your Eccentric Behaviour",
     261037: "A Remarkable Reluctance to Observe Your Misdeeds",
     261025: "A Machiavellian Mien",
@@ -32,13 +32,15 @@ const CHIMES_BOONS_BRANCHES: Record<number, string> = {
     261033: "A Cryptoanatomical Celebrity",
     261034: "A Protean Prominence",
     261035: "A Zalty Ztature"
-} as const;//calling Object.keys() on this returns string keys. swapping key/value means using values to look up key. Duplicating key list seemed the best option.
+} as const;*///calling Object.keys() on this returns string keys. swapping key/value means using values to look up key. Duplicating key list seemed the best option.
 
 interface LivingStory { ids: readonly number[], story: string, timer: number; };
 const LIVING_STORY_NAMES = ["livingStoryBookBoon", "livingStoryAstronomerMap", "livingStoryNavalOfficerMap", "livingStoryClayManMap", "livingStoryMrCups", "livingStoryMrHearts",
     "livingStoryMarigold", "livingStoryHighwayman", "livingStoryDilmun", "livingStoryCalmer", "livingStoryTutorial", "livingStoryRoseInBurrow", "livingStoryClara",
     "livingStoryPristineEgg", "livingStoryNextBout",  "livingStoryAirship", "livingStoryRatkind", "livingStoryMatterAtHome", "livingStoryDeparture", "livingStoryRaven", "livingStoryEfficient", "livingStoryRegimental",
-    "livingStoryMissive", "livingStoryInvitation", "livingStoryArdour", "livingStoryMinting", "livingStoryWhitsun", "livingStoryEscape", "livingStoryChristmas"] as const
+    "livingStoryMissive", "livingStoryInvitation", "livingStoryArdour", "livingStoryMinting", "livingStoryWhitsun", "livingStoryEscape", "livingStoryChristmas",
+    "livingStoryTolerance", "livingStoryReluctance", "livingStoryMien", "livingStoryPseudo", "livingStoryReflect", "livingStoryPoison", "livingStoryGenerous",
+    "livingStoryCrypto", "livingStoryProtean", "livingStoryZalty"] as const;
 type LivingStoryName = typeof LIVING_STORY_NAMES[number];//todo station 8 master airship
 const MISC_LIVING_STORIES: Record<LivingStoryName, LivingStory> = {
     livingStoryBookBoon: { ids: [263646, 263647, 263648, 263645], story: "Another Volume for the Library", timer: SEVEN_DAYS_IN_MILLISECONDS },
@@ -69,7 +71,17 @@ const MISC_LIVING_STORIES: Record<LivingStoryName, LivingStory> = {
     livingStoryMinting: { ids: [250116], story: "A Minting, Completed", timer: MILLISECONDS_IN_DAY },
     livingStoryWhitsun: { ids: [238693], story: "Your Whitsun Egg is Hatching!", timer: 23 * MILLISECONDS_IN_HOUR },
     livingStoryEscape: { ids: [235720], story: "A Clean Escape?", timer: MILLISECONDS_IN_DAY },
-    livingStoryChristmas: { ids: [262517], story: "Dissipating Goodwill", timer: 2 * SEVEN_DAYS_IN_MILLISECONDS }
+    livingStoryChristmas: { ids: [262517], story: "Dissipating Goodwill", timer: 2 * SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryTolerance: { ids: [261036], story: "A Remarkable Tolerance for Your Eccentric Behaviour", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryReluctance: { ids: [261037], story: "A Remarkable Reluctance to Observe Your Misdeeds", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryMien: { ids: [261025], story: "A Machiavellian Mien", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryPseudo: { ids: [261029], story: "A Pseudoscientific Seeming", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryReflect: { ids: [261030], story: "A Reflective Reputation", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryPoison: { ids: [261031], story: "A Poisonous Prestige", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryGenerous: { ids: [261032], story: "A Generous Guise", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryCrypto: { ids: [261033], story: "A Cryptoanatomical Celebrity", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryProtean: { ids: [261034], story: "A Protean Prominence", timer: SEVEN_DAYS_IN_MILLISECONDS },
+    livingStoryZalty: { ids: [261035], story: "A Zalty Ztature", timer: SEVEN_DAYS_IN_MILLISECONDS }
 } as const
 
 const MESSAGE_STRINGS = {
@@ -81,7 +93,7 @@ const MESSAGE_STRINGS = {
 const DAYS = { SUNDAY: 0, MONDAY: 1, TUESDAY: 2, WEDNESDAY: 3, THURSDAY: 4, FRIDAY: 5, SATURDAY: 6 } as const;
 
 
-const RattyDemands = ["ALWAYS", "SAINTLY_DEMAND", "SOFT_DEMAND", "TEMPESTUOUS_DEMAND", "INSCRUTABLE_DEMAND", "INTRICATE_DEMAND", "MAUDLIN_DEMAND", "CALCULATING_DEMAND", "RUINOUS_DEMAND"] as const;
+const RattyDemands = ["ALWAYS", "SAINTLY_DEMAND", "SOFT_DEMAND", "TEMPESTUOUS_DEMAND", "INSCRUTABLE_DEMAND", "INTRICATE_DEMAND", "MAUDLIN_DEMAND", "CALCULATING_DEMAND", "RUINOUS_DEMAND", "ECLIPSE"] as const;
 type RattyDemand = typeof RattyDemands[number];
 const RAT_MARKET_BUYING: Record<RattyDemand, readonly RatItem[]> = {
     ALWAYS: [{ id: 142797, name: "Fourth-City Echo", price: 125 }],
@@ -92,13 +104,14 @@ const RAT_MARKET_BUYING: Record<RattyDemand, readonly RatItem[]> = {
     INTRICATE_DEMAND: [{ id: 141946, name: "Unlawful Device", price: 125 }, { id: 142840, name: "Crackling Device", price: 625}],
     MAUDLIN_DEMAND: [{ id: 142386, name: "Captivating Ballad", price: 625 }, { id: 142463, name: "Parabolan Parable", price: 3125 }],
     CALCULATING_DEMAND: [{ id: 122489, name: "Vital Intelligence", price: 125 }, { id: 140970 /* and 140971*/, name: "Queen Mate and Epaulette Mate Pairs", price: 500 }, { id: 142793, name: "Corresponding Sounder", price: 3125 }],
-    RUINOUS_DEMAND: [{ id: 141882, name: "Mortification of a Great Power", price: 625 }, { id: 814, name: "Dreadful Surmise", price: 3125 }, { id: 141764, name: "Distillation of Retribution", price: 3125}]
+    RUINOUS_DEMAND: [{ id: 141882, name: "Mortification of a Great Power", price: 625 }, { id: 814, name: "Dreadful Surmise", price: 3125 }, { id: 141764, name: "Distillation of Retribution", price: 3125 }],
+    ECLIPSE: [{ id: 141385, name: "Memory of Discordance", price: 125}, { id: 141772, name: "Discordant Soul", price: 625 }]
 } as const;
 
 
 const ratItemNames = ["WATCH", "UMBRELLA", "PIECE", "CANE", "TIARA", "LENGUALS", "SMOCK", "VAKEBOOTS", "AMBER", "IRRIGO", "GOGGLES", "CINDER", "SKULL",
     "STARSTONE", "COMPENDIUM", "FROCK", "SUIT", "SECRET", "SOUL", "SLIPPERS", "EDICTS", "LEGENDA", "LOCATION", "GLOVES", "TEARS", "GANT",
-    "WADERS", "HAIRS", "CATALOGUE", "KNIFE" ] as const;
+    "WADERS", "HAIRS", "CATALOGUE", "KNIFE", "BOTV" ] as const;
 type RatItemName = typeof ratItemNames[number];
 const RAT_MARKET_ITEMS: Record<RatItemName, RatItem> = {
     WATCH: { id: 655, name: "Ratwork Watch", price: 3200 },
@@ -130,7 +143,8 @@ const RAT_MARKET_ITEMS: Record<RatItemName, RatItem> = {
     WADERS: { id: 143131, name: "Venge-Rat Waders", price: 10000 },
     HAIRS: { id: 143303, name: "Seven of St Eligius' Very Own Beard Hairs", price: 10000 },
     CATALOGUE: { id: 143415, name: "False-Star Catalogue", price: 10000 },
-    KNIFE: { id: 143625, name: "Leviathan-Bone Knife", price: 10000 }
+    KNIFE: { id: 143625, name: "Leviathan-Bone Knife", price: 10000 },
+    BOTV: { id: 934, name: "Breath of the Void", price: 15600 }
 } as const;
 
 
@@ -173,13 +187,14 @@ const RAT_MARKET_SELLING: Record<RatSellingCategory, readonly RatItem[]> = {
 } as const;
 Object.freeze(RAT_MARKET_SELLING);
 
-type SeasonWithItems = "1" | "2" | "3" | "8" | "9";
+type SeasonWithItems = "1" | "2" | "3" | "8" | "9" | "10";
 const WASWOOD_ITEMS: Record<SeasonWithItems, readonly CharacterQualityName[]> = {
     "1": ["JENNYS_WIMPLE"],
     "2": ["ANON_WHITE_MASK"],
     "3": ["VISCOUNT_COLLAR", "VISCOUNTESS_COLLAR"],
     "8": ["STURDY_PICK", "SPEAKING_TUBE", "M_D_A_FOR_F", "DRINKING_VESSEL", "POISONED_PEN", "WAX_BOOTS", "WORK_GLOVES"],
-    "9": ["MINIATURE_MUSEUM", "PERFUMERS_ARTS", "GEBRANDTS_ADDRESS_BOOK"]
+    "9": ["MINIATURE_MUSEUM", "PERFUMERS_ARTS", "GEBRANDTS_ADDRESS_BOOK"],
+    "10": ["STRANGE_AERONAUT", "HORTICULTURAL_MEMBERSHIP", "RANK_FLIGHT_CAPTAIN", "HARD_EARNED_KNACK"]
 } as const;
 
 type HeartsGameSeason = "Nascency" | "Excess" | "Dares" | "Devotions" | "Irreverences" | "Duplicities"
@@ -193,9 +208,9 @@ const HEARTS_GAME_SEASON_TO_DISTINCTION: Record<HeartsGameSeason, HeartsGameDist
     Duplicities: "DUPLICITY",
 } as const;
 
-const worldQualityNames = ["SAINTLY_DEMAND", "SOFT_DEMAND", "TEMPESTUOUS_DEMAND", "INSCRUTABLE_DEMAND", "INTRICATE_DEMAND", "MAUDLIN_DEMAND", "CALCULATING_DEMAND", "RUINOUS_DEMAND",
-    "THE_RAT_SEASON", "DIRECTION_OF_THE_RAT_WIND", "PHASE_OF_THE_RAT_MOON", "THE_FALSE_SEASON", "THE_SEASON_IN_SOUP", "BONE_MARKET_FLUCTUATIONS", "ZOOLOGICAL_MANIA",
-    "HEARTS_GAME_SEASON", "SEASON_OF_THE_SACROBOSCAN_CALENDAR"] as const;
+const worldQualityNames = ["SAINTLY_DEMAND", "SOFT_DEMAND", "TEMPESTUOUS_DEMAND", "INSCRUTABLE_DEMAND", "INTRICATE_DEMAND", "MAUDLIN_DEMAND", "CALCULATING_DEMAND", "RUINOUS_DEMAND", "ECLIPSE",
+    "THE_RAT_SEASON", "DIRECTION_OF_THE_RAT_WIND", "PHASE_OF_THE_RAT_MOON", "THE_FALSE_SEASON", "THE_SEASON_IN_SOUP", "BONE_MARKET_FLUCTUATIONS", "ZOOLOGICAL_MANIA", "OCCASIONAL_BUYER",
+    "DIPLOMAT_FASCINATION", "HEARTS_GAME_SEASON", "SEASON_OF_THE_SACROBOSCAN_CALENDAR"] as const;
 type WorldQualityName = typeof worldQualityNames[number];
 
 type CharacterQualityName = "MAKING_WAVES" | "NOTABILITY" | "BENEFICENCE" | "FREE_EVENING" | "MIRED_IN_MAIL" | "WHISPERS" | "A_KNOCK" | "A_SUSURRUS" | "UNEARTHLY_WHISPER" |
@@ -204,9 +219,10 @@ type CharacterQualityName = "MAKING_WAVES" | "NOTABILITY" | "BENEFICENCE" | "FRE
     "PARABOLAN_RAVAGES" | "PARABOLAN_CAMPAIGN" | "PARABOLAN_WAR_STAGE" | "PARABOLAN_WAR_ADVANCE" | "TRUE_DENIZEN" | "CONSEQUENCE" | "ROUTE_BONE_MARKET" | "BONE_MARKET_EXHAUSTION" |
     "DELAY_NEXT_MEETING" | "RAILWAY_VENTURE" | "BUREAUCRATIC_ADVANTAGE" | "APPROACHING_HELL" | "VISITOR_TO_HELL" | "FLOWER_FROM_HELL" | "STARVED_EXCHANGE" | "ECDYSIS" | "WIDE_EYED" |
     "PARTIALLY_BONELESS" | "RADIANT_BEARING" | "HALLOW_VESSEL" | "VOTES_CAST" | "VOTES_ALLOWED" | "JENNYS_WIMPLE" | "ANON_WHITE_MASK" | "VISCOUNT_COLLAR" | "VISCOUNTESS_COLLAR" | "STURDY_PICK" |
-    "SPEAKING_TUBE" | "M_D_A_FOR_F" | "DRINKING_VESSEL" | "POISONED_PEN" | "WAX_BOOTS" | "WORK_GLOVES" | "MINIATURE_MUSEUM" | "PERFUMERS_ARTS" | "GEBRANDTS_ADDRESS_BOOK" | "NASCENCY" |
-    "EXCESS" | "DARES" | "DEVOTION" | "IRREVERENCE" | "DUPLICITY" | "BALMORAL" | "NULL_AND_VOID" | "KHAGANS_PALACE_REPORT" | "AGENT" | "JAUNT_WASWOOD" | "DISCOVERED_WELLSPRING" |
-    "GLOWING_VIRIC" | "BALMORAL_CASTELLAN" | "BALMORAL_GIFT" | "RAT_MARKET_SATURATION"
+    "SPEAKING_TUBE" | "M_D_A_FOR_F" | "DRINKING_VESSEL" | "POISONED_PEN" | "WAX_BOOTS" | "WORK_GLOVES" | "MINIATURE_MUSEUM" | "PERFUMERS_ARTS" | "GEBRANDTS_ADDRESS_BOOK" | "STRANGE_AERONAUT" |
+    "HORTICULTURAL_MEMBERSHIP" | "RANK_FLIGHT_CAPTAIN" | "HARD_EARNED_KNACK" | "NASCENCY" | "EXCESS" | "DARES" | "DEVOTION" | "IRREVERENCE" | "DUPLICITY" | "BALMORAL" | "NULL_AND_VOID" |
+    "KHAGANS_PALACE_REPORT" | "AGENT" | "JAUNT_WASWOOD" | "DISCOVERED_WELLSPRING" | "GLOWING_VIRIC" | "BALMORAL_CASTELLAN" | "BALMORAL_GIFT" | "RAT_MARKET_SATURATION" | "EMPTY_PROMISE" |
+    "SOCIETY_FAVOUR" | "REV_FAVOUR" | "GG_FAVOUR" | "DRAMATIC_TENSION" | "DISCO_LAW" | "STONES_STAND"
 
 interface RatItem { id: number, name: string, price: number; };
 interface WorldQuality { name: string, result?: WikiResult, resetDay: number; blindspot?: boolean}
@@ -228,6 +244,9 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
     backupMoments: Map<string, string> = new Map();
     waitingOnApi = false;
     activeLivingStories: Record<string, string> = {};
+    remainingEEFChoices = 0;
+    subscriptionEnd = "";
+
     worldQualities: Record<WorldQualityName, WorldQuality> = {
         SAINTLY_DEMAND: { name: "Saintly Demand", result: undefined, resetDay: DAYS.MONDAY },
         SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: DAYS.MONDAY },
@@ -237,6 +256,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY },
         CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY },
         RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY },
+        ECLIPSE: { name: "The Rat Market, in Eclipse", result: undefined, resetDay: DAYS.MONDAY },
         THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY },
         DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY },
         PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY },
@@ -244,9 +264,11 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY },
         BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: DAYS.TUESDAY },
         ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY },
+        OCCASIONAL_BUYER: { name: "Occasional Buyer:", result: undefined, resetDay: DAYS.TUESDAY },
+        DIPLOMAT_FASCINATION: { name: "The Diplomat's Current Fascination", result: undefined, resetDay: DAYS.TUESDAY },
         HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: undefined, resetDay: DAYS.TUESDAY },
         SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: undefined, resetDay: DAYS.THURSDAY },
-    };//todo I'm saving the whole thing, maybe just save the results?
+    };
 
     private characterQualities: Record<CharacterQualityName, CharacterQuality> = {
         MAKING_WAVES: { id: 545, value: 0 },
@@ -309,6 +331,10 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         MINIATURE_MUSEUM: { id: 143538, value: 0, name: "Memory of a Miniature Museum" },
         PERFUMERS_ARTS: { id: 143748, value: 0, name: "An Initiate into the Perfumer's Arts" },
         GEBRANDTS_ADDRESS_BOOK: { id: 143752, value: 0, name: "Your Name in F.F. Gebrandt's Address Book" },
+        STRANGE_AERONAUT: { id: 145862, value: 0, name: "Strange Aeronaut" },
+        HORTICULTURAL_MEMBERSHIP: { id: 144483, value: 0, name: "Honorary Membership in the London Horticultural Society" },
+        RANK_FLIGHT_CAPTAIN: { id: 144495, value: 0, name: "The Rank of Flight Captain" },
+        HARD_EARNED_KNACK: { id: 144499, value: 0, name: "A Hard-Earned Knack for Repair" },
         NASCENCY: { id: 144836, value: 0 },
         EXCESS: { id: 144837, value: 0 },
         DARES: { id: 144838, value: 0 },
@@ -325,7 +351,14 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         BALMORAL_CASTELLAN: { id: 141780, value: 0 },
         BALMORAL_GIFT: { id: 141783, value: 0 },
         RAT_MARKET_SATURATION: { id: 145145, value: 0 },
-        DREADED_BOON: { id: 142225, value: 0}
+        EMPTY_PROMISE: { id: 145156, value: 0, name: "An Empty Promise" },
+        DREADED_BOON: { id: 142225, value: 0 },
+        SOCIETY_FAVOUR: { id: 133833, value: 0 },
+        REV_FAVOUR: { id: 133831, value: 0 },
+        GG_FAVOUR: { id: 133044, value: 0 },
+        DRAMATIC_TENSION: { id: 820, value: 0 },
+        DISCO_LAW: { id: 141904, value: 0 },
+        STONES_STAND: { id: 141905, value: 0 }
     };
 
     characterEffectiveQualities: Record<string, CharacterQuality> = {
@@ -366,7 +399,9 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             Object.values(this.characterEffectiveQualities).forEach((characterQuality) => {
                 characterQuality.value = g.getQualityById(characterQuality.id)?.effectiveLevel || 0;
             });
-            this.populateNotabilityItems(); //this happens after equip change
+            if (this.currentSettings.notability) {
+                this.populateNotabilityItems(); //this happens after equip change
+            }
         });
         state.onQualityChanged((_state, quality, _previous, _current) => {
             Object.values(this.characterQualities).forEach((characterQuality) => {
@@ -537,6 +572,9 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         const nadirItem = document.createElement("li");
         nadirItem.id = 'cave-of-nadir-item';
         tthPanel.appendChild(nadirItem);
+        const discoItem = document.createElement("li");
+        discoItem.id = 'disco-law-item';
+        tthPanel.appendChild(discoItem);
         const paraRavages = document.createElement("li");
         paraRavages.id = 'parabolan-ravages-item';
         tthPanel.appendChild(paraRavages);
@@ -564,6 +602,9 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         const exceptionalStoryItem = document.createElement("li");
         exceptionalStoryItem.id = "exceptional-story-item";
         tthPanel.appendChild(exceptionalStoryItem);
+        const enhancedExceptionalItem = document.createElement("li");
+        enhancedExceptionalItem.id = "enhanced-exceptional-item";
+        tthPanel.appendChild(enhancedExceptionalItem);
 
         if (this.currentSettings.notability) {
             this.populateNotabilityItems(losingNotability, currentBdrItem, bdrRequiredItem);
@@ -631,7 +672,22 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 if (this.characterQualities.VIOLANT_SIGHTS.value === 0) {
                     nadirItem.textContent += " Consider going to Zenith first.";
                 }
+                if (this.characterQualities.SOCIETY_FAVOUR.value === 7) {
+                    nadirItem.textContent += " Consider spending some Society Favours first.";
+                }
+                if (this.characterQualities.REV_FAVOUR.value === 7) {
+                    nadirItem.textContent += " Consider spending some Revolutionary Favours first.";
+                }
+                if (this.characterQualities.GG_FAVOUR.value === 7) {
+                    nadirItem.textContent += " Consider spending some Great Game Favours first.";
+                }
+                if (this.characterQualities.DRAMATIC_TENSION.value >= 2) {
+                    nadirItem.textContent += " Consider spending your Dramatic Tension first.";
+                }
             }
+        }
+        if (this.currentSettings.disco_law && this.characterQualities.STONES_STAND.value && !this.characterQualities.DISCO_LAW.value) {
+            discoItem.textContent = "You can activate a Discordance Law."
         }
         if (this.currentSettings.parabolan_ravages && this.characterQualities.PARABOLAN_COMPANY.value) {
             if (this.characterQualities.PARABOLAN_RAVAGES.value < 10 && this.characterQualities.PARABOLAN_CAMPAIGN.value) {
@@ -723,6 +779,28 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             const changeDate = this.getNextExceptionalStoryDate(now);
             const remainingTime = this.calculateRemainingTime(changeDate.getTime());
             exceptionalStoryItem.textContent = `The next Exceptional Story will be available ${remainingTime}`;
+        }
+        if (this.currentSettings.enhanced_exceptional) {
+            if (this.remainingEEFChoices > 1) {
+                enhancedExceptionalItem.textContent = "You can choose an EEF story.";
+            } else if (this.remainingEEFChoices === 1) {
+                enhancedExceptionalItem.textContent = "You can refresh an EEF story you've already played.";
+            } else {
+                enhancedExceptionalItem.textContent = "All EEF stories used this month.";
+            }
+            if (this.subscriptionEnd) {
+                const remainingTime = this.calculateRemainingTimeFromIsoOrNumberString(this.subscriptionEnd)
+                enhancedExceptionalItem.textContent += ` Can choose a new story ${remainingTime}`;
+            }
+            const now = new Date();
+            if (now.getUTCDate() === 1 && now.getUTCHours() < 11) {
+                //a few hours
+            } else {
+                now.setUTCMonth(now.getUTCMonth() + 1);
+                now.setUTCDate(1);
+                now.setUTCHours(11, 0, 0, 0);
+            }
+            enhancedExceptionalItem.textContent += ` Story selection will rotate ${this.calculateRemainingTime(now.getTime())}`;
         }
         return tthPanel;
     }
@@ -977,7 +1055,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
 
             livingStoryPanel.appendChild(khanateDiv);
         }
-        if (this.currentSettings.chimes_boons) {
+        /*if (this.currentSettings.chimes_boons) {
             const chimesBoons = document.createElement("div");
             for (const [id, boonName] of Object.entries(CHIMES_BOONS_BRANCHES)) {
                 if (this.currentSettings[boonName]) {
@@ -992,7 +1070,7 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 }
             }
             livingStoryPanel.appendChild(chimesBoons);
-        }
+        }*/
         //todo need a setting to turn this feature on/off
         for (const [title, livingStory] of Object.entries(MISC_LIVING_STORIES)) {
             if (this.currentSettings[title]) {
@@ -1042,9 +1120,19 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             startAt = 8;
         }
         const keys = Object.keys(WASWOOD_ITEMS).sort((a, b) => { return Number(a) - Number(b); }) as SeasonWithItems[];
+        if (startAt < Number(keys[0]) || startAt > Number(keys[keys.length - 1])) {
+            waswoodPanel.textContent = `A new event has been added to the Waswood, and this extension has not been updated to account for it. Please check the wiki until this extension is updated.`;
+            return waswoodPanel;
+        }
+        let infiniteLoopCheck = 0;
         while (Number(keys[0]) !== startAt) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             keys.push(keys.shift()!);
+            infiniteLoopCheck++;
+            if (infiniteLoopCheck > 2 * keys.length) {
+                waswoodPanel.textContent = `Cannot determine current Waswood event.`;
+                return waswoodPanel;
+            }
         }
         for (const key of keys) {
             for (const item of (WASWOOD_ITEMS[key])) {
@@ -1307,6 +1395,12 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         const zoologicalManiaItem = document.createElement("li");
         const zoologicalMania = this.worldQualities.ZOOLOGICAL_MANIA.result?.value;
         zoologicalManiaItem.textContent = `Zoological Mania: ${zoologicalMania}`;
+        const buyerItem = document.createElement("li");
+        const buyer = this.worldQualities.OCCASIONAL_BUYER.result?.value;
+        buyerItem.textContent = `Occasional Buyer: ${buyer}`;
+        const diplomatItem = document.createElement("li");
+        const diplomat = this.worldQualities.DIPLOMAT_FASCINATION.result?.value;
+        diplomatItem.textContent = `The Diplomat's Current Fascination: ${diplomat}`;
         const refreshItem = document.createElement("li");
 
         refreshItem.textContent = `These values will change ${this.calculateRemainingTime(this.getNextDay(new Date(), DAYS.TUESDAY))}`;
@@ -1316,12 +1410,21 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
         exhaustionItem.textContent = `You have ${currentExhaustion} exhaustion`;
         if (this.currentSettings.nextTthISOString) {
             exhaustionItem.textContent += `, reducing by 4 ${this.calculateRemainingTimeFromIsoOrNumberString(this.currentSettings.nextTthISOString)}`;
+            if (currentExhaustion >= 8) {
+                const remainingFullWeeks = Math.ceil((currentExhaustion - 4) / 4);
+                const date = new Date(this.currentSettings.nextTthISOString as string);
+                date.setUTCDate(date.getUTCDate() + 7 * remainingFullWeeks);
+                exhaustionItem.textContent += ` Exhaustion will fall below 4 ${this.calculateRemainingTime(date.getTime())}`;
+            }
         }
+
 
         boneMarketPanel.appendChild(boneMarketHeader);
         boneMarketPanel.appendChild(boneMarketList);
         boneMarketList.appendChild(preferredQualityItem);
         boneMarketList.appendChild(zoologicalManiaItem);
+        boneMarketList.appendChild(buyerItem);
+        boneMarketList.appendChild(diplomatItem);
         boneMarketList.appendChild(refreshItem);
         boneMarketList.appendChild(exhaustionItem);
         return boneMarketPanel;
@@ -1436,13 +1539,25 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 ratMarketList.appendChild(sellingItem);
             }
         }
-        //special case
+        //special cases
         if (this.worldQualities.TEMPESTUOUS_DEMAND.result?.value === "1" || this.worldQualities.TEMPESTUOUS_DEMAND.result?.value === "2") {
             const sellingItem = document.createElement("li");
             const item = RAT_MARKET_ITEMS.GANT;
             const current = this.currentState.getQualityById(item.id)?.level || 0;
             sellingItem.textContent = `Selling ${item.name} for ${item.price} Rat-shillings. You currently have ${current}.`;
             ratMarketList.appendChild(sellingItem);
+            if (this.characterQualities.EMPTY_PROMISE.value > 0) {
+                const sellingBotv = document.createElement("li");
+                const botv = RAT_MARKET_ITEMS.BOTV;
+                const botvCurrent = this.currentState.getQualityById(botv.id)?.level || 0;
+                sellingBotv.textContent = `Selling ${botv.name} for ${botv.price} Rat-shillings. You currently have ${botvCurrent}.`;
+                ratMarketList.appendChild(sellingBotv);
+            }
+        }
+        if (this.worldQualities.ECLIPSE.result?.value === "1" && this.characterQualities.EMPTY_PROMISE.value == 0) {
+            const promiseItem = document.createElement("li");
+            promiseItem.textContent = "Can collect an Empty Promise now.";
+            ratMarketList.appendChild(promiseItem);
         }
 
         const nextRefreshItem = document.createElement("li");
@@ -1493,7 +1608,11 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             }
         }
         if (this.currentSettings.worldQualities) {
-            this.worldQualities = JSON.parse(this.currentSettings.worldQualities as string);
+            //this.worldQualities = JSON.parse(this.currentSettings.worldQualities as string);
+            const savedWorldQualities = JSON.parse(this.currentSettings.worldQualities as string);
+            for (const [key, value] of Object.entries(savedWorldQualities)) {
+                this.worldQualities[key as WorldQualityName] = value as WorldQuality;
+            }
             const dirty = this.removeOutdatedWorldQualities(new Date());
             if (dirty) {
                 sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { worldQualities: JSON.stringify(this.worldQualities) } });
@@ -1518,6 +1637,21 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             if (this.currentSettings[key]) {
                 this.activeLivingStories[key] = this.currentSettings[key] as string;
             }
+        }
+        //delete old living stories
+        const now = new Date();
+        let dirty = false;
+        for (const [key, value] of Object.entries(this.currentSettings)) {
+            if (Object.keys(MISC_LIVING_STORIES).includes(key)) {
+                const finishTime = new Date(value as string);
+                if (finishTime.getTime() < now.getTime()) {
+                    delete this.currentSettings[key]
+                    dirty = true;
+                }
+            }
+        }
+        if (dirty) {
+            sendToServiceWorker(MSG_TYPE_SAVE_SETTINGS, { settings: this.currentSettings });
         }
     }
     
@@ -1635,11 +1769,11 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
                 const nextWaswoodMoment = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
                 sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextWaswoodISOString: new Date(nextWaswoodMoment).toISOString() } });
             }
-            if (CHIMES_BOONS_BRANCH_IDS.includes(request.branchId)) {
-                const boonExpires = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
-                const boonName = CHIMES_BOONS_BRANCHES[request.branchId]
-                sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { [boonName]: new Date(boonExpires).toISOString() } });
-            }
+            //if (CHIMES_BOONS_BRANCH_IDS.includes(request.branchId)) {
+            //    const boonExpires = new Date().getTime() + SEVEN_DAYS_IN_MILLISECONDS + EVENT_TRIGGER_LEEWAY;
+            //    const boonName = CHIMES_BOONS_BRANCHES[request.branchId]
+            //    sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { [boonName]: new Date(boonExpires).toISOString() } });
+            //}
             for (const [title, livingStory] of Object.entries(MISC_LIVING_STORIES)) {
                 if (livingStory.ids.includes(request.branchId)) {
                     const expiryTime = new Date().getTime() + livingStory.timer + EVENT_TRIGGER_LEEWAY;
@@ -1681,6 +1815,10 @@ export class TimeKeeperFixer implements IMutationAware, IStateAware, INetworkAwa
             if (response.dateTimeToExecute) {
                 sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { nextTthISOString: response.dateTimeToExecute } });
             }
+        });
+        interceptor.onResponseReceived("/api/fate", (_, response) => {
+            this.remainingEEFChoices = response.remainingStoryUnlocks
+            this.subscriptionEnd = response.premiumSubExpiryDateTime
         });
     }
 }

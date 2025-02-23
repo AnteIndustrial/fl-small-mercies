@@ -4,14 +4,15 @@ import { GameStateController, GameState } from "../game_state";
 import { MSG_TYPE_UPDATE_SETTINGS } from "../constants";
 import { sendToServiceWorker } from "../comms";
 import { FLApiInterceptor } from "../api_interceptor";
-import { SortableTable } from "../sortable-table"
-import { AssemblyOptionIDMap, BoneDetails, BONE_NAMES, Ingredient, recipeMap } from "./recipes";
+import { SortableTable } from "../sortable-table";
+import { AssemblyOptionIDMap, BoneDetails, BONE_NAMES, Recipe, recipeMap, AssemblyDetails, BoneName, SkeletonMania, SkeletonQuality } from "./recipes";
+import { WorldQuality, WorldQualityName } from "./timekeeper";
 
-
-//add other skeleton recipes, eg generators
-//levi frame, brass skull, 2 ivory femur, reptile, bomba generator, 4.93. levi frame, brass skull, 2 amber fin, fish, bomba generator, 5.30
 //Knock-Kneed Newt recipe checks for failed checks, and changes the recipe to recover. Maybe deal with that?
-//Amalgamy bomb says the tail is optional (it's too slow to be worth grinding, but if you've got it, use it here). Some sort of optional tag on ingredients?
+//Steps can have costs (add more joints) or prerequisites (carve away age). How to deal with that?
+//branches can currently only be one step
+//Calculate cost of adding more joints
+//consider changing to indexeddb
 export class BoneMarketFixer implements IMutationAware, IStateAware {
 
     currentSettings!: SettingsObject;
@@ -21,6 +22,9 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
     currentRecipeName = "";
     currentRecipeStep = 0;
     currentlyActive = false;
+    fourExhaustion = false;
+    mania: string | undefined;
+    quality: string | undefined;
 
     constructor() {
         //
@@ -35,7 +39,6 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
         this.currentState = state.getState();
         state.onLocationChanged((_, __) => {
             if (this.shouldBoneMarketHelpersExist()) {
-                console.log("location change")
                 this.createBoneMarketPanels();
             } else if (this.currentlyActive) {
                 this.deletePanels(undefined, undefined);
@@ -77,10 +80,10 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
     }
 
     createBoneMarketPanels() {
+        const headings = document.getElementsByClassName("media__heading heading heading--2 storylet-root__heading");
         const recipeDiv = document.getElementById("bone-market-recipe-helper") as HTMLDivElement || this.createRecipeSelect();
         const ingredientDiv = document.getElementById("bone-market-ingredient-container") as HTMLDivElement || this.generateIngredientTable();
         this.placeDivsInRightPosition(recipeDiv, ingredientDiv);
-        const headings = document.getElementsByClassName("media__heading heading heading--2 storylet-root__heading");
         if (headings && headings.length === 1) {
             if (headings[0].textContent === "Assemble a Skeleton") {
                 this.lockOrUnlockButtons();
@@ -108,6 +111,7 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
 
         const left = document.createElement("div");
         left.style.display = "inline-block";
+        left.style.flexBasis = "100%";
         infoDisplay.appendChild(left)
 
         const recipeSelect = document.createElement("select");
@@ -125,13 +129,11 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
         recipeSelect.value = this.currentRecipeName;
 
         recipeSelect.addEventListener("change", () => {
-            const requirementsListInner = document.getElementById("requirements-list") as HTMLUListElement;
             const chartParent = document.getElementById("bone-market-recipe-helper");
-            if (!requirementsListInner || !chartParent) {
+            if (!chartParent) {
                 console.log("couldn't find requirements list or chart parent");
                 return;
             }
-            requirementsListInner.replaceChildren();
             const recipeSelectInner = document.getElementById("recipe-select") as HTMLSelectElement;
             if (!recipeSelectInner) {
                 console.log("couldn't find recipe select");
@@ -140,7 +142,7 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
             this.currentRecipeName = recipeSelectInner.value;
             this.currentRecipeStep = 0;
             sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { current_recipe_name: recipeSelectInner.value, current_recipe_step: "0" } });
-            this.populateRequirementsList(requirementsListInner, recipeSelectInner.value);
+            this.createRecipeDetailsPanel(recipeSelectInner.value);
 
             const oldDiagram = document.getElementById("bone-market-recipe-diagram")
             oldDiagram?.parentNode?.removeChild(oldDiagram);
@@ -149,42 +151,26 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
             this.lockOrUnlockButtons();
         });
         left.appendChild(recipeSelect);
-
-        const requirementsList = document.createElement("ul");
-        requirementsList.id = "requirements-list";
-        if (recipeSelect.value !== "") {
-            this.populateRequirementsList(requirementsList, recipeSelect.value);
-            infoDisplay.appendChild(this.makeChartWithCss(recipeSelect.value))
-        }
-        left.appendChild(requirementsList);
-
+        
+        left.appendChild(this.createRecipeDetailsPanel(recipeSelect.value));
+        infoDisplay.appendChild(this.makeChartWithCss(recipeSelect.value))
 
         contentsDiv.appendChild(infoDisplay);
         displayDiv.appendChild(contentsDiv);
         containerDiv.appendChild(displayDiv);
 
-        //const routeMap = getRouteMap();
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        //routeMap.get("a")!.getVisualisation(containerDiv);
-        //containerDiv.appendChild(diagramDiv);
-
         return containerDiv;
     }
 
-    makeChartWithCss(recipeName: string): HTMLDivElement {
+    makeChartWithCss(recipeName: string): HTMLDivElement { //account for ""
         const diagramDiv = document.createElement("div");
-        diagramDiv.addEventListener("click", () => {
-            this.currentRecipeStep++; //todo delete, testing
-            this.highlightCurrentStepOnDiagram();
-        })
         diagramDiv.id = "bone-market-recipe-diagram";
         const recipe = recipeMap.get(recipeName);
         if (!recipe) {
-            console.log(`error finding ${recipeName}`);
             return diagramDiv;
         }
         diagramDiv.classList.add("diagram-col");
-        //diagramDiv.style.display = "inline-flex"
+        diagramDiv.style.flexBasis = "100%"
         for (let i = 0; i < recipe.steps.length; i++) {
             const step = recipe.steps[i];
             const diagramRow = document.createElement("div");
@@ -226,51 +212,204 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
         }
     }
 
-    populateRequirementsList(requirementsList: HTMLUListElement, recipeName: string) { //todo is this updated?
-        const recipe = recipeMap.get(recipeName);
-        if (!recipe) {
-            console.log(`error finding ${recipeName}`);
+    createRecipeDetailsPanel(recipeName: string): HTMLDivElement { //todo is this updated?
+        const recipe = recipeMap.get(recipeName) || blankRecipe;
+
+        const recipeDetails = document.createElement("div");
+        recipeDetails.id = "recipe-details-container-div";
+        this.populateRecipeDetails(recipe, recipeDetails);
+
+
+        if (recipe.exhaustion && recipe.exhaustion > 0 && !document.getElementById("four-exhaustion-checkbox")) {
+            const fourExhaustionCheckbox = document.createElement("input");
+            fourExhaustionCheckbox.type = "checkbox";
+            fourExhaustionCheckbox.id = "four-exhaustion-checkbox";
+            if (this.fourExhaustion) {
+                fourExhaustionCheckbox.checked = true;
+            }
+            fourExhaustionCheckbox.addEventListener("change", (_) => {
+                const checkBoxInner = document.getElementById("four-exhaustion-checkbox") as HTMLInputElement;
+                this.fourExhaustion = checkBoxInner.checked;
+                sendToServiceWorker(MSG_TYPE_UPDATE_SETTINGS, { settings: { four_exhaustion: fourExhaustionCheckbox.checked } });
+                this.createRecipeDetailsPanel(this.currentRecipeName);
+            });
+            recipeDetails.appendChild(fourExhaustionCheckbox);
+            const label = document.createElement("label");
+            label.htmlFor = "four-exhaustion-checkbox";
+            label.textContent = "Multiply requirements to use four exhaustion.";
+            recipeDetails.appendChild(label);
+        }
+
+        const checkBox = document.getElementById("four-exhaustion-checkbox") as HTMLInputElement;
+        if (checkBox) {
+            recipe.exhaustion ? checkBox.disabled = false : checkBox.disabled = true; //todo also hidden?
+        }
+
+        this.populateRequirements(recipe, recipeDetails);
+        return recipeDetails;
+    }
+
+    populateRecipeDetails(recipe: Recipe, parent: HTMLDivElement) {
+        let detailsList = document.getElementById("recipe-details-list") as HTMLUListElement;
+        if (detailsList) {
+            detailsList.replaceChildren()
+        } else {
+            detailsList = document.createElement("ul");
+            detailsList.id = "recipe-details-list";
+            detailsList.style.listStyleType = "none";
+            parent.appendChild(detailsList);
+        }
+
+        if (recipe.name === "") {
+            const name = document.createElement("li");
+            name.textContent = `No recipe selected.`;
+            detailsList.appendChild(name);
+            const recTitle = document.createElement("li");
+            recTitle.textContent = `Recommended recipes for ${this.quality} and ${this.mania} week:`;
+            detailsList.appendChild(recTitle);
+            const recommended = this.getRecommendedRecipeNames();
+            for (const recipeName of recommended) {
+                const recc = document.createElement("li");
+                recc.textContent = recipeName;
+                detailsList.appendChild(recc);
+            }
             return;
         }
-        const requirements: Ingredient[] = [];
-        const optionals: Ingredient[] = [];
-        for (const requirement of recipe.bones) {
-            const details = BoneDetails[requirement.bone];
-            if (!details) {
-                console.log(`can't find ID for bone ${requirement.bone}`);
-                return;
+        
+        const name = document.createElement("li");
+        name.textContent = `Recipe name: ${recipe.name}.`;
+        detailsList.appendChild(name);
+
+        if (recipe.quality.length !== 0 && !recipe.quality.includes("NA")) {
+            const quality = document.createElement("li");
+            quality.textContent = `To be made in ${recipe.quality.join(", ")} weeks.`;
+            detailsList.appendChild(quality);
+        }
+        if (recipe.mania.length !== 0 && !recipe.mania.includes("NA")) {
+            const mania = document.createElement("li");
+            mania.textContent = `To be made in ${recipe.mania.join(", ")} weeks.`;
+            detailsList.appendChild(mania);
+        }
+        if (recipe.buyer) {
+            const buyer = document.createElement("li");
+            buyer.textContent = `Sell to ${recipe.buyer}.`;
+            detailsList.appendChild(buyer);
+        }
+        if (recipe.payout) {
+            const payout = document.createElement("li");
+            payout.textContent = `Sells for ${recipe.payout}.`;
+            detailsList.appendChild(payout);
+        }
+        if (recipe.exhaustion || recipe.exhaustion === 0) {
+            const exhaustion = document.createElement("li");
+            exhaustion.textContent = `Costs ${recipe.exhaustion || 0} exhaustion.`;
+            detailsList.appendChild(exhaustion);
+        }
+        if (recipe.epa) {
+            const epa = document.createElement("li");
+            epa.textContent = `Estimated EPA: ${recipe.epa}.`;
+            detailsList.appendChild(epa);
+        }
+    }
+
+    //todo maybe something like if bonefragments are low, recommend that
+    getRecommendedRecipeNames(): string[] {
+        const recommended: string[] = []
+        for (const [key, val] of recipeMap) {
+            if (val.exhaustion) {
+                if (val.mania.includes(this.mania as SkeletonMania) && val.quality.includes(this.quality as SkeletonQuality)) {
+                    recommended.push(key)
+                }
+            } else {
+                if (val.mania.includes(this.mania as SkeletonMania) || val.quality.includes(this.quality as SkeletonQuality)) {
+                    recommended.push(key);
+                }
             }
-            requirement.optional ? optionals.push(requirement) : requirements.push(requirement);
+        }
+        return recommended;
+    }
 
-            if (details.additionalCost) {
-                for (const additionalReq of details.additionalCost) {
-                    const quantityProduct = additionalReq.quantity * requirement.quantity;
+    populateRequirements(recipe: Recipe, parent: HTMLDivElement) {
+        let requirementsList = document.getElementById("requirements-list") as HTMLUListElement;
+        if (requirementsList) {
+            requirementsList.replaceChildren();
+        } else {
+            requirementsList = document.createElement("ul");
+            requirementsList.id = "requirements-list";
+            requirementsList.style.listStyleType = "none";
+            parent.appendChild(requirementsList);
+        }
+        
+        const reqMap: Map<BoneName, number> = new Map();
+        const optMap: Map<BoneName, number> = new Map();
 
-                    requirement.optional ?
-                        optionals.push({ bone: additionalReq.bone, quantity: quantityProduct }) :
-                        requirements.push({ bone: additionalReq.bone, quantity: quantityProduct })
+        for (const steps of recipe.steps) {
+            if (steps.length === 1) {
+                for (const ingredient of AssemblyDetails[steps[0]].cost) {
+                    reqMap.set(ingredient.bone, ingredient.quantity + (reqMap.get(ingredient.bone) || 0));
+                }
+            } else {
+                for (const step of steps) {
+                    for (const ingredient of AssemblyDetails[step].cost) {
+                        optMap.set(ingredient.bone, ingredient.quantity + (optMap.get(ingredient.bone) || 0));
+                    }
                 }
             }
         }
 
-        for (const bone of requirements) {
-            const item = document.createElement("li");
-            const boneID = BoneDetails[bone.bone].id;
-            const bonesOwned = this.currentState.getQualityById(boneID)?.level || 0;
-            item.textContent = `${bone.bone}: ${bone.quantity} needed, currently have ${bonesOwned}`;
-            if (bone.quantity - bonesOwned > 0) {
-                item.style.fontWeight = "bold";
+        //todo update this with player's current exhaustion?
+        let multiplier;
+        if (this.fourExhaustion) {
+            switch (recipe.exhaustion) {
+                case (undefined): //fallthrough
+                case (0): multiplier = 0;
+                    break;
+                case (1):
+                    multiplier = 4;
+                    break;
+                case (2): //fallthrough
+                case (3):
+                    multiplier = 2;
+                    break;
+                case (4): //fallthrough
+                default:
+                    multiplier = 1;
             }
+        }
+
+        for (const [boneName, boneNum] of reqMap) {
+            const item = document.createElement("li");
+            const boneID = BoneDetails[boneName].id;
+            const bonesOwned = this.currentState.getQualityById(boneID)?.level || 0;
+            if (multiplier && recipe.exhaustion) {
+                item.textContent = `${boneName}: ${boneNum * multiplier} needed for ${recipe.exhaustion * multiplier} exhaustion, currently have ${bonesOwned}`;
+                if (boneNum * multiplier - bonesOwned > 0) {
+                    item.style.fontWeight = "bold";
+                }
+            } else {
+                item.textContent = `${boneName}: ${boneNum} needed, currently have ${bonesOwned}`;
+                if (boneNum - bonesOwned > 0) {
+                    item.style.fontWeight = "bold";
+                }
+            }
+            
             requirementsList.appendChild(item);
         }
 
-        for (const bone of optionals) {
+        for (const [boneName, boneNum] of optMap) {
             const item = document.createElement("li");
-            const boneID = BoneDetails[bone.bone].id;
+            const boneID = BoneDetails[boneName].id;
             const bonesOwned = this.currentState.getQualityById(boneID)?.level || 0;
-            item.textContent = `${bone.bone}: ${bone.quantity} can optionally be added, currently have ${bonesOwned}`;
-            if (bone.quantity - bonesOwned > 0) {
-                item.style.fontWeight = "bold";
+            if (multiplier && recipe.exhaustion) {
+                item.textContent = `${boneName}: ${boneNum * multiplier} can optionally be added for ${recipe.exhaustion * multiplier} exhaustion, currently have ${bonesOwned}`;
+                if (boneNum * multiplier - bonesOwned > 0) {
+                    item.style.fontWeight = "bold";
+                }
+            } else {
+                item.textContent = `${boneName}: ${boneNum} can optionally be added, currently have ${bonesOwned}`;
+                if (boneNum - bonesOwned > 0) {
+                    item.style.fontWeight = "bold";
+                }
             }
             requirementsList.appendChild(item);
         }
@@ -383,6 +522,7 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
     }
 
     linkNetworkTools(interceptor: FLApiInterceptor): void {
+        //todo put more calls to placeDivsInRightPosition here, maybe?
         interceptor.onResponseReceived("/api/storylet/choosebranch", (request, _) => {
             if (!this.enableBoneMarketHelper || !this.currentRecipeName || this.currentState.location.area.areaId !== 111138) {
                 return;
@@ -399,15 +539,20 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
                     }
                 }
             }
+            this.placeDivsInRightPosition();
         });
     }
 
     applySettings(settings: SettingsObject): void {
+        this.currentSettings = settings;
         this.enableBoneMarketHelper = settings.bone_market_helper as boolean;
         this.currentRecipeName = settings.current_recipe_name as string;
         this.currentRecipeStep = Number(settings.current_recipe_step as string);
+        this.fourExhaustion = settings.four_exhaustion as boolean;
+        const worldQualities: Record<WorldQualityName, WorldQuality> = JSON.parse(settings.worldQualities as string);
+        this.mania = worldQualities.ZOOLOGICAL_MANIA.result?.value;
+        this.quality = worldQualities.BONE_MARKET_FLUCTUATIONS.result?.value;
         this.highlightCurrentStepOnDiagram();
-        this.currentSettings = settings;
         if (this.currentlyActive && !this.enableBoneMarketHelper) {
             this.deletePanels(undefined, undefined);
             this.currentlyActive = false;
@@ -440,6 +585,7 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
             }
         }
     }
+
     lockBranch(branch: HTMLDivElement) {
         if (!branch.classList.contains("media--locked")) {
             branch.classList.add("media--locked");
@@ -459,6 +605,7 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
             firstReq.parentElement?.insertBefore(template.content.firstChild as HTMLDivElement, firstReq);
         }
     }
+
     unlockBranch(branch: HTMLDivElement) {
         branch.querySelectorAll('img[alt="It is locked for your own good."]').forEach((elem) => elem.parentElement?.parentElement?.remove())
         if (branch.getElementsByClassName("icon--locked quality-requirement").length === 0) {
@@ -471,3 +618,12 @@ export class BoneMarketFixer implements IMutationAware, IStateAware {
         }
     }
 }
+
+const blankRecipe: Recipe = {
+    name: "",
+    bones: [],
+    type: "Chimera",
+    quality: [],
+    steps: [],
+    mania: []
+};

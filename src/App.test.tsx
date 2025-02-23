@@ -129,6 +129,7 @@ describe('testAsuite', () => {
             MAUDLIN_DEMAND: { name: "Maudlin Demand", result: { name: "Maudlin Demand", value: "0", timestamp: 1727409904666 }, resetDay: DAYS.MONDAY, blindspot: false },
             CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            ECLIPSE: { name: "The Rat Market, in Eclipse", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             THE_RAT_SEASON: { name: "The Rat-Season:", result: { name: "The Rat-Season:", value: "Kifer-Caitiff", timestamp: 1727409904666 }, resetDay: DAYS.MONDAY, blindspot: false },
             DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: { name: "Direction of the Rat-Wind:", value: "North", timestamp: 1727409904666 }, resetDay: DAYS.MONDAY, blindspot: false },
             PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: { name: "Phase of the Rat-Moon:", value: "Blue", timestamp: 1727409904666 }, resetDay: DAYS.MONDAY, blindspot: false },
@@ -136,6 +137,8 @@ describe('testAsuite', () => {
             THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: { name: "The Season in Soup", value: "4", timestamp: 1727409904666 }, resetDay: DAYS.MONDAY, blindspot: false },
             BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: { name: "Bone Market Fluctuations:", value: "Menace", timestamp: 1727409904666 }, resetDay: DAYS.TUESDAY, blindspot: false },
             ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: { name: "Zoological Mania:", value: "Amphibians", timestamp: 1727409904666 }, resetDay: DAYS.TUESDAY, blindspot: false },
+            OCCASIONAL_BUYER: { name: "Occasional Buyer:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            DIPLOMAT_FASCINATION: { name: "The Diplomat's Current Fascination", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
             HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: { name: "Hearts' Game Season (Placeholder)", value: "Irreverences", timestamp: 1727409904666 }, resetDay: DAYS.TUESDAY, blindspot: false },
             SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: { name: "Season of the Sacroboscan Calendar", value: "4", timestamp: 1727409904666 }, resetDay: DAYS.THURSDAY, blindspot: false },
         };
@@ -160,12 +163,15 @@ describe('testAsuite', () => {
             INTRICATE_DEMAND: { name: "Intricate Demand", result: { name: "d", value: "0", timestamp: 1725621035017 }, resetDay: DAYS.MONDAY }, //2024-09-06T11:10:35.017Z friday
             MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY },
             THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY },
+            ECLIPSE: { name: "The Rat Market, in Eclipse", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY },
             PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY },
             THE_FALSE_SEASON: { name: "The False-Season:", result: undefined, resetDay: DAYS.MONDAY },
             THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY },
             BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: { name: "e", value: "", timestamp: 1727176235017 }, resetDay: DAYS.TUESDAY }, //2024-09-24T11:10:35.017Z tues
             ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY },
+            OCCASIONAL_BUYER: { name: "Occasional Buyer:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            DIPLOMAT_FASCINATION: { name: "The Diplomat's Current Fascination", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
             HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: { name: "f", value: "", timestamp: 1725880235017 }, resetDay: DAYS.TUESDAY }, //2024-09-09T11:10:35.017Z mon
             SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: { name: "g", value: "0", timestamp: 1726848635017 }, resetDay: DAYS.THURSDAY }, //Fri, 20 Sep 2024 16:10:35 GMT
             CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY },
@@ -186,6 +192,7 @@ describe('testAsuite', () => {
             MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            ECLIPSE: { name: "The Rat Market, in Eclipse", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
@@ -193,6 +200,8 @@ describe('testAsuite', () => {
             THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
             ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            OCCASIONAL_BUYER: { name: "Occasional Buyer:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            DIPLOMAT_FASCINATION: { name: "The Diplomat's Current Fascination", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
             HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: { name: "f", value: "", timestamp: 1725880235017 }, resetDay: DAYS.TUESDAY, blindspot: false },
             SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: { name: "g", value: "0", timestamp: 1726848635017 }, resetDay: DAYS.THURSDAY, blindspot: false }
         };
@@ -223,10 +232,13 @@ describe('testAsuite', () => {
             THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY },
             BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: { name: "e", value: "", timestamp: 1727176235017 }, resetDay: DAYS.TUESDAY },
             ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY },
+            OCCASIONAL_BUYER: { name: "Occasional Buyer:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            DIPLOMAT_FASCINATION: { name: "The Diplomat's Current Fascination", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
             HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: { name: "f", value: "", timestamp: 1725880235017 }, resetDay: DAYS.TUESDAY },
             SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: { name: "g", value: "0", timestamp: 1726848635017 }, resetDay: DAYS.THURSDAY },//Fri, 20 Sep 2024 16:10:35 GMT
             CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY },
             RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY },
+            ECLIPSE: { name: "The Rat Market, in Eclipse", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
         };
 
         timekeeper.worldQualities = worldQualities;
@@ -243,6 +255,7 @@ describe('testAsuite', () => {
             MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            ECLIPSE: { name: "The Rat Market, in Eclipse", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
@@ -250,6 +263,8 @@ describe('testAsuite', () => {
             THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
             ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            OCCASIONAL_BUYER: { name: "Occasional Buyer:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            DIPLOMAT_FASCINATION: { name: "The Diplomat's Current Fascination", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
             HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: { name: "f", value: "", timestamp: 1725880235017 }, resetDay: DAYS.TUESDAY, blindspot: false },
             SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: undefined, resetDay: DAYS.THURSDAY, blindspot: true }
         };
@@ -279,10 +294,13 @@ describe('testAsuite', () => {
             THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY },
             BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: DAYS.TUESDAY },
             ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY },
+            OCCASIONAL_BUYER: { name: "Occasional Buyer:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            DIPLOMAT_FASCINATION: { name: "The Diplomat's Current Fascination", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
             HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: { name: "f", value: "", timestamp: 1725880235017 }, resetDay: DAYS.TUESDAY }, //2024-09-09T11:10:35.017Z mon
             SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: undefined, resetDay: DAYS.THURSDAY },
             CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY },
             RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY },
+            ECLIPSE: { name: "The Rat Market, in Eclipse", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
         };
 
         timekeeper.worldQualities = worldQualities;
@@ -299,6 +317,7 @@ describe('testAsuite', () => {
             MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+            ECLIPSE: { name: "The Rat Market, in Eclipse", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
@@ -306,6 +325,8 @@ describe('testAsuite', () => {
             THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
             BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
             ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            OCCASIONAL_BUYER: { name: "Occasional Buyer:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            DIPLOMAT_FASCINATION: { name: "The Diplomat's Current Fascination", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
             HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: undefined, resetDay: DAYS.TUESDAY, blindspot: true },
             SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: undefined, resetDay: DAYS.THURSDAY, blindspot: false }
         };
@@ -535,10 +556,7 @@ describe('testAsuite', () => {
         boneMarketFixer.lockOrUnlockButtons();
 
         const branchesAfter = document.getElementsByClassName("media branch media--branch") as HTMLCollectionOf<HTMLDivElement>;
-        console.log(branchesAfter[0].outerHTML);
-        console.log(branchesAfter[1].outerHTML);
-        console.log(branchesAfter[2].outerHTML);
-        console.log(branchesAfter[3].outerHTML);
+
         expect(branchesAfter.length).toStrictEqual(4);
         expect(branchesAfter[0].dataset.branchId).toStrictEqual("242491");
         expect(branchesAfter[0].classList.contains("media--locked")).toBeTruthy();
@@ -552,5 +570,55 @@ describe('testAsuite', () => {
         expect(branchesAfter[3].dataset.branchId).toStrictEqual("242468");
         expect(branchesAfter[3].classList.contains("media--locked")).toBeTruthy();
         expect(branchesAfter[3].getElementsByClassName("icon--locked quality-requirement").length).toStrictEqual(1)
+    })
+
+    it('testRecipeRecommend', () => {
+        const boneMarketFixer = new BoneMarketFixer();
+        boneMarketFixer.mania = "Fish";
+        boneMarketFixer.quality = "Menace";
+
+        const result = boneMarketFixer.getRecommendedRecipeNames();
+
+        expect(result).toContain("Prismatic Walrus");
+        expect(result).toContain("Menacing Fish 1 Exhaustion");
+        expect(result).toContain("Bombazine Fish");
+        expect(result).not.toContain("Bone Generator Bird");
+        expect(result).not.toContain("Brass Lollipop");
+        expect(result).not.toContain("Roof Pope");
+        expect(result).not.toContain("Antique Primate 1 Exhaustion");
+        expect(result).not.toContain("Antique Amphibian 1 Exhaustion");
+        expect(result).not.toContain("Menacing Primate 1 Exhaustion");
+        expect(result).not.toContain("Amalgamy Reptile 1 Exhaustion");
+
+    })
+
+    it('testWaswoodWithNewEvent', () => {
+        jest.useFakeTimers().setSystemTime(new Date('2024-09-26T11:10:35.017Z'))
+        const timekeeper = new TimeKeeperFixer();
+        const worldQualities: Record<WorldQualityName, WorldQuality> = {
+            SAINTLY_DEMAND: { name: "Saintly Demand", result: undefined, resetDay: DAYS.MONDAY },
+            SOFT_DEMAND: { name: "Soft Demand", result: undefined, resetDay: DAYS.MONDAY },
+            TEMPESTUOUS_DEMAND: { name: "Tempestuous Demand", result: undefined, resetDay: DAYS.MONDAY },
+            INSCRUTABLE_DEMAND: { name: "Inscrutable Demand", result: undefined, resetDay: DAYS.MONDAY },
+            INTRICATE_DEMAND: { name: "Intricate Demand", result: undefined, resetDay: DAYS.MONDAY },
+            MAUDLIN_DEMAND: { name: "Maudlin Demand", result: undefined, resetDay: DAYS.MONDAY },
+            THE_RAT_SEASON: { name: "The Rat-Season:", result: undefined, resetDay: DAYS.MONDAY },
+            DIRECTION_OF_THE_RAT_WIND: { name: "Direction of the Rat-Wind:", result: undefined, resetDay: DAYS.MONDAY },
+            PHASE_OF_THE_RAT_MOON: { name: "Phase of the Rat-Moon:", result: undefined, resetDay: DAYS.MONDAY },
+            THE_FALSE_SEASON: { name: "The False-Season:", result: undefined, resetDay: DAYS.MONDAY },
+            THE_SEASON_IN_SOUP: { name: "The Season in Soup", result: undefined, resetDay: DAYS.MONDAY },
+            BONE_MARKET_FLUCTUATIONS: { name: "Bone Market Fluctuations:", result: undefined, resetDay: DAYS.TUESDAY },
+            ZOOLOGICAL_MANIA: { name: "Zoological Mania:", result: undefined, resetDay: DAYS.TUESDAY },
+            OCCASIONAL_BUYER: { name: "Occasional Buyer:", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            DIPLOMAT_FASCINATION: { name: "The Diplomat's Current Fascination", result: undefined, resetDay: DAYS.TUESDAY, blindspot: false },
+            HEARTS_GAME_SEASON: { name: "Hearts' Game Season (Placeholder)", result: undefined, resetDay: DAYS.TUESDAY },
+            SEASON_OF_THE_SACROBOSCAN_CALENDAR: { name: "Season of the Sacroboscan Calendar", result: { name: "g", value: "0", timestamp: 1726848635017 }, resetDay: DAYS.THURSDAY }, //Fri, 20 Sep 2024 16:10:35 GMT
+            CALCULATING_DEMAND: { name: "Calculating Demand", result: undefined, resetDay: DAYS.MONDAY },
+            RUINOUS_DEMAND: { name: "Ruinous Demand", result: undefined, resetDay: DAYS.MONDAY },
+            ECLIPSE: { name: "The Rat Market, in Eclipse", result: undefined, resetDay: DAYS.MONDAY, blindspot: false },
+        };
+        timekeeper.worldQualities = worldQualities;
+        const panel = timekeeper.buildWaswoodPanel();
+        console.log(panel.textContent)
     })
 });

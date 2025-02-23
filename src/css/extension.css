@@ -92,6 +92,7 @@
     background-size: 1.75em;
 }
 
+/* sortable table */
 table.sortable td,
 table.sortable th {
     padding: 0.125em 0.25em;
@@ -161,8 +162,6 @@ table.sortable tbody tr:nth-child(odd) {
     background-color: #ddd;
 }
 
-/* Focus and hover styling */
-
 table.sortable th button:focus,
 table.sortable th button:hover {
     padding: 2px;
@@ -183,23 +182,26 @@ table.sortable th:not([aria-sort]) button:hover span::after {
     top: 0;
 }
 
+/* flowchart diagram */
 .diagram-row,
 .diagram-col {
-    display: flex;
-    gap: 1em;
+    display: inline-flex;
 }
 
 .diagram-row {
     flex-direction: row;
+    justify-content: space-evenly
 }
 
 .diagram-col {
     flex-direction: column;
+    align-items: center;
+    width: 50%
 }
 
 .diagram-pill,
 .diagram-rect {
-    padding: 1em;
+    padding: 1px 5px;
     text-align: center;
     border: 2px solid #999;
 }
@@ -211,14 +213,19 @@ table.sortable th:not([aria-sort]) button:hover span::after {
 }
 
 .diagram-rect {
-    flex: 0;
-    margin: auto 0;
+    flex: 1 1 min-content;
+    margin: 2px 5px 2px 5px;
     background: #eee;
 }
 
 .diagram-line-h {
-    height: 2px;
-    min-width: 3em;
+    width: 2px;
+    min-height: 1em;
     background: #999;
     margin: auto -1em;
+    align-self: center;
+}
+
+.highlight-step {
+    border-style: ridge;
 }
